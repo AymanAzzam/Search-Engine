@@ -27,6 +27,7 @@
             android:textColor="@color/colorWhite"/>
 
         <Button
+            android:id="@+id/crawler_search"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:text="Crawler Search"
