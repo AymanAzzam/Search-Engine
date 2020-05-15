@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/colorBlue"
             android:id="@+id/first_number"
-            android:padding="16dp"
+            android:padding="10dp"
             android:textSize="20sp"
             android:text="1"
             android:layout_toLeftOf="@id/second_number"
@@ -51,22 +51,44 @@
             android:layout_height="wrap_content"
             android:textColor="@color/colorBlue"
             android:id="@+id/second_number"
-            android:padding="16dp"
+            android:padding="10dp"
             android:textSize="20sp"
             android:text="2"
+            android:layout_toLeftOf="@id/third_number"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@id/third_number"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorBlue"
+            android:id="@+id/third_number"
+            android:padding="10dp"
+            android:textSize="20sp"
+            android:text="3"
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/colorBlue"
-            android:id="@+id/third_number"
-            android:padding="16dp"
+            android:id="@+id/fourth_number"
+            android:padding="10dp"
             android:textSize="20sp"
-            android:text="3"
+            android:text="4"
             android:layout_centerVertical="true"
-            android:layout_toRightOf="@id/second_number"
-            android:layout_toEndOf="@id/second_number" />
+            android:layout_toRightOf="@id/third_number"
+            android:layout_toEndOf="@id/third_number" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorBlue"
+            android:id="@+id/fifth_number"
+            android:padding="10dp"
+            android:textSize="20sp"
+            android:text="5"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/fourth_number"
+            android:layout_toEndOf="@id/fourth_number" />
     </RelativeLayout>
 
 </RelativeLayout>

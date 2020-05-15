@@ -21,11 +21,11 @@ import java.util.ArrayList;
 
 public class ResultsActivity extends AppCompatActivity {
 
-    ListView listView;
-    ImageView imageLeft,imageRight;
-    TextView firstNumber,secondNumber,thirdNumber;
+    ListView list_view;
+    ImageView image_left,image_right;
+    TextView first_number,second_number,third_number,fourth_number,fifth_number;
     ArrayList<String> headers,links,summaries;
-    int pageNumber,startIndex,endIndex;
+    int page_number,start_index,end_index;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -36,14 +36,25 @@ public class ResultsActivity extends AppCompatActivity {
         links = new ArrayList<String>();
         summaries = new ArrayList<String>();
 
-        listView = (ListView) findViewById(R.id.list_view);
-        imageLeft = (ImageView) findViewById(R.id.arrow_left);
-        imageRight = (ImageView) findViewById(R.id.arrow_right);
-        firstNumber = (TextView) findViewById(R.id.first_number);
-        secondNumber = (TextView) findViewById(R.id.second_number);
-        thirdNumber = (TextView) findViewById(R.id.third_number);
+        list_view = (ListView) findViewById(R.id.list_view);
+        image_left = (ImageView) findViewById(R.id.arrow_left);
+        image_right = (ImageView) findViewById(R.id.arrow_right);
+        first_number = (TextView) findViewById(R.id.first_number);
+        second_number = (TextView) findViewById(R.id.second_number);
+        third_number = (TextView) findViewById(R.id.third_number);
+        fourth_number = (TextView) findViewById(R.id.fourth_number);
+        fifth_number = (TextView) findViewById(R.id.fifth_number);
 
         /************* Input For Testing *************/
+        headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");
+        headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");
+
+        links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");
+        links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");
+
+        summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");
+        summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");
+
         headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");
         headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");
 
@@ -67,73 +78,106 @@ public class ResultsActivity extends AppCompatActivity {
         summaries.add("In computer Engineering. Computer Architecture is a set of rules and methods that describes the functionality");
 
         /************* Update ListView Indices and Page Number *************/
-        pageNumber = Integer.parseInt(getIntent().getStringExtra("EXTRA_PAGE_NUMBER"));
+        page_number = Integer.parseInt(getIntent().getStringExtra("EXTRA_PAGE_NUMBER"));
         //System.out.println(pageNumber);
-        startIndex = pageNumber*10;
-        endIndex = Math.min(startIndex + 10,headers.size());
+        start_index = page_number*10;
+        end_index = Math.min(start_index + 10,headers.size());
 
         /************* Update Arrows *************/
-        if(pageNumber == 0)             imageLeft.setVisibility(View.GONE);
-        else                            imageLeft.setVisibility(View.VISIBLE);
-        if(endIndex == headers.size())  imageRight.setVisibility(View.GONE);
-        else                            imageRight.setVisibility(View.VISIBLE);
+        if(start_index == 0)             image_left.setVisibility(View.GONE);
+        else                            image_left.setVisibility(View.VISIBLE);
+        if(end_index == headers.size())  image_right.setVisibility(View.GONE);
+        else                            image_right.setVisibility(View.VISIBLE);
 
         /************* Update Numbers *************/
-        if(headers.size() <= 20)
-        {   firstNumber.setVisibility(View.GONE);  secondNumber.setVisibility(View.GONE);    thirdNumber.setVisibility(View.GONE);  }
+        if(headers.size() <= 40)
+        {
+            first_number.setVisibility(View.GONE);  second_number.setVisibility(View.GONE);    third_number.setVisibility(View.GONE);
+            fourth_number.setVisibility(View.GONE); fifth_number.setVisibility(View.GONE);
+        }
         else
         {
-            int first = Math.min(pageNumber + 1,headers.size()/10 - 1);
-            firstNumber.setVisibility(View.VISIBLE);    firstNumber.setText(Integer.toString(first));
-            secondNumber.setVisibility(View.VISIBLE);   secondNumber.setText(Integer.toString(first + 1));
-            thirdNumber.setVisibility(View.VISIBLE);   thirdNumber.setText(Integer.toString(first + 2));
+            // to let the page in the middle of the five numbers
+            int first = Math.max(3,Math.min(page_number + 1,headers.size()/10 - 1));
+            first_number.setVisibility(View.VISIBLE);    first_number.setText(Integer.toString(first - 2));
+            second_number.setVisibility(View.VISIBLE);   second_number.setText(Integer.toString(first - 1));
+            third_number.setVisibility(View.VISIBLE);    third_number.setText(Integer.toString(first));
+            fourth_number.setVisibility(View.VISIBLE);   fourth_number.setText(Integer.toString(first + 1));
+            fifth_number.setVisibility(View.VISIBLE);    fifth_number.setText(Integer.toString(first + 2));
 
-            if(first == pageNumber + 1)     firstNumber.setTextColor(getResources().getColor(R.color.colorBlack));
-            else if(first == pageNumber)    secondNumber.setTextColor(getResources().getColor(R.color.colorBlack));
-            else                            thirdNumber.setTextColor(getResources().getColor(R.color.colorBlack));
+            if(first - 3 == page_number)            first_number.setTextColor(getResources().getColor(R.color.colorBlack));
+            else if(first - 2 == page_number)       second_number.setTextColor(getResources().getColor(R.color.colorBlack));
+            else if (first - 1 == page_number)      third_number.setTextColor(getResources().getColor(R.color.colorBlack));
+            else if (first  == page_number)         fourth_number.setTextColor(getResources().getColor(R.color.colorBlack));
+            else                                    fifth_number.setTextColor(getResources().getColor(R.color.colorBlack));
         }
 
         /************* Update ListView *************/
-        CustomListView adapter = new CustomListView(this,headers.subList(startIndex,endIndex),links.subList(startIndex,endIndex),summaries.subList(startIndex,endIndex));
-        listView.setAdapter(adapter);
+        CustomListView adapter = new CustomListView(this,headers.subList(start_index,end_index),links.subList(start_index,end_index),summaries.subList(start_index,end_index));
+        list_view.setAdapter(adapter);
 
         /************* Pressing Right Arrow Action *************/
-        imageRight.setOnClickListener(new View.OnClickListener() {
+        image_right.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                pageNumber = pageNumber + 1;
-                //System.out.println(pageNumber);
-                finish();
-                overridePendingTransition(0, 0);
-                getIntent().putExtra("EXTRA_PAGE_NUMBER",Integer.toString(pageNumber));
-                startActivity(getIntent());
-                overridePendingTransition(0, 0);
-            }
+            public void onClick(View v) { newPage(page_number + 1);}
         });
 
         /************* Pressing Left Arrow Action *************/
-        imageLeft.setOnClickListener(new View.OnClickListener() {
+        image_left.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                pageNumber = pageNumber - 1;
-                finish();
-                overridePendingTransition(0, 0);
-                getIntent().putExtra("EXTRA_PAGE_NUMBER",Integer.toString(pageNumber));
-                startActivity(getIntent());
-                overridePendingTransition(0, 0);
-            }
+            public void onClick(View v) { newPage(page_number - 1);   }
+        });
+
+        /************* Pressing first-number Action *************/
+        first_number.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) { newPage(Integer.parseInt(first_number.getText().toString()) - 1); }
+        });
+
+        /************* Pressing second-number Action *************/
+        second_number.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) { newPage(Integer.parseInt(second_number.getText().toString()) - 1); }
+        });
+
+        /************* Pressing third-number Action *************/
+        third_number.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) { newPage(Integer.parseInt(third_number.getText().toString()) - 1); }
+        });
+
+        /************* Pressing fourth-number Action *************/
+        fourth_number.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {newPage(Integer.parseInt(fourth_number.getText().toString()) - 1);}
+        });
+
+        /************* Pressing fifth-number Action *************/
+        fifth_number.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) { newPage(Integer.parseInt(fifth_number.getText().toString()) - 1); }
         });
 
         /************* Pressing Item Action *************/
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        list_view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String url = links.get(pageNumber*10+position);
+                String url = links.get(page_number*10+position);
                 if (!url.startsWith("http://") && !url.startsWith("https://")) url = "http://" + url;
 
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 startActivity(browserIntent);
             }
         });
+    }
+
+    void newPage(int newPageNumber)
+    {
+        page_number =  newPageNumber;
+        finish();
+        overridePendingTransition(0, 0);
+        getIntent().putExtra("EXTRA_PAGE_NUMBER",Integer.toString(page_number));
+        startActivity(getIntent());
+        overridePendingTransition(0, 0);
     }
 }

@@ -27,7 +27,7 @@ import opennlp.tools.stemmer.PorterStemmer;
 
 public class MainActivity extends AppCompatActivity {
 
-    EditText editText;
+    EditText edit_text;
     Button button;
 
     @Override
@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        editText = (EditText)(findViewById(R.id.search_phrase));
+        edit_text = (EditText)(findViewById(R.id.search_phrase));
         button = (Button) findViewById(R.id.crawler_search);
 
         /************* Pressing Search-Button Action *************/
@@ -54,10 +54,10 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
 
         /************* Test Steaming *************/
-        System.out.println(editText.getText());
+        System.out.println(edit_text.getText());
         PorterStemmer porterStemmer = new PorterStemmer();
-        String stem = porterStemmer.stem(editText.getText().toString());
-        System.out.println("The stem of " + editText.getText().toString() + " is " + stem);
+        String stem = porterStemmer.stem(edit_text.getText().toString());
+        System.out.println("The stem of " + edit_text.getText().toString() + " is " + stem);
 
     }
 }
