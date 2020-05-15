@@ -34,6 +34,39 @@
             android:id="@+id/arrow_right"
             android:padding="16dp"
             android:layout_alignParentRight="true"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorBlue"
+            android:id="@+id/first_number"
+            android:padding="16dp"
+            android:textSize="20sp"
+            android:text="1"
+            android:layout_toLeftOf="@id/second_number"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@id/second_number" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorBlue"
+            android:id="@+id/second_number"
+            android:padding="16dp"
+            android:textSize="20sp"
+            android:text="2"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorBlue"
+            android:id="@+id/third_number"
+            android:padding="16dp"
+            android:textSize="20sp"
+            android:text="3"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/second_number"
+            android:layout_toEndOf="@id/second_number" />
     </RelativeLayout>
 
 </RelativeLayout>

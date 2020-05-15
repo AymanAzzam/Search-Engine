@@ -38,10 +38,12 @@ public class MainActivity extends AppCompatActivity {
         editText = (EditText)(findViewById(R.id.search_phrase));
         button = (Button) findViewById(R.id.crawler_search);
 
+        /************* Search-Button Action *************/
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(MainActivity.this,ResultsActivity.class);
+                i.putExtra("EXTRA_PAGE_NUMBER", "0");
                 startActivity(i);
             }
         });
@@ -51,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause ()  {
         super.onPause();
 
+        /************* Test Steaming *************/
         System.out.println(editText.getText());
         PorterStemmer porterStemmer = new PorterStemmer();
         String stem = porterStemmer.stem(editText.getText().toString());

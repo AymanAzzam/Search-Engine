@@ -12,16 +12,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class CustomListView extends ArrayAdapter<String> {
-    @NonNull
 
-    Activity context;
-    ArrayList<String> headers;
-    ArrayList<String> links;
-    ArrayList<String> summaries;
+    private Activity context;
+    private List<String> headers,links,summaries;
 
-    CustomListView(@NonNull Activity context, ArrayList<String>  headers, ArrayList<String>  links, ArrayList<String>  summary)
+    CustomListView(@NonNull Activity context, List<String>  headers, List<String>  links, List<String>  summary)
     {
         super(context,R.layout.row,headers);
         this.context = context;     this.headers = headers;     this.links = links;     this.summaries = summary;

@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/page_header"
-        android:textSize="26dp"
+        android:textSize="26sp"
         android:textColor="@color/colorBlue"/>
     <TextView
         android:layout_width="match_parent"
