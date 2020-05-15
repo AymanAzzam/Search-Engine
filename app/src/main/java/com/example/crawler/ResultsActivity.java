@@ -2,10 +2,12 @@ package com.example.crawler;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -61,7 +63,7 @@ public class ResultsActivity extends AppCompatActivity {
         summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");
 
         headers.add("Computer Architecture");
-        links.add("htttp://en.wikipedia.org");
+        links.add("http://en.wikipedia.org");
         summaries.add("In computer Engineering. Computer Architecture is a set of rules and methods that describes the functionality");
 
         /************* Update ListView Indices and Page Number *************/
@@ -95,7 +97,7 @@ public class ResultsActivity extends AppCompatActivity {
         CustomListView adapter = new CustomListView(this,headers.subList(startIndex,endIndex),links.subList(startIndex,endIndex),summaries.subList(startIndex,endIndex));
         listView.setAdapter(adapter);
 
-        /************* Right Arrow Action *************/
+        /************* Pressing Right Arrow Action *************/
         imageRight.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -109,7 +111,7 @@ public class ResultsActivity extends AppCompatActivity {
             }
         });
 
-        /************* Left Arrow Action *************/
+        /************* Pressing Left Arrow Action *************/
         imageLeft.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -119,6 +121,18 @@ public class ResultsActivity extends AppCompatActivity {
                 getIntent().putExtra("EXTRA_PAGE_NUMBER",Integer.toString(pageNumber));
                 startActivity(getIntent());
                 overridePendingTransition(0, 0);
+            }
+        });
+
+        /************* Pressing Item Action *************/
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String url = links.get(pageNumber*10+position);
+                if (!url.startsWith("http://") && !url.startsWith("https://")) url = "http://" + url;
+
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(browserIntent);
             }
         });
     }

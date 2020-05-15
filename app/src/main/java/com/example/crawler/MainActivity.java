@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         editText = (EditText)(findViewById(R.id.search_phrase));
         button = (Button) findViewById(R.id.crawler_search);
 
-        /************* Search-Button Action *************/
+        /************* Pressing Search-Button Action *************/
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
