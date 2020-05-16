@@ -16,7 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <EditText
+        <SearchView
             android:id="@+id/search_phrase"
             android:layout_width="match_parent"
             android:layout_height="50dp"
@@ -24,7 +24,9 @@
             android:layout_margin="16dp"
             android:maxLines="1"
             android:inputType="text"
-            android:textColor="@color/colorWhite"/>
+            android:iconifiedByDefault="false"
+            android:background="@color/colorWhite"
+            android:queryHint="@string/query_hint"/>
 
         <Button
             android:id="@+id/crawler_search"

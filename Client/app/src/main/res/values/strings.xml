@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Crawler</string>
+    <string name="query_hint">Search here</string>
 </resources>
