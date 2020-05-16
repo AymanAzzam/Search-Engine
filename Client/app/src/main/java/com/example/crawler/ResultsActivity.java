@@ -1,22 +1,15 @@
 package com.example.crawler;
 
-import android.app.Activity;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
 import java.util.ArrayList;
 
 public class ResultsActivity extends AppCompatActivity {
@@ -169,6 +162,7 @@ public class ResultsActivity extends AppCompatActivity {
                 startActivity(browserIntent);
             }
         });
+
     }
 
     void newPage(int newPageNumber)

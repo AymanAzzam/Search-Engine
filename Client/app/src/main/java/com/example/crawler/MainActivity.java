@@ -6,24 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.SearchView;
-
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
-
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-
-import cz.msebera.android.httpclient.Header;
 import opennlp.tools.stemmer.PorterStemmer;
 
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
@@ -42,14 +25,12 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         /************* Pressing Search-Button Action *************/
         button.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                Intent i = new Intent(MainActivity.this,ResultsActivity.class);
-                i.putExtra("EXTRA_PAGE_NUMBER", "0");
-                startActivity(i);
-            }
+            public void onClick(View v) { searchAction(search_view.getQuery().toString()); }
         });
 
         search_view.setOnQueryTextListener(this);
+        search_view.setQueryRefinementEnabled(true);    //To Enable Search Suggestions
+        search_view.setSubmitButtonEnabled(true);       //Add a "submit" button
     }
 
     @Override
@@ -67,14 +48,20 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     /************* Pressing Search Action *************/
     @Override
     public boolean onQueryTextSubmit(String query) {
-        Intent i = new Intent(MainActivity.this,ResultsActivity.class);
-        i.putExtra("EXTRA_PAGE_NUMBER", "0");
-        startActivity(i);
+        searchAction(query);
         return false;
     }
 
     @Override
     public boolean onQueryTextChange(String newText) {
         return false;
+    }
+
+    void searchAction(String query)
+    {
+        if(query.length() == 0)    return; /*** Do Nothing if Empty String ***/
+        Intent i = new Intent(MainActivity.this,ResultsActivity.class);
+        i.putExtra("EXTRA_PAGE_NUMBER", "0");
+        startActivity(i);
     }
 }
