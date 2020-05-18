@@ -43,4 +43,7 @@ dependencies {
     api group: 'org.apache.opennlp', name: 'opennlp-tools', version: '1.9.0'
 
     api 'com.loopj.android:android-async-http:1.4.9'
+
+    // Library used to send Requests
+    implementation 'com.android.volley:volley:1.1.1'
 }
