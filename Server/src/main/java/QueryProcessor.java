@@ -1,13 +1,18 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 import opennlp.tools.stemmer.PorterStemmer;
+import java.sql.*; 
 
 public class QueryProcessor {
 
-	 public static void main(String []args) throws FileNotFoundException {
+	 public static void main(String []args) throws FileNotFoundException,Exception {
 	        System.out.println("Query Processor started\n");
 	        
 	        /*** Declare Variables ***/
@@ -18,7 +23,7 @@ public class QueryProcessor {
 	    	
 	     }
 	 
-	 	public static ArrayList<String> query(String sentence) throws FileNotFoundException
+	 	public static ArrayList<String> query(String sentence) throws FileNotFoundException,Exception
 	 	{
 	        String phraseSearch = "0";
 	        
@@ -33,6 +38,16 @@ public class QueryProcessor {
 	    	/*** For Testing Purpose ***/
 	        System.out.println("\nAfter Query: ");
 	        for(String word: queryWords)	System.out.println(word);
+	        
+	        /*** Apply Queries to the DataBase ***/
+	        Class.forName("com.mysql.cj.jdbc.Driver");  
+	        //here sonoo is database name, root is username and admin is password
+			Connection con=DriverManager.getConnection("jdbc:mysql://localhost:3306/sonoo","root","admin");  
+			Statement stmt= con.createStatement();
+			ResultSet rs=stmt.executeQuery("select * from emp");  
+			while(rs.next())  
+				System.out.println(rs.getInt(1)+"  "+rs.getString(2)+"  "+rs.getString(3));  
+			con.close();  
 	    	
 	    	return queryWords;
 	 	}
