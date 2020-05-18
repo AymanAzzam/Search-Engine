@@ -42,22 +42,10 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         search_view.setSubmitButtonEnabled(true);       //Add a "submit" button
     }
 
-    @Override
-    protected void onPause ()  {
-        super.onPause();
-
-        /************* Test Steaming *************/
-        System.out.println(search_view.getQuery());
-        PorterStemmer porterStemmer = new PorterStemmer();
-        String stem = porterStemmer.stem(search_view.getQuery().toString());
-        System.out.println("The stem of " + search_view.getQuery().toString() + " is " + stem);
-
-    }
-
     /************* Pressing Search Action *************/
     @Override
     public boolean onQueryTextSubmit(String query) {
-        searchAction(query);
+        //searchAction(query);
         return false;
     }
 

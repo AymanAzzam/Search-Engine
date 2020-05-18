@@ -2,6 +2,7 @@ package com.example.crawler;
 
 import android.content.SearchRecentSuggestionsProvider;
 
+/*** For Query Search Suggestions ***/
 public class SuggestionProvider extends SearchRecentSuggestionsProvider {
     public final static String AUTHORITY = "com.example.crawler.SuggestionProvider";
     public final static int MODE = DATABASE_MODE_QUERIES;
