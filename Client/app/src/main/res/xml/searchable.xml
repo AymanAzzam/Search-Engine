@@ -4,5 +4,6 @@
     android:hint="@string/search_hint"
     android:voiceSearchMode="showVoiceSearchButton|launchRecognizer"
     android:searchSuggestAuthority="com.example.crawler.SuggestionProvider"
-    android:searchSuggestSelection=" ?">
+    android:searchSuggestSelection=" ?"
+    android:searchSuggestThreshold="1">
 </searchable>

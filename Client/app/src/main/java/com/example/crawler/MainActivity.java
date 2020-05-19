@@ -7,11 +7,9 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.SearchRecentSuggestions;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SearchView;
-import opennlp.tools.stemmer.PorterStemmer;
 
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
@@ -40,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         search_view.setOnQueryTextListener(this);
         search_view.setQueryRefinementEnabled(true);    //To Enable Search Suggestions
         search_view.setSubmitButtonEnabled(true);       //Add a "submit" button
+
     }
 
     /************* Pressing Search Action *************/
@@ -58,14 +57,9 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     {
         if(query.length() == 0)    return; /*** Do Nothing if Empty String ***/
 
-        /*** Save the Query for Suggestion ***/
-        SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
-                SuggestionProvider.AUTHORITY, SuggestionProvider.MODE);
-        suggestions.saveRecentQuery(query, null);
-
-        /*** start the Results Activity ***/
-        Intent i = new Intent(MainActivity.this,ResultsActivity.class);
-        i.putExtra("EXTRA_PAGE_NUMBER", "0");
+        /*** start the Searchable Activity ***/
+        Intent i = new Intent(MainActivity.this,SearchableActivity.class);
+        i.putExtra("query", query);
         startActivity(i);
     }
 }

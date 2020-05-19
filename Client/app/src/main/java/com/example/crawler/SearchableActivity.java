@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.SearchRecentSuggestions;
-import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,7 +27,8 @@ public class SearchableActivity extends AppCompatActivity {
         super.onStart();
 
         /*** Getting the query search ***/
-        query = getIntent().getStringExtra(SearchManager.QUERY);
+        if (Intent.ACTION_SEARCH.equals(getIntent().getAction()))   query = getIntent().getStringExtra(SearchManager.QUERY);
+        else                                                        query = getIntent().getStringExtra("query");
 
         /*** Save the Query for Suggestion ***/
         SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
@@ -47,27 +47,29 @@ public class SearchableActivity extends AppCompatActivity {
 
         /*** Send GET Request ***/
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "https://www.google.ru/?q=" + query;
+
+        String url = "https://www.google.ru/?q=" + query.replace(" ","%20");
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         // Display the first 500 characters of the response string.
                         System.out.println("Response is: "+ response.substring(0,500));
+
+                        /*** start the Results Activity ***/
+                        Intent i = new Intent(SearchableActivity.this,ResultsActivity.class);
+                        i.putExtra("EXTRA_PAGE_NUMBER", "0");
+                        startActivity(i);
+                        finish();
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast errorToast = Toast.makeText(SearchableActivity.this, "Failed to send Get Request with url = "+url, Toast.LENGTH_SHORT);
+                Toast errorToast = Toast.makeText(SearchableActivity.this, "Server Failed to Response with URL = "+url, Toast.LENGTH_SHORT);
                 errorToast.show();
+                finish();
             }
         });
         queue.add(stringRequest);
-
-        /*** start the Results Activity ***/
-        Intent i = new Intent(SearchableActivity.this,ResultsActivity.class);
-        i.putExtra("EXTRA_PAGE_NUMBER", "0");
-        startActivity(i);
-        finish();
     }
 }
