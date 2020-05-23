@@ -36,5 +36,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="D:/GitHub/Crawler/Server/jsoup-1.13.1.jar"/>
 	<classpathentry kind="lib" path="D:/GitHub/Crawler/Server/mysql-connector-java-8.0.20.jar"/>
+	<classpathentry kind="lib" path="D:/GitHub/Crawler/Server/opennlp-tools-1.9.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
