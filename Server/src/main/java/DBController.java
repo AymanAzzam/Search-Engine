@@ -30,7 +30,6 @@ public class DBController {
 	public DBController() throws ClassNotFoundException 
 	{
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		System.out.println("Constructor");
 	}
 	
 	public void connect() throws SQLException
@@ -140,7 +139,6 @@ public class DBController {
 	}
 	
 	public static void main(String []args) throws ClassNotFoundException, SQLException {
-		System.out.println("Test");
 		
 		DBController controller = new DBController();
 		controller.connect();
