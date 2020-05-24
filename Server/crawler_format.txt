@@ -1,0 +1,33 @@
+#URL
+www.example.com
+
+#IMAGES
+www.example.com/cat.png
+www.example.com/dog.jpg
+www.example.com/1.png
+
+#TTILE
+Welcome to 7moda Pasta - Login
+
+#HEADERS //It means there's no a header text of h1:h6 [This is a comment don't consider it].
+
+#PLAINTEXT
+7moda Pasta Stories
+Superhero 7moda Pastaaa
+kan feh wad esmo el shater 3mr we kaman kan feh gedo be shanabat
+we dh kan el a2kl be amr se 3mr we kaman gedo y7kelo 7ekayat
+Layyyy lay lay layyyy lay lay, lay lay lay lay lay lay laaaaaaaaaaaaaaaaaa
+
+#Body
+Ay 7aga nefsk feha fe el body as a text htb2a mawgoda hena
+sawa2 b2a plain elle aw 7ata headers aw ay tag tany bytktb goah
+Ya rb el estorha m3ana fe el IQ level el se7lya dh
+7moda Pasta Stories
+Superhero 7moda Pastaaa
+kan feh wad esmo el shater 3mr we kaman kan feh gedo be shanabat
+we dh kan el a2kl be amr se 3mr we kaman gedo y7kelo 7ekayat
+Layyyy lay lay layyyy lay lay, lay lay lay lay lay lay laaaaaaaaaaaaaaaaaa
+Rbna y5lelna el libraries elle btsahel 3lena we ywl3 fe el kolya 3lshan a3mal el sana
+mesh msam7kom fe a3mal el sana we 7asby Allah wa n3m el wakel
+The End
+mtnsosh t3mlo like we subscribe a7baby fe Allah
