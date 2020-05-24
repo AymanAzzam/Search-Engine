@@ -70,7 +70,7 @@ public class QueryProcessor {
 	        scanner.close();
 	        
 	        /*** Deleting the Stop Words ***/
-	        for(String word : stopWords)	queryWords.remove(word);
+	        for(String word : stopWords)	while(queryWords.remove(word));
 	        
 	        /*** Steaming ***/ 
 	        PorterStemmer porterStemmer = new PorterStemmer();
