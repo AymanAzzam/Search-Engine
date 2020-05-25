@@ -18,6 +18,8 @@ public class DBController {
 	final String URLName_col = "URL";
 	final String countWords_col = "words_count";
 	final String URLFilePath_col = "file_path";
+	final String URLTitle_col = "title";
+	final String URLSummary_col = "summary";
 	
 	// Image Database
 	final String image_table = "image_table";
@@ -56,8 +58,11 @@ public class DBController {
 					+ "%s INT PRIMARY KEY AUTO_INCREMENT,"
 					+ "%s TINYTEXT UNIQUE NOT NULL,"
 					+ "%s INT DEFAULT -1,"
-					+ "%s TINYTEXT NOT NULL);", 
-					URL_table, URLID_col, URLName_col, countWords_col, URLFilePath_col));
+					+ "%s TINYTEXT NOT NULL,"
+					+ "%s TINYTEXT NOT NULL,"
+					+ "%s VARCHAR(500) NOT NULL;", 
+					URL_table, URLID_col, URLName_col, countWords_col, 
+					URLFilePath_col, URLTitle_col, URLSummary_col));
 			
 			
 			// CREATE IMAGE TABLE
