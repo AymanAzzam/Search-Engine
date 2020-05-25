@@ -74,7 +74,7 @@ public class QueryProcessor {
 	        
 	        /*** Steaming ***/ 
 	        PorterStemmer porterStemmer = new PorterStemmer();
-	        for(int i =0; i < queryWords.size(); i++)	queryWords.set(i, porterStemmer.stem(queryWords.get(i)));
+	        for(int i =0; i < queryWords.size(); i++)	queryWords.set(i, porterStemmer.stem(queryWords.get(i)).toLowerCase());
 	        
 	        return queryWords;	 
 	 	}
