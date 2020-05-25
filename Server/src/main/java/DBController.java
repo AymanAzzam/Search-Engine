@@ -1,11 +1,11 @@
-import java.io.ObjectInputStream.GetField;
+//import java.io.ObjectInputStream.GetField;
 import java.sql.*;
 
 public class DBController {
 
 	private Connection conn;
 	
-	private Statement stmt;
+//	private Statement stmt;
 
 	
 	final String DBName = "Search_Engine";
@@ -28,7 +28,7 @@ public class DBController {
 	final String imageURL_col = "image_URL";
 	
 	// Inverted File Database
-	final String invertedFile_table = "inverted_file_table";
+	final String invertedFile_table = "word_table";
 	final String word_col = "word";				// PRIMARY
 	final String wordURLID_col = "URL_ID";		// PRIMARY
 	final String countPlaintxt_col = "plaintext_count";
@@ -45,32 +45,36 @@ public class DBController {
 	public void connect() throws SQLException
 	{
 		conn = DriverManager.getConnection(String.format("jdbc:mysql://localhost:3306/%s?useLegacyDatetimeCode=false&serverTimezone=Africa/Cairo", DBName),username,password);
-		stmt = conn.createStatement();
 		System.out.println("Connect...");
 	}
 	
-	public void init() throws SQLException
+	public void build() throws SQLException
 
 	{
 		try {
 			// CREATE URL TABLE
+			Statement stmt = conn.createStatement();
 			stmt.executeUpdate(String.format("CREATE TABLE %s ("
 					+ "%s INT PRIMARY KEY AUTO_INCREMENT,"
 					+ "%s TINYTEXT UNIQUE NOT NULL,"
 					+ "%s INT DEFAULT -1,"
 					+ "%s TINYTEXT NOT NULL,"
-					+ "%s TINYTEXT NOT NULL,"
-					+ "%s VARCHAR(500) NOT NULL;", 
+					+ "%s TINYTEXT,"
+					+ "%s VARCHAR(500));", 
 					URL_table, URLID_col, URLName_col, countWords_col, 
 					URLFilePath_col, URLTitle_col, URLSummary_col));
+			
 			
 			
 			// CREATE IMAGE TABLE
 			stmt.executeUpdate(String.format("CREATE TABLE %s ("
 					+ " %s INT PRIMARY KEY AUTO_INCREMENT,"
 					+ " %s INT NOT NULL,"
-					+ " %s TINYTEXT NOT NULL);", 
-					image_table, imageID_col, imageURLID_col, imageURL_col));
+					+ " %s TINYTEXT NOT NULL,"
+					+ " FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE"
+					+ ");", 
+					image_table, imageID_col, imageURLID_col, imageURL_col,
+					imageURLID_col, URL_table, URLID_col));
 			
 			
 			// CREATE INVERTED FILE TABLE
@@ -86,39 +90,45 @@ public class DBController {
 					word_col, wordURLID_col,
 					wordURLID_col, URL_table, URLID_col));
 			
+			stmt.close();
 			System.out.println("Init...");
 			
+			
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("Init: Tables exists!");
 		}
 	}
 	
 	public ResultSet getRows(int lowerbound_ID) throws SQLException
 	{
-		ResultSet res;
-		res = stmt.executeQuery(String.format("SELECT * FROM %s"
+		Statement stmt = conn.createStatement();
+		return stmt.executeQuery(String.format("SELECT * FROM %s"
 				+ " WHERE %s>%d;", URL_table, URLID_col, lowerbound_ID));
-		
-		return res;
 	}
 	
 	public int getMaxURLID() throws SQLException {
 		
+		Statement stmt = conn.createStatement();
 		ResultSet res = stmt.executeQuery(String.format("SELECT MAX(%s)"
 				+ " FROM %s;", URLID_col, URL_table));
 		
 		res.next();
-		return res.getInt(1);
+		int ret = res.getInt(1);
+		res.close();
+		stmt.close();
+		return ret;
 	}
 	
 	public boolean insertImage(int URLID, String imageURL) {
 		
 		try {
-			
+
+			Statement stmt = conn.createStatement();
 			stmt.executeUpdate(String.format("INSERT INTO %s(%s,%s) "
 					+ "VALUES(%d,'%s');",
 					image_table, imageURLID_col, imageURL_col, URLID, imageURL));
-			
+			stmt.close();
 		} catch (SQLException e) {
 			return false;
 		}
@@ -128,26 +138,29 @@ public class DBController {
 	public boolean insertURL(String URL, String filePath) {
 		
 		try {
-			
+
+			Statement stmt = conn.createStatement();
 			stmt.executeUpdate(String.format("INSERT INTO %s(%s,%s) "
 					+ "VALUES('%s','%s');",
 					URL_table, URLName_col, URLFilePath_col, URL, filePath));
-			
+			stmt.close();
 		} catch (SQLException e) {
 			return false;
 		}
 		return true;
 	}
 	
-	public boolean updateURL(int URLID, int count) {
+	public boolean updateURL(int URLID, int count, String title, String summary) {
 		
 		try {
-			
+
+			Statement stmt = conn.createStatement();
 			stmt.executeUpdate(String.format("UPDATE %s "
-					+ "SET %s=%d "
+					+ "SET %s=%d, %s='%s', %s='%s' "
 					+ "WHERE %s=%d;", 
-					URL_table, countWords_col, count, URLID_col, URLID));
-			
+					URL_table, countWords_col, count, URLTitle_col, title, URLSummary_col, summary, 
+					URLID_col, URLID));
+			stmt.close();
 		} catch (Exception e) {
 			return false;
 		}
@@ -157,13 +170,15 @@ public class DBController {
 	public boolean insertWord(String word, int URLID, int plain, int header, int total) {
 		
 		try {
-			
+
+			Statement stmt = conn.createStatement();
 			stmt.executeUpdate(String.format("INSERT INTO %s(%s,%s,%s,%s,%s) "
 					+ "VALUES('%s',%d,%d,%d,%d);", 
 					invertedFile_table, word_col, wordURLID_col, countPlaintxt_col, countHeader_col, countTotal_col,
 					word, URLID, plain, header, total));
-			
+			stmt.close();
 		} catch(SQLException e) {
+			e.printStackTrace();
 			return false;
 		}
 		return true;
@@ -173,38 +188,22 @@ public class DBController {
 	{
 		int ID;
 		try {
-			
+
+			Statement stmt = conn.createStatement();
 			ResultSet res = stmt.executeQuery(String.format("SELECT %s FROM %s WHERE %s='%s';",
 					URLID_col, URL_table, URLName_col, URL));
 			
 			res.next();
 			
 			ID = res.getInt(1);
-			
+			stmt.close();
+			res.close();
 		} catch (SQLException e) {
 			return -1;
 		}
 		return ID;
 	}
-	
-//	public int addURLData(int URLID, String word, int plain, int header, int total, int totalWords) {
-//		
-//		/*
-//		 * Errors:
-//		 * 	URL Exists => -1
-//		 *  Error in word insertion => 0
-//		 *  Success => 1
-//		 */
-//		
-//		boolean flag = true;
-//		flag &= updateURL(URLID, totalWords);
-//		if(!flag)	return -1;
-//		
-//		flag &= insertWord(word, URLID, plain, header, total);
-//		
-//		return flag?1:0;
-//	}
-	
+
 	public void close() throws SQLException
 	{
 		conn.close();
@@ -213,19 +212,17 @@ public class DBController {
 	
 	public static void main(String []args) throws ClassNotFoundException, SQLException {
 
-		
-		
 		DBController controller = new DBController();
 		controller.connect();
-		controller.init();
+		controller.build();
 		
 //		String link = "www.sdasasdsa.com";
 //		System.out.println(controller.insertURL(link, "aaa.txt"));
 //		System.out.println(controller.addURLData(controller.getURLID(link), "7moda", 5, 2, 10, 30));
 		
-		System.out.println(controller.getMaxURLID());
-		
-		ResultSet res = controller.getRows(1);
+//		System.out.println(controller.getMaxURLID());
+//		
+		ResultSet res = controller.getRows(0);
 		try {
 			
 			while(res.next()) {
@@ -233,6 +230,7 @@ public class DBController {
 			}
 		} catch (Exception e) {
 			System.out.println("Empty Results!!!");
+			e.printStackTrace();
 		}
 		
 		
