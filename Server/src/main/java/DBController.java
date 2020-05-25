@@ -28,7 +28,7 @@ public class DBController {
 	final String imageURL_col = "image_URL";
 	
 	// Inverted File Database
-	final String invertedFile_table = "word_table";
+	final String word_table = "word_table";
 	final String word_col = "word";				// PRIMARY
 	final String wordURLID_col = "URL_ID";		// PRIMARY
 	final String countPlaintxt_col = "plaintext_count";
@@ -86,7 +86,7 @@ public class DBController {
 					+ "%s INT NOT NULL,"
 					+ "PRIMARY KEY(%s,%s),"
 					+ "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE"
-					+ ");", invertedFile_table, word_col, wordURLID_col, countPlaintxt_col, countHeader_col, countTotal_col, 
+					+ ");", word_table, word_col, wordURLID_col, countPlaintxt_col, countHeader_col, countTotal_col, 
 					word_col, wordURLID_col,
 					wordURLID_col, URL_table, URLID_col));
 			
@@ -95,23 +95,34 @@ public class DBController {
 			
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			System.out.println("Init: Tables exists!");
 		}
 	}
 	
-	public ResultSet getRows(int lowerbound_ID) throws SQLException
+	public ResultSet getNonIndexedRows() throws SQLException
 	{
 		Statement stmt = conn.createStatement();
 		return stmt.executeQuery(String.format("SELECT * FROM %s"
-				+ " WHERE %s>%d;", URL_table, URLID_col, lowerbound_ID));
+				+ " WHERE %s=-1;", URL_table, countWords_col));
 	}
 	
-	public int getMaxURLID() throws SQLException {
+	public void markNonIndexedRows() throws SQLException {
+		Statement stmt = conn.createStatement();
+		
+		stmt.executeUpdate(String.format("UPDATE %s "
+				+ "SET %s = 0 "
+				+ "WHERE %s = -1;",
+				URL_table, countWords_col, countWords_col));
+		
+		stmt.close();
+	}
+	
+	public int getMinURLWordCount() throws SQLException {
 		
 		Statement stmt = conn.createStatement();
-		ResultSet res = stmt.executeQuery(String.format("SELECT MAX(%s)"
-				+ " FROM %s;", URLID_col, URL_table));
+		ResultSet res = stmt.executeQuery(String.format("SELECT MIN(%s)"
+				+ " FROM %s;", countWords_col, URL_table));
 		
 		res.next();
 		int ret = res.getInt(1);
@@ -174,7 +185,7 @@ public class DBController {
 			Statement stmt = conn.createStatement();
 			stmt.executeUpdate(String.format("INSERT INTO %s(%s,%s,%s,%s,%s) "
 					+ "VALUES('%s',%d,%d,%d,%d);", 
-					invertedFile_table, word_col, wordURLID_col, countPlaintxt_col, countHeader_col, countTotal_col,
+					word_table, word_col, wordURLID_col, countPlaintxt_col, countHeader_col, countTotal_col,
 					word, URLID, plain, header, total));
 			stmt.close();
 		} catch(SQLException e) {
@@ -222,7 +233,7 @@ public class DBController {
 		
 //		System.out.println(controller.getMaxURLID());
 //		
-		ResultSet res = controller.getRows(0);
+		ResultSet res = controller.getNonIndexedRows();
 		try {
 			
 			while(res.next()) {

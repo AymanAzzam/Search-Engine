@@ -69,7 +69,7 @@ public class Indexer {
 	private static Queue<URLRecord> URLQueue;
 	private static Queue<WebsiteData> WebsiteQueue;
 	private static Object InMutex, OutMutex, DBMutex;
-	private static int lowerbound_ID = 0;
+//	private static int lowerbound_ID = 0;
 	
 	public Indexer(DBController con, Object mutex) throws ClassNotFoundException {
 		controller = con;
@@ -141,8 +141,10 @@ public class Indexer {
 				synchronized (DBMutex) {
 					
 					try {
-						while(controller.getMaxURLID()==lowerbound_ID) {
-
+						// Insert URL from the crawler initilize the word count with -1
+						while(controller.getMinURLWordCount()!=-1) {
+							System.out.println(controller.getMinURLWordCount());
+							
 							System.out.println("Producer Wait!");
 							try {
 								DBMutex.wait();
@@ -151,10 +153,11 @@ public class Indexer {
 							}
 						}
 						System.out.println("Producer Awaken!");
-						res = controller.getRows(lowerbound_ID);
-						System.out.println(lowerbound_ID);
-						lowerbound_ID = controller.getMaxURLID();
-						System.out.println(lowerbound_ID);
+						res = controller.getNonIndexedRows();
+						controller.markNonIndexedRows();
+//						System.out.println(lowerbound_ID);
+//						lowerbound_ID = controller.getMaxURLID();
+//						System.out.println(lowerbound_ID);
 						
 					} catch (SQLException e) {
 						e.printStackTrace();
