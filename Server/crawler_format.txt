@@ -2,7 +2,7 @@
 www.example.com/cat.png
 www.example.com/dog.jpg
 www.example.com/1.png
-#TTILE
+#TITLE
 Welcome to 7moda Pasta - Login
 #HEADERS
 #PLAINTEXT
