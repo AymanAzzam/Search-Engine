@@ -16,41 +16,28 @@ public class Indexer {
 	
 	public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException, InterruptedException {
 		System.out.println("Indexer");
-//		String Test = "Hello everybody, this is a test for the stemmer from the Indexer!";
-//		ArrayList<String> List = QueryProcessor.steaming(Test);
-//		for(String s:List)	System.out.println(s);
-//		Document document = Jsoup.connect("https://www.facebook.com/").get();
-//		System.out.println(document.head().text());
-//		
-//		OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream("test.txt"), StandardCharsets.UTF_8);
-//	    writer.write(document.text());
-//	    writer.close();
-		
-//		BufferedReader reader = new BufferedReader(new FileReader("crawler_format.txt"));
-//		String s;
-//		while((s = reader.readLine()) != null)
-//		{
-//			if(s.equals(""));
-//		}
-//		reader.close();
-//		System.out.println("Done!");
-		
-//		Map<String, ArrayList<Integer>> test = new HashMap<String, ArrayList<Integer> >();
-//		System.out.println(test.get("test"));
-//		test.put("test", test.get("test")+1);
-//		System.out.println(test.get("test"));
 		
 		Object mutex = new Object();
 		DBController con = new DBController();
 		Indexer index = new Indexer(con, mutex);
 		
+		Connection mainConnection = con.connect();
+		con.indexerTest(mainConnection);
+		
 		Producer prod = index.new Producer();
+		Producer prod2 = index.new Producer();
+		Producer prod3 = index.new Producer();
+		Producer prod4 = index.new Producer();
+		Producer prod5 = index.new Producer();
+		Producer prod6 = index.new Producer();
+
 		Processor proc = index.new Processor();
 		Processor proc2 = index.new Processor();
 		Processor proc3 = index.new Processor();
-//		Processor proc4 = index.new Processor();
-//		Processor proc5 = index.new Processor();
-//		Processor proc6 = index.new Processor();
+		Processor proc4 = index.new Processor();
+		Processor proc5 = index.new Processor();
+		Processor proc6 = index.new Processor();
+
 		Publisher pub = index.new Publisher();
 		Publisher pub2 = index.new Publisher();
 		Publisher pub3 = index.new Publisher();
@@ -59,12 +46,19 @@ public class Indexer {
 		Publisher pub6 = index.new Publisher();
 		
 		prod.start();
+		prod2.start();
+		prod3.start();
+		prod4.start();
+		prod5.start();
+		prod6.start();
+		
 		proc.start();
 		proc2.start();
 		proc3.start();
-//		proc4.start();
-//		proc5.start();
-//		proc6.start();
+		proc4.start();
+		proc5.start();
+		proc6.start();
+		
 		pub.start();
 		pub2.start();
 		pub3.start();
@@ -79,13 +73,26 @@ public class Indexer {
 			}
 		}
 		
-//		prod.join();
-//		proc.join();
-//		proc2.join();
-//		proc3.join();
-//		pub.join();
-//		pub2.join();
-//		pub3.join();
+		prod.join();
+		prod2.join();
+		prod3.join();
+		prod4.join();
+		prod5.join();
+		prod6.join();
+		
+		proc.join();
+		proc2.join();
+		proc3.join();
+		proc4.join();
+		proc5.join();
+		proc6.join();
+		
+		pub.join();
+		pub2.join();
+		pub3.join();
+		pub4.join();
+		pub5.join();
+		pub6.join();
 	}
 	
 	private static DBController controller;
