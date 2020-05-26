@@ -145,7 +145,7 @@ public class Indexer {
 		int URLID;
 		int totalWords;
 		String title;
-		String summary;
+		String content;
 		
 		public DocumentData(int ID, String url) {
 			wordStats = new ArrayList<WordRecord>();
@@ -153,7 +153,7 @@ public class Indexer {
 			URLID = ID;
 			URL = url;
 			totalWords=0;
-			summary = "";
+			content = "";
 		}
 	}
 	
@@ -279,16 +279,10 @@ public class Indexer {
 					}
 					
 					if(current==5) {
-						// Prepare Summary
-						if(line.length()+ret.summary.length()<500) {
-							ret.summary += line;
-							// Separate every lines with spaces not "\r"
-							ret.summary += " ";
-						}
-						else if(ret.summary.length()<500) {
-							// Add the needed number of characters
-							ret.summary+=line.substring(0,Integer.min(line.length(), 500-ret.summary.length()));
-						}
+						// Prepare Content
+						ret.content += line;
+						// Separate every lines with spaces not "\r"
+						ret.content += " ";
 						
 						//Count total words in the document
 						ret.totalWords += words.size();
@@ -375,8 +369,8 @@ public class Indexer {
 					// Extract a document instance from the queue
 					documentInstance = DocumentQueue.poll();
 				}
-				// Update the title, summary, words_count of a URL
-				controller.updateURL(publisherConnection, documentInstance.URLID, documentInstance.totalWords, documentInstance.title, documentInstance.summary);
+				// Update the title, content, words_count of a URL
+				controller.updateURL(publisherConnection, documentInstance.URLID, documentInstance.totalWords, documentInstance.title, documentInstance.content);
 				
 				// Insert words statistics related to a URL
 				for(WordRecord w:documentInstance.wordStats) {

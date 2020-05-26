@@ -19,7 +19,7 @@ public class DBController {
 	final String countWords_col = "words_count";
 	final String URLFilePath_col = "file_path";
 	final String URLTitle_col = "title";
-	final String URLSummary_col = "summary";
+	final String URLContent_col = "content";
 	
 	// Image Database
 	final String image_table = "image_table";
@@ -61,9 +61,9 @@ public class DBController {
 					+ "%s INT DEFAULT -1,"
 					+ "%s TINYTEXT NOT NULL,"
 					+ "%s TINYTEXT,"
-					+ "%s VARCHAR(500));", 
+					+ "%s TEXT);", 
 					URL_table, URLID_col, URLName_col, countWords_col, 
-					URLFilePath_col, URLTitle_col, URLSummary_col));
+					URLFilePath_col, URLTitle_col, URLContent_col));
 			
 			
 			
@@ -168,7 +168,7 @@ public class DBController {
 	}
 	
 	// Update the remaining attributes of the url_table record
-	public boolean updateURL(Connection conn, int URLID, int count, String title, String summary) {
+	public boolean updateURL(Connection conn, int URLID, int count, String title, String content) {
 		
 		try {
 
@@ -176,10 +176,11 @@ public class DBController {
 			stmt.executeUpdate(String.format("UPDATE %s "
 					+ "SET %s=%d, %s='%s', %s='%s' "
 					+ "WHERE %s=%d;", 
-					URL_table, countWords_col, count, URLTitle_col, title, URLSummary_col, summary, 
+					URL_table, countWords_col, count, URLTitle_col, title, URLContent_col, content, 
 					URLID_col, URLID));
 			stmt.close();
 		} catch (Exception e) {
+			e.printStackTrace();
 			return false;
 		}
 		return true;
