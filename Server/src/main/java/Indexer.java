@@ -157,6 +157,7 @@ public class Indexer {
 		}
 	}
 	
+	// Extract URLs from the Database to be indexed
 	public class Producer extends Thread
 	{
 		private ResultSet res;
@@ -212,6 +213,7 @@ public class Indexer {
 		}
 	}
 	
+	// Processing the URLs Documents to make statistics
 	public class Processor extends Thread {
 			
 		private URLRecord URLInstance;
@@ -346,6 +348,7 @@ public class Indexer {
 		}
 	}
 	
+	// Inserting the documents statistics into the Database
 	public class Publisher extends Thread {
 		
 		private DocumentData documentInstance;
