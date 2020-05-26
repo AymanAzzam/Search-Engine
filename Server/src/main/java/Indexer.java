@@ -136,6 +136,7 @@ public class Indexer {
 	public static class WebsiteData {
 		ArrayList<WordRecord> word_stats;
 		ArrayList<String> images_url;
+		String URL;
 		int URLID;
 		int total_words;
 		String title;
@@ -155,35 +156,26 @@ public class Indexer {
 		private ResultSet res;
 		private int siz;
 		
-//		public Producer() throws SQLException {
-//			System.out.println("Producer Connecting...");
-//			conn = controller.connect();
-//		}
-		
 		public void run()
 		{
-			System.out.println("Producer Ready...");
+//			System.out.println("Producer Ready...");
 			while(true) {
 				synchronized (DBMutex) {
 					
 					try {
 						// Insert URL from the crawler initilize the word count with -1
 						while(controller.getMinURLWordCount(indexerConnection)!=-1) {
-//							System.out.println(controller.getMinURLWordCount());
 							
-							System.out.println("Producer Wait!");
+//							System.out.println("Producer Wait!");
 							try {
 								DBMutex.wait();
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							}
 						}
-						System.out.println("Producer Awaken!");
+//						System.out.println("Producer Awaken!");
 						res = controller.getNonIndexedRows(indexerConnection);
 						controller.markNonIndexedRows(indexerConnection);
-//						System.out.println(lowerbound_ID);
-//						lowerbound_ID = controller.getMaxURLID();
-//						System.out.println(lowerbound_ID);
 						
 					} catch (SQLException e) {
 						e.printStackTrace();
@@ -207,8 +199,6 @@ public class Indexer {
 					}
 				}
 
-				System.out.println(URLQueue.size());
-				
 			}
 		}
 	}
@@ -223,6 +213,8 @@ public class Indexer {
 		
 		public WebsiteData process(URLRecord r) throws IOException {
 			WebsiteData ret = new WebsiteData(r.ID);
+			ret.URL = r.Name;
+			
 			Map<String, Integer> header_freq = new HashMap<String, Integer>();
 			Map<String, Integer> plain_freq = new HashMap<String, Integer>();
 			Map<String, Integer> body_freq = new HashMap<String, Integer>();
@@ -294,32 +286,27 @@ public class Indexer {
 		
 		public void run() {
 
-			System.out.println("Processor "+ Thread.currentThread().getName() +" Ready...");
+//			System.out.println("Processor "+ Thread.currentThread().getName() +" Ready...");
 			while(true) {
 				
 				synchronized(InMutex) {
 					while(URLQueue.size()==0) {
 						
 						try {
-							System.out.println("Processor Wait!");
+//							System.out.println("Processor Wait!");
 							InMutex.wait();
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
 						
 					}
-					System.out.println("Processor "+ Thread.currentThread().getName() +" Awaken!");
+//					System.out.println("Processor "+ Thread.currentThread().getName() +" Awaken!");
 					url_rec = URLQueue.poll();
 				}
 				
 				try {
 					website_rec = process(url_rec);
 					
-//					System.out.println("Processor:");
-//					System.out.println("URL: " + website_rec.URLID);
-//					System.out.println("Img: " + website_rec.images_url.size());
-//					System.out.println("Wrd: " + website_rec.word_stats.size());
-//					System.out.println("Obj: " + website_rec);
 					
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -328,7 +315,6 @@ public class Indexer {
 				synchronized (OutMutex) {
 					siz=WebsiteQueue.size();
 					WebsiteQueue.add(website_rec);
-					System.out.println("Inc: " + WebsiteQueue.size());
 					if(siz==0) {
 						OutMutex.notifyAll();
 					}
@@ -342,42 +328,28 @@ public class Indexer {
 		
 		private WebsiteData website_rec;
 		private Connection publisherConnection;
+		
 		public Publisher() throws SQLException {
-			System.out.println("Publisher Connecting...");
+//			System.out.println("Publisher Connecting...");
 			publisherConnection = controller.connect();
 		}
 		
 		public void run() {
 
-			System.out.println("Publisher Ready...");
-			long cur = System.currentTimeMillis();
+//			System.out.println("Publisher Ready...");
 			while(true) {
 				synchronized (OutMutex) {
 					while(WebsiteQueue.size()==0) {
 
-						cur = System.currentTimeMillis()-cur;
-						System.out.println(cur);
-						cur = System.currentTimeMillis();
-						
 						try {
-//							System.out.println("Publisher "+ Thread.currentThread().getName() +" Wait!");
 							OutMutex.wait();
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
 					}
 					
-//					System.out.println("Publisher "+ Thread.currentThread().getName() +" Awaken!");
 					website_rec = WebsiteQueue.poll();
-//					System.out.println("Dec: " + WebsiteQueue.size());
 				}
-//				System.out.println("Publisher");
-//				System.out.println("URL: " + website_rec.URLID);
-//				System.out.println("Img: " + website_rec.images_url.size());
-//				System.out.println("Wrd: " + website_rec.word_stats.size());
-//				System.out.println("Obj: " + website_rec);
-				
-//				System.out.println("======================== " + Thread.currentThread().getName());
 				controller.updateURL(publisherConnection, website_rec.URLID, website_rec.total_words, website_rec.title, website_rec.summary);
 				
 				for(WordRecord w:website_rec.word_stats) {
@@ -388,7 +360,7 @@ public class Indexer {
 				for(String img:website_rec.images_url) {
 					controller.insertImage(publisherConnection, website_rec.URLID, img);
 				}
-//				System.out.println("######################## " + Thread.currentThread().getName());
+				System.out.println("Finished: " + website_rec.URL);
 			}
 		}
 	}
