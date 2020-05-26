@@ -42,12 +42,14 @@ public class DBController {
 		Class.forName("com.mysql.cj.jdbc.Driver");
 	}
 	
+	// Establish a database connection
 	public Connection connect() throws SQLException
 	{
 		System.out.println("Establishing DB Connection...");
 		return DriverManager.getConnection(String.format("jdbc:mysql://localhost:3306/%s?useLegacyDatetimeCode=false&serverTimezone=Africa/Cairo", DBName),username,password);
 	}
 	
+	// Create the tables
 	public void build(Connection conn) throws SQLException
 	{
 		try {
@@ -99,6 +101,7 @@ public class DBController {
 		}
 	}
 	
+	// Get non-indexed yet rows
 	public ResultSet getNonIndexedRows(Connection conn) throws SQLException
 	{
 		Statement stmt = conn.createStatement();
@@ -106,6 +109,7 @@ public class DBController {
 				+ " WHERE %s=-1 ORDER BY %s LIMIT 1;", URL_table, countWords_col, URLID_col));
 	}
 	
+	// Mark returned non-indexed rows
 	public void markNonIndexedRows(Connection conn) throws SQLException {
 		Statement stmt = conn.createStatement();
 		
@@ -117,6 +121,7 @@ public class DBController {
 		stmt.close();
 	}
 	
+	// Get the minimum word counts in url_table
 	public int getMinURLWordCount(Connection conn) throws SQLException {
 		
 		Statement stmt = conn.createStatement();
@@ -130,6 +135,7 @@ public class DBController {
 		return ret;
 	}
 	
+	// Insert an image related with a URL
 	public boolean insertImage(Connection conn, int URLID, String imageURL) {
 		
 		try {
@@ -145,6 +151,7 @@ public class DBController {
 		return true;
 	}
 	
+	// Insert a URL with its extracted document path
 	public boolean insertURL(Connection conn, String URL, String filePath) {
 		
 		try {
@@ -160,7 +167,7 @@ public class DBController {
 		return true;
 	}
 	
-	
+	// Update the remaining attributes of the url_table record
 	public boolean updateURL(Connection conn, int URLID, int count, String title, String summary) {
 		
 		try {
@@ -178,7 +185,7 @@ public class DBController {
 		return true;
 	}
 	
-	
+	// Insert a record to word_table
 	public boolean insertWord(Connection conn, String word, int URLID, int plain, int header, int total) {
 		
 		try {
@@ -196,7 +203,7 @@ public class DBController {
 		return true;
 	}
 	
-	
+	// get URLID of specific URL String
 	public int getURLID(Connection conn, String URL)
 	{
 		int ID;
@@ -217,14 +224,14 @@ public class DBController {
 		return ID;
 	}
 
-
+	// Close a database connection
 	public void close(Connection conn) throws SQLException
 	{
 		System.out.println("Closing DB Connection...");
 		conn.close();
 	}
 	
-	
+	// Main method
 	public static void main(String []args) throws ClassNotFoundException, SQLException {
 
 		DBController controller = new DBController();
@@ -234,7 +241,7 @@ public class DBController {
 		controller.close(conn);
 	}
 	
-
+	// Preparing a test for the indexer
 	public void indexerTest(Connection conn) throws SQLException {
 		Statement stmt = conn.createStatement();
 		

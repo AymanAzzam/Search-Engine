@@ -1,6 +1,5 @@
 
 import java.io.*;
-//import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,8 +7,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
-//import org.jsoup.Jsoup;
-//import org.jsoup.nodes.Document;
 
 public class Indexer {
 
@@ -97,23 +94,22 @@ public class Indexer {
 	
 	private static DBController controller;
 	
-	private static Queue<URLRecord> URLQueue;
-	private static Queue<WebsiteData> WebsiteQueue;
-	private static Object InMutex, OutMutex, DBMutex;
-	
+	private Queue<URLRecord> URLQueue;
+	private Queue<DocumentData> DocumentQueue;
+	private Object InMutex, OutMutex, DBMutex;
 	private Connection indexerConnection;
 	
 	public Indexer(DBController control, Object mutex) throws ClassNotFoundException, SQLException {
 		controller = control;
 		DBMutex = mutex;
 		URLQueue = new LinkedList<URLRecord>();
-		WebsiteQueue = new LinkedList<WebsiteData>();
+		DocumentQueue = new LinkedList<DocumentData>();
 		InMutex = new Object();
 		OutMutex = new Object();
 		indexerConnection = controller.connect();
 	}
 	
-	
+	// Needed data of the URL record
 	public static class URLRecord {
 		int ID;
 		String Name;
@@ -126,34 +122,37 @@ public class Indexer {
 		}
 	}
 	
+	// Needed data of the word record
 	public static class WordRecord {
 		String word;
-		int word_count;
-		int plain_count;
-		int header_count;
+		int wordCount;
+		int plainCount;
+		int headerCount;
 		
 		public WordRecord(String w, int wc, int pc, int hc) {
 			word = w;
-			word_count = wc;
-			plain_count = pc;
-			header_count = hc;
+			wordCount = wc;
+			plainCount = pc;
+			headerCount = hc;
 		}
 	}
 	
-	public static class WebsiteData {
-		ArrayList<WordRecord> word_stats;
-		ArrayList<String> images_url;
+	// Needed data and statistics of the Document
+	public static class DocumentData {
+		ArrayList<WordRecord> wordStats;
+		ArrayList<String> imagesURL;
 		String URL;
 		int URLID;
-		int total_words;
+		int totalWords;
 		String title;
 		String summary;
 		
-		public WebsiteData(int ID) {
-			word_stats = new ArrayList<WordRecord>();
-			images_url = new ArrayList<String>();
+		public DocumentData(int ID, String url) {
+			wordStats = new ArrayList<WordRecord>();
+			imagesURL = new ArrayList<String>();
 			URLID = ID;
-			total_words=0;
+			URL = url;
+			totalWords=0;
 			summary = "";
 		}
 	}
@@ -165,22 +164,23 @@ public class Indexer {
 		
 		public void run()
 		{
-//			System.out.println("Producer Ready...");
 			while(true) {
+				// Database Use Mutex lock
 				synchronized (DBMutex) {
 					
 					try {
-						// Insert URL from the crawler initilize the word count with -1
+						// Inserting URL from the crawler initializes the word count with -1
+						// Check if -1 is existing
 						while(controller.getMinURLWordCount(indexerConnection)!=-1) {
 							
-//							System.out.println("Producer Wait!");
+							// Wait untill a notification of insertion
 							try {
 								DBMutex.wait();
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							}
 						}
-//						System.out.println("Producer Awaken!");
+						// Get & Mark available row(s)
 						res = controller.getNonIndexedRows(indexerConnection);
 						controller.markNonIndexedRows(indexerConnection);
 						
@@ -190,17 +190,19 @@ public class Indexer {
 				}
 				
 				synchronized(InMutex) {
+					// Get the size before the insertion
 					siz = URLQueue.size();
 					
 					try {
-
+						// Extract the data from the ResultSet and inserting it into a URL queue
 						while(res.next()) {
 							URLQueue.add(new URLRecord(res.getInt(1), res.getString(2), res.getString(4)));
 						}
 					} catch (SQLException e) {
-						System.out.println("Failed");
 						e.printStackTrace();
 					}
+					
+					// If before insertion siz=0, this means some "Processor" threads are waiting, so notify them
 					if(siz==0) {
 						InMutex.notifyAll();
 					}
@@ -212,20 +214,22 @@ public class Indexer {
 	
 	public class Processor extends Thread {
 			
-		private URLRecord url_rec;
-		private WebsiteData website_rec;
+		private URLRecord URLInstance;
+		private DocumentData documentInstance;
 		private int siz;
 		String line;
 		ArrayList<String> words;
 		
-		public WebsiteData process(URLRecord r) throws IOException {
-			WebsiteData ret = new WebsiteData(r.ID);
-			ret.URL = r.Name;
+		public DocumentData process(URLRecord r) throws IOException {
 			
+			DocumentData ret = new DocumentData(r.ID, r.Name);
+			
+			// Maps to count word frequencies
 			Map<String, Integer> header_freq = new HashMap<String, Integer>();
 			Map<String, Integer> plain_freq = new HashMap<String, Integer>();
 			Map<String, Integer> body_freq = new HashMap<String, Integer>();
 			
+			// File Reader
 			BufferedReader reader = new BufferedReader(new FileReader(r.filePath));
 			
 			int current=0;
@@ -238,10 +242,11 @@ public class Indexer {
 				else if(line.equals("#PLAINTEXT"))	current=4;
 				else if(line.equals("#BODY"))	current=5;
 				else if(current==1) {
-					ret.images_url.add(line);
+					// Add image URL
+					ret.imagesURL.add(line);
 				}
 				else if(current==2) {
-					// Prepare Title
+					// add Title
 					ret.title=line;
 				}
 				else {
@@ -249,79 +254,89 @@ public class Indexer {
 					words = QueryProcessor.steaming(line);
 					
 					for(String s:words) {
+						// If word isn't existing, add it with frequency=0
 						header_freq.putIfAbsent(s, 0);
 						plain_freq.putIfAbsent(s, 0);
 						body_freq.putIfAbsent(s, 0);
 						
 						if(current==3) {
+							// Header Section
 							int c=header_freq.get(s);
 							header_freq.put(s, c+1);
 						}
 						else if(current==4) {
+							// Plaintext Section
 							int c=plain_freq.get(s);
 							plain_freq.put(s, c+1);
 						}
 						else if(current==5) {
+							// Body Section
 							int c=body_freq.get(s);
 							body_freq.put(s, c+1);
 						}
 					}
 					
 					if(current==5) {
-						// Append to Summary
+						// Prepare Summary
 						if(line.length()+ret.summary.length()<500) {
 							ret.summary += line;
+							// Separate every lines with spaces not "\r"
 							ret.summary += " ";
 						}
 						else if(ret.summary.length()<500) {
+							// Add the needed number of characters
 							ret.summary+=line.substring(0,Integer.min(line.length(), 500-ret.summary.length()));
 						}
 						
-						//Count total words in document
-						ret.total_words += words.size();
+						//Count total words in the document
+						ret.totalWords += words.size();
 					}
 					
 				}
 			}
+			// Close the File reader connection
 			reader.close();
 			
 			for(String w:header_freq.keySet()) {
-				ret.word_stats.add(new WordRecord(w, body_freq.get(w), plain_freq.get(w), header_freq.get(w)));
+				// Add a word statistics
+				ret.wordStats.add(new WordRecord(w, body_freq.get(w), plain_freq.get(w), header_freq.get(w)));
 			}
 			return ret;
 		}
 		
 		public void run() {
 
-//			System.out.println("Processor "+ Thread.currentThread().getName() +" Ready...");
 			while(true) {
 				
 				synchronized(InMutex) {
+					
 					while(URLQueue.size()==0) {
-						
+						// If no URLRecord exists, wait untill notification
 						try {
-//							System.out.println("Processor Wait!");
 							InMutex.wait();
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
 						
 					}
-//					System.out.println("Processor "+ Thread.currentThread().getName() +" Awaken!");
-					url_rec = URLQueue.poll();
+					// Get the first of the queue
+					URLInstance = URLQueue.poll();
 				}
 				
 				try {
-					website_rec = process(url_rec);
-					
+					// Process the document and make the required statistics
+					documentInstance = process(URLInstance);
 					
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 				
 				synchronized (OutMutex) {
-					siz=WebsiteQueue.size();
-					WebsiteQueue.add(website_rec);
+					// Size before Inserting a DocumentData
+					siz=DocumentQueue.size();
+					// Enqueue a document instance
+					DocumentQueue.add(documentInstance);
+					// If the size was 0, notify the waiting threads
 					if(siz==0) {
 						OutMutex.notifyAll();
 					}
@@ -333,41 +348,45 @@ public class Indexer {
 	
 	public class Publisher extends Thread {
 		
-		private WebsiteData website_rec;
+		private DocumentData documentInstance;
 		private Connection publisherConnection;
 		
 		public Publisher() throws SQLException {
-//			System.out.println("Publisher Connecting...");
+			// Establish a connection for each thread separately
 			publisherConnection = controller.connect();
 		}
 		
 		public void run() {
 
-//			System.out.println("Publisher Ready...");
 			while(true) {
 				synchronized (OutMutex) {
-					while(WebsiteQueue.size()==0) {
-
+					
+					while(DocumentQueue.size()==0) {
+						// Wait if no DocumentData is available
 						try {
 							OutMutex.wait();
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
 					}
-					
-					website_rec = WebsiteQueue.poll();
+					// Extract a document instance from the queue
+					documentInstance = DocumentQueue.poll();
 				}
-				controller.updateURL(publisherConnection, website_rec.URLID, website_rec.total_words, website_rec.title, website_rec.summary);
+				// Update the title, summary, words_count of a URL
+				controller.updateURL(publisherConnection, documentInstance.URLID, documentInstance.totalWords, documentInstance.title, documentInstance.summary);
 				
-				for(WordRecord w:website_rec.word_stats) {
-					controller.insertWord(publisherConnection, w.word, website_rec.URLID, 
-							w.plain_count, w.header_count, w.word_count);
+				// Insert words statistics related to a URL
+				for(WordRecord w:documentInstance.wordStats) {
+					controller.insertWord(publisherConnection, w.word, documentInstance.URLID, 
+							w.plainCount, w.headerCount, w.wordCount);
 				}
 				
-				for(String img:website_rec.images_url) {
-					controller.insertImage(publisherConnection, website_rec.URLID, img);
+				// Insert images URLs related to a URL
+				for(String img:documentInstance.imagesURL) {
+					controller.insertImage(publisherConnection, documentInstance.URLID, img);
 				}
-				System.out.println("Finished: " + website_rec.URL);
+				
+				System.out.println("Finished: " + documentInstance.URL);
 			}
 		}
 	}
