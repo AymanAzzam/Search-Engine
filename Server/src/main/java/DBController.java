@@ -3,7 +3,7 @@ import java.sql.*;
 
 public class DBController {
 
-	private Connection conn;
+//	private Connection conn;
 	
 //	private Statement stmt;
 
@@ -42,14 +42,18 @@ public class DBController {
 		Class.forName("com.mysql.cj.jdbc.Driver");
 	}
 	
-	public void connect() throws SQLException
+//	public void connect() throws SQLException
+//	{
+//		conn = DriverManager.getConnection(String.format("jdbc:mysql://localhost:3306/%s?useLegacyDatetimeCode=false&serverTimezone=Africa/Cairo", DBName),username,password);
+//		System.out.println("Connect...");
+//	}
+	public Connection connect() throws SQLException
 	{
-		conn = DriverManager.getConnection(String.format("jdbc:mysql://localhost:3306/%s?useLegacyDatetimeCode=false&serverTimezone=Africa/Cairo", DBName),username,password);
 		System.out.println("Connect...");
+		return DriverManager.getConnection(String.format("jdbc:mysql://localhost:3306/%s?useLegacyDatetimeCode=false&serverTimezone=Africa/Cairo", DBName),username,password);
 	}
 	
-	public void build() throws SQLException
-
+	public void build(Connection conn) throws SQLException
 	{
 		try {
 			// CREATE URL TABLE
@@ -100,14 +104,14 @@ public class DBController {
 		}
 	}
 	
-	public ResultSet getNonIndexedRows() throws SQLException
+	public ResultSet getNonIndexedRows(Connection conn) throws SQLException
 	{
 		Statement stmt = conn.createStatement();
 		return stmt.executeQuery(String.format("SELECT * FROM %s"
 				+ " WHERE %s=-1;", URL_table, countWords_col));
 	}
 	
-	public void markNonIndexedRows() throws SQLException {
+	public void markNonIndexedRows(Connection conn) throws SQLException {
 		Statement stmt = conn.createStatement();
 		
 		stmt.executeUpdate(String.format("UPDATE %s "
@@ -118,7 +122,7 @@ public class DBController {
 		stmt.close();
 	}
 	
-	public int getMinURLWordCount() throws SQLException {
+	public int getMinURLWordCount(Connection conn) throws SQLException {
 		
 		Statement stmt = conn.createStatement();
 		ResultSet res = stmt.executeQuery(String.format("SELECT MIN(%s)"
@@ -131,7 +135,7 @@ public class DBController {
 		return ret;
 	}
 	
-	public boolean insertImage(int URLID, String imageURL) {
+	public boolean insertImage(Connection conn, int URLID, String imageURL) {
 		
 		try {
 
@@ -146,7 +150,7 @@ public class DBController {
 		return true;
 	}
 	
-	public boolean insertURL(String URL, String filePath) {
+	public boolean insertURL(Connection conn, String URL, String filePath) {
 		
 		try {
 
@@ -161,7 +165,8 @@ public class DBController {
 		return true;
 	}
 	
-	public boolean updateURL(int URLID, int count, String title, String summary) {
+	
+	public boolean updateURL(Connection conn, int URLID, int count, String title, String summary) {
 		
 		try {
 
@@ -178,7 +183,8 @@ public class DBController {
 		return true;
 	}
 	
-	public boolean insertWord(String word, int URLID, int plain, int header, int total) {
+	
+	public boolean insertWord(Connection conn, String word, int URLID, int plain, int header, int total) {
 		
 		try {
 
@@ -195,7 +201,8 @@ public class DBController {
 		return true;
 	}
 	
-	public int getURLID(String URL)
+	
+	public int getURLID(Connection conn, String URL)
 	{
 		int ID;
 		try {
@@ -215,37 +222,40 @@ public class DBController {
 		return ID;
 	}
 
-	public void close() throws SQLException
+
+	public void close(Connection conn) throws SQLException
 	{
 		conn.close();
 		System.out.println("Close!");
 	}
 	
+	
 	public static void main(String []args) throws ClassNotFoundException, SQLException {
 
 		DBController controller = new DBController();
-		controller.connect();
-		controller.build();
+		Connection conn;
+		conn = controller.connect();
+		controller.build(conn);
 		
 //		String link = "www.sdasasdsa.com";
 //		System.out.println(controller.insertURL(link, "aaa.txt"));
 //		System.out.println(controller.addURLData(controller.getURLID(link), "7moda", 5, 2, 10, 30));
 		
-//		System.out.println(controller.getMaxURLID());
+//		System.out.println(controller.getMinURLWordCount(conn));
 //		
-		ResultSet res = controller.getNonIndexedRows();
-		try {
-			
-			while(res.next()) {
-				System.out.println(res.getInt(1) + " " + res.getString(2) + " " + res.getInt(3) + " " + res.getString(4));
-			}
-		} catch (Exception e) {
-			System.out.println("Empty Results!!!");
-			e.printStackTrace();
-		}
+//		ResultSet res = controller.getNonIndexedRows(conn);
+//		try {
+//			
+//			while(res.next()) {
+//				System.out.println(res.getInt(1) + " " + res.getString(2) + " " + res.getInt(3) + " " + res.getString(4));
+//			}
+//		} catch (Exception e) {
+//			System.out.println("Empty Results!!!");
+//			e.printStackTrace();
+//		}
 		
 		
-		controller.close();
+		controller.close(conn);
 	}
 	
 }
