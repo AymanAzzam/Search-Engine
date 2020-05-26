@@ -54,9 +54,9 @@ public class Indexer {
 		Publisher pub = index.new Publisher();
 		Publisher pub2 = index.new Publisher();
 		Publisher pub3 = index.new Publisher();
-//		Publisher pub4 = index.new Publisher();
-//		Publisher pub5 = index.new Publisher();
-//		Publisher pub6 = index.new Publisher();
+		Publisher pub4 = index.new Publisher();
+		Publisher pub5 = index.new Publisher();
+		Publisher pub6 = index.new Publisher();
 		
 		prod.start();
 		proc.start();
@@ -68,9 +68,9 @@ public class Indexer {
 		pub.start();
 		pub2.start();
 		pub3.start();
-//		pub4.start();
-//		pub5.start();
-//		pub6.start();
+		pub4.start();
+		pub5.start();
+		pub6.start();
 		
 		while(System.in.read()>-1)
 		{
@@ -94,14 +94,16 @@ public class Indexer {
 	private static Queue<WebsiteData> WebsiteQueue;
 	private static Object InMutex, OutMutex, DBMutex;
 	
-	public Indexer(DBController con, Object mutex) throws ClassNotFoundException, SQLException {
-		controller = con;
+	private Connection indexerConnection;
+	
+	public Indexer(DBController control, Object mutex) throws ClassNotFoundException, SQLException {
+		controller = control;
 		DBMutex = mutex;
 		URLQueue = new LinkedList<URLRecord>();
 		WebsiteQueue = new LinkedList<WebsiteData>();
 		InMutex = new Object();
 		OutMutex = new Object();
-		con.connect();
+		indexerConnection = controller.connect();
 	}
 	
 	
@@ -155,7 +157,7 @@ public class Indexer {
 		
 //		public Producer() throws SQLException {
 //			System.out.println("Producer Connecting...");
-//			controller.connect();
+//			conn = controller.connect();
 //		}
 		
 		public void run()
@@ -166,8 +168,8 @@ public class Indexer {
 					
 					try {
 						// Insert URL from the crawler initilize the word count with -1
-						while(controller.getMinURLWordCount()!=-1) {
-							System.out.println(controller.getMinURLWordCount());
+						while(controller.getMinURLWordCount(indexerConnection)!=-1) {
+//							System.out.println(controller.getMinURLWordCount());
 							
 							System.out.println("Producer Wait!");
 							try {
@@ -177,8 +179,8 @@ public class Indexer {
 							}
 						}
 						System.out.println("Producer Awaken!");
-						res = controller.getNonIndexedRows();
-						controller.markNonIndexedRows();
+						res = controller.getNonIndexedRows(indexerConnection);
+						controller.markNonIndexedRows(indexerConnection);
 //						System.out.println(lowerbound_ID);
 //						lowerbound_ID = controller.getMaxURLID();
 //						System.out.println(lowerbound_ID);
@@ -339,11 +341,11 @@ public class Indexer {
 	public class Publisher extends Thread {
 		
 		private WebsiteData website_rec;
-		
-//		public Publisher() throws SQLException {
-//			System.out.println("Publisher Connecting...");
-//			controller.connect();
-//		}
+		private Connection publisherConnection;
+		public Publisher() throws SQLException {
+			System.out.println("Publisher Connecting...");
+			publisherConnection = controller.connect();
+		}
 		
 		public void run() {
 
@@ -376,15 +378,15 @@ public class Indexer {
 //				System.out.println("Obj: " + website_rec);
 				
 //				System.out.println("======================== " + Thread.currentThread().getName());
-				controller.updateURL(website_rec.URLID, website_rec.total_words, website_rec.title, website_rec.summary);
+				controller.updateURL(publisherConnection, website_rec.URLID, website_rec.total_words, website_rec.title, website_rec.summary);
 				
 				for(WordRecord w:website_rec.word_stats) {
-					controller.insertWord(w.word, website_rec.URLID, 
+					controller.insertWord(publisherConnection, w.word, website_rec.URLID, 
 							w.plain_count, w.header_count, w.word_count);
 				}
 				
 				for(String img:website_rec.images_url) {
-					controller.insertImage(website_rec.URLID, img);
+					controller.insertImage(publisherConnection, website_rec.URLID, img);
 				}
 //				System.out.println("######################## " + Thread.currentThread().getName());
 			}
