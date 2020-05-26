@@ -42,14 +42,9 @@ public class DBController {
 		Class.forName("com.mysql.cj.jdbc.Driver");
 	}
 	
-//	public void connect() throws SQLException
-//	{
-//		conn = DriverManager.getConnection(String.format("jdbc:mysql://localhost:3306/%s?useLegacyDatetimeCode=false&serverTimezone=Africa/Cairo", DBName),username,password);
-//		System.out.println("Connect...");
-//	}
 	public Connection connect() throws SQLException
 	{
-		System.out.println("Connect...");
+		System.out.println("Establishing DB Connection...");
 		return DriverManager.getConnection(String.format("jdbc:mysql://localhost:3306/%s?useLegacyDatetimeCode=false&serverTimezone=Africa/Cairo", DBName),username,password);
 	}
 	
@@ -108,7 +103,7 @@ public class DBController {
 	{
 		Statement stmt = conn.createStatement();
 		return stmt.executeQuery(String.format("SELECT * FROM %s"
-				+ " WHERE %s=-1;", URL_table, countWords_col));
+				+ " WHERE %s=-1 ORDER BY %s LIMIT 1;", URL_table, countWords_col, URLID_col));
 	}
 	
 	public void markNonIndexedRows(Connection conn) throws SQLException {
@@ -116,8 +111,8 @@ public class DBController {
 		
 		stmt.executeUpdate(String.format("UPDATE %s "
 				+ "SET %s = 0 "
-				+ "WHERE %s = -1;",
-				URL_table, countWords_col, countWords_col));
+				+ "WHERE %s = -1 ORDER BY %s LIMIT 1;",
+				URL_table, countWords_col, countWords_col, URLID_col));
 		
 		stmt.close();
 	}
@@ -225,8 +220,8 @@ public class DBController {
 
 	public void close(Connection conn) throws SQLException
 	{
+		System.out.println("Closing DB Connection...");
 		conn.close();
-		System.out.println("Close!");
 	}
 	
 	
@@ -235,26 +230,7 @@ public class DBController {
 		DBController controller = new DBController();
 		Connection conn;
 		conn = controller.connect();
-		controller.build(conn);
-		
-//		String link = "www.sdasasdsa.com";
-//		System.out.println(controller.insertURL(link, "aaa.txt"));
-//		System.out.println(controller.addURLData(controller.getURLID(link), "7moda", 5, 2, 10, 30));
-		
-//		System.out.println(controller.getMinURLWordCount(conn));
-//		
-//		ResultSet res = controller.getNonIndexedRows(conn);
-//		try {
-//			
-//			while(res.next()) {
-//				System.out.println(res.getInt(1) + " " + res.getString(2) + " " + res.getInt(3) + " " + res.getString(4));
-//			}
-//		} catch (Exception e) {
-//			System.out.println("Empty Results!!!");
-//			e.printStackTrace();
-//		}
-		
-		
+		controller.build(conn);		
 		controller.close(conn);
 	}
 	
