@@ -103,7 +103,7 @@ public class DBController {
 	{
 		Statement stmt = conn.createStatement();
 		return stmt.executeQuery(String.format("SELECT * FROM %s"
-				+ " WHERE %s=-1;", URL_table, countWords_col));
+				+ " WHERE %s=-1 ORDER BY %s LIMIT 1;", URL_table, countWords_col, URLID_col));
 	}
 	
 	public void markNonIndexedRows(Connection conn) throws SQLException {
@@ -111,8 +111,8 @@ public class DBController {
 		
 		stmt.executeUpdate(String.format("UPDATE %s "
 				+ "SET %s = 0 "
-				+ "WHERE %s = -1;",
-				URL_table, countWords_col, countWords_col));
+				+ "WHERE %s = -1 ORDER BY %s LIMIT 1;",
+				URL_table, countWords_col, countWords_col, URLID_col));
 		
 		stmt.close();
 	}
@@ -233,5 +233,17 @@ public class DBController {
 		controller.build(conn);		
 		controller.close(conn);
 	}
+	
+
+	public void indexerTest(Connection conn) throws SQLException {
+		Statement stmt = conn.createStatement();
+		
+		stmt.executeUpdate("delete from url_table;");
+		
+		for(int i=0 ; i<10 ; ++i) {
+			stmt.executeUpdate("INSERT INTO url_table(URL, file_path) values('www."+ i +".com','crawler_format.txt');");
+		}
+	}
+	
 	
 }
