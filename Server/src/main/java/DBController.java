@@ -103,7 +103,7 @@ public class DBController {
 	{
 		Statement stmt = conn.createStatement();
 		return stmt.executeQuery(String.format("SELECT * FROM %s"
-				+ " WHERE %s=-1 ORDER BY %s LIMIT 1;", URL_table, countWords_col, URLID_col));
+				+ " WHERE %s=-1;", URL_table, countWords_col));
 	}
 	
 	public void markNonIndexedRows(Connection conn) throws SQLException {
@@ -111,8 +111,8 @@ public class DBController {
 		
 		stmt.executeUpdate(String.format("UPDATE %s "
 				+ "SET %s = 0 "
-				+ "WHERE %s = -1 ORDER BY %s LIMIT 1;",
-				URL_table, countWords_col, countWords_col, URLID_col));
+				+ "WHERE %s = -1;",
+				URL_table, countWords_col, countWords_col));
 		
 		stmt.close();
 	}
