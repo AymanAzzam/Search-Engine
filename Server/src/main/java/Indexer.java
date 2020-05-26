@@ -46,11 +46,31 @@ public class Indexer {
 		
 		Producer prod = index.new Producer();
 		Processor proc = index.new Processor();
+		Processor proc2 = index.new Processor();
+		Processor proc3 = index.new Processor();
+//		Processor proc4 = index.new Processor();
+//		Processor proc5 = index.new Processor();
+//		Processor proc6 = index.new Processor();
 		Publisher pub = index.new Publisher();
+		Publisher pub2 = index.new Publisher();
+		Publisher pub3 = index.new Publisher();
+//		Publisher pub4 = index.new Publisher();
+//		Publisher pub5 = index.new Publisher();
+//		Publisher pub6 = index.new Publisher();
 		
 		prod.start();
 		proc.start();
+		proc2.start();
+		proc3.start();
+//		proc4.start();
+//		proc5.start();
+//		proc6.start();
 		pub.start();
+		pub2.start();
+		pub3.start();
+//		pub4.start();
+//		pub5.start();
+//		pub6.start();
 		
 		while(System.in.read()>-1)
 		{
@@ -59,9 +79,13 @@ public class Indexer {
 			}
 		}
 		
-		prod.join();
-		proc.join();
-		pub.join();
+//		prod.join();
+//		proc.join();
+//		proc2.join();
+//		proc3.join();
+//		pub.join();
+//		pub2.join();
+//		pub3.join();
 	}
 	
 	private static DBController controller;
@@ -69,15 +93,15 @@ public class Indexer {
 	private static Queue<URLRecord> URLQueue;
 	private static Queue<WebsiteData> WebsiteQueue;
 	private static Object InMutex, OutMutex, DBMutex;
-//	private static int lowerbound_ID = 0;
 	
-	public Indexer(DBController con, Object mutex) throws ClassNotFoundException {
+	public Indexer(DBController con, Object mutex) throws ClassNotFoundException, SQLException {
 		controller = con;
 		DBMutex = mutex;
 		URLQueue = new LinkedList<URLRecord>();
 		WebsiteQueue = new LinkedList<WebsiteData>();
 		InMutex = new Object();
 		OutMutex = new Object();
+		con.connect();
 	}
 	
 	
@@ -129,10 +153,10 @@ public class Indexer {
 		private ResultSet res;
 		private int siz;
 		
-		public Producer() throws SQLException {
-			System.out.println("Producer Connecting...");
-			controller.connect();
-		}
+//		public Producer() throws SQLException {
+//			System.out.println("Producer Connecting...");
+//			controller.connect();
+//		}
 		
 		public void run()
 		{
@@ -268,7 +292,7 @@ public class Indexer {
 		
 		public void run() {
 
-			System.out.println("Processor Ready...");
+			System.out.println("Processor "+ Thread.currentThread().getName() +" Ready...");
 			while(true) {
 				
 				synchronized(InMutex) {
@@ -282,7 +306,7 @@ public class Indexer {
 						}
 						
 					}
-					System.out.println("Processor Awaken!");
+					System.out.println("Processor "+ Thread.currentThread().getName() +" Awaken!");
 					url_rec = URLQueue.poll();
 				}
 				
@@ -316,30 +340,34 @@ public class Indexer {
 		
 		private WebsiteData website_rec;
 		
-		public Publisher() throws SQLException {
-			System.out.println("Publisher Connecting...");
-			controller.connect();
-		}
+//		public Publisher() throws SQLException {
+//			System.out.println("Publisher Connecting...");
+//			controller.connect();
+//		}
 		
 		public void run() {
 
 			System.out.println("Publisher Ready...");
+			long cur = System.currentTimeMillis();
 			while(true) {
-				
 				synchronized (OutMutex) {
-					if(WebsiteQueue.size()==0) {
+					while(WebsiteQueue.size()==0) {
 
+						cur = System.currentTimeMillis()-cur;
+						System.out.println(cur);
+						cur = System.currentTimeMillis();
+						
 						try {
-							System.out.println("Publisher Wait!");
+//							System.out.println("Publisher "+ Thread.currentThread().getName() +" Wait!");
 							OutMutex.wait();
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
 					}
 					
-					System.out.println("Publisher Awaken!");
+//					System.out.println("Publisher "+ Thread.currentThread().getName() +" Awaken!");
 					website_rec = WebsiteQueue.poll();
-					System.out.println("Dec: " + WebsiteQueue.size());
+//					System.out.println("Dec: " + WebsiteQueue.size());
 				}
 //				System.out.println("Publisher");
 //				System.out.println("URL: " + website_rec.URLID);
@@ -347,6 +375,7 @@ public class Indexer {
 //				System.out.println("Wrd: " + website_rec.word_stats.size());
 //				System.out.println("Obj: " + website_rec);
 				
+//				System.out.println("======================== " + Thread.currentThread().getName());
 				controller.updateURL(website_rec.URLID, website_rec.total_words, website_rec.title, website_rec.summary);
 				
 				for(WordRecord w:website_rec.word_stats) {
@@ -357,6 +386,7 @@ public class Indexer {
 				for(String img:website_rec.images_url) {
 					controller.insertImage(website_rec.URLID, img);
 				}
+//				System.out.println("######################## " + Thread.currentThread().getName());
 			}
 		}
 	}
