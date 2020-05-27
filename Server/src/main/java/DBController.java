@@ -20,6 +20,7 @@ public class DBController {
 	final String URLFilePath_col = "file_path";
 	final String URLTitle_col = "title";
 	final String URLContent_col = "content";
+	final String isIndexed_col = "is_indexed";
 	
 	// Image Database
 	final String image_table = "image_table";
@@ -58,12 +59,13 @@ public class DBController {
 			stmt.executeUpdate(String.format("CREATE TABLE %s ("
 					+ "%s INT PRIMARY KEY AUTO_INCREMENT,"
 					+ "%s TINYTEXT UNIQUE NOT NULL,"
-					+ "%s INT DEFAULT -1,"
+					+ "%s INT DEFAULT 0 NOT NULL,"
 					+ "%s TINYTEXT NOT NULL,"
 					+ "%s TINYTEXT,"
-					+ "%s TEXT);", 
+					+ "%s TEXT,"
+					+ "%s BOOLEAN DEFAULT FALSE NOT NULL);", 
 					URL_table, URLID_col, URLName_col, countWords_col, 
-					URLFilePath_col, URLTitle_col, URLContent_col));
+					URLFilePath_col, URLTitle_col, URLContent_col, isIndexed_col));
 			
 			
 			
@@ -106,7 +108,7 @@ public class DBController {
 	{
 		Statement stmt = conn.createStatement();
 		return stmt.executeQuery(String.format("SELECT * FROM %s"
-				+ " WHERE %s=-1 ORDER BY %s LIMIT 1;", URL_table, countWords_col, URLID_col));
+				+ " WHERE %s = FALSE ORDER BY %s LIMIT 1;", URL_table, isIndexed_col, URLID_col));
 	}
 	
 	// Mark returned non-indexed rows
@@ -114,19 +116,19 @@ public class DBController {
 		Statement stmt = conn.createStatement();
 		
 		stmt.executeUpdate(String.format("UPDATE %s "
-				+ "SET %s = 0 "
-				+ "WHERE %s = -1 ORDER BY %s LIMIT 1;",
-				URL_table, countWords_col, countWords_col, URLID_col));
+				+ "SET %s = TRUE "
+				+ "WHERE %s = FALSE ORDER BY %s LIMIT 1;",
+				URL_table, isIndexed_col, isIndexed_col, URLID_col));
 		
 		stmt.close();
 	}
 	
 	// Get the minimum word counts in url_table
-	public int getMinURLWordCount(Connection conn) throws SQLException {
+	public int checkNonIndexed(Connection conn) throws SQLException {
 		
 		Statement stmt = conn.createStatement();
-		ResultSet res = stmt.executeQuery(String.format("SELECT MIN(%s)"
-				+ " FROM %s;", countWords_col, URL_table));
+		ResultSet res = stmt.executeQuery(String.format("SELECT COUNT(*)"
+				+ " FROM %s WHERE %s = FALSE;", URL_table, isIndexed_col));
 		
 		res.next();
 		int ret = res.getInt(1);
@@ -174,9 +176,9 @@ public class DBController {
 
 			Statement stmt = conn.createStatement();
 			stmt.executeUpdate(String.format("UPDATE %s "
-					+ "SET %s=%d, %s='%s', %s='%s' "
+					+ "SET %s=%d, %s='%s', %s='%s', %s = TRUE "
 					+ "WHERE %s=%d;", 
-					URL_table, countWords_col, count, URLTitle_col, title, URLContent_col, content, 
+					URL_table, countWords_col, count, URLTitle_col, title, URLContent_col, content, isIndexed_col,
 					URLID_col, URLID));
 			stmt.close();
 		} catch (Exception e) {

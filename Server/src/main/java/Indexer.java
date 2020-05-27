@@ -170,9 +170,9 @@ public class Indexer {
 				synchronized (DBMutex) {
 					
 					try {
-						// Inserting URL from the crawler initializes the word count with -1
-						// Check if -1 is existing
-						while(controller.getMinURLWordCount(indexerConnection)!=-1) {
+						// Inserting URL from the crawler initializes is_indexed with FALSE
+						// Check if [is_indexed = false] is existing
+						while(controller.checkNonIndexed(indexerConnection)==0) {
 							
 							// Wait untill a notification of insertion
 							try {
