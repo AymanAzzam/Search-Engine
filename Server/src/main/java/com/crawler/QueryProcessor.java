@@ -1,3 +1,5 @@
+package com.crawler;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.sql.Connection;
@@ -19,7 +21,7 @@ public class QueryProcessor {
 	        String sentence ="\"how to install nodejs on linux\"" ;
 	        
 	    	/*** Converting the Sentence into words ***/
-	    	ArrayList<String> queryWords = query(sentence);
+	    	query(sentence);
 	    	
 	     }
 	 
@@ -48,7 +50,7 @@ public class QueryProcessor {
 	 		/*** Declare Variables ***/
 	 		ArrayList<String> stopWords = new ArrayList<String>();
 	    	 
-	 		/*** Removing the Speacial Charachters ***/
+	 		/*** Removing the Special Characters ***/
 	    	sentence = sentence.replaceAll("[^a-zA-Z0-9 ]", "");
 	    	
 	    	/*** Converting the Sentence into words ***/
@@ -75,7 +77,7 @@ public class QueryProcessor {
 	 		/*** Declare Variables ***/
 	 		ArrayList<String> stopWords = new ArrayList<String>();
 	    	 
-	 		/*** Removing the Speacial Charachters ***/
+	 		/*** Removing the Special Characters ***/
 	    	sentence = sentence.replaceAll("[^a-zA-Z0-9 ]", "");
 	    	
 	    	/*** For Testing Purpose ***/

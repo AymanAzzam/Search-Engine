@@ -1,3 +1,4 @@
+package com.crawler;
 
 public class WebsiteTFIDFPair implements Comparable<WebsiteTFIDFPair> {
 	String websiteName;

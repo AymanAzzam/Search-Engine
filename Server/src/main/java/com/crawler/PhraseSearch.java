@@ -1,3 +1,5 @@
+package com.crawler;
+
 import java.util.*;
 
 public class PhraseSearch {

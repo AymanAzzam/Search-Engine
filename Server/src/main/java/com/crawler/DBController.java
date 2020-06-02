@@ -1,5 +1,8 @@
+package com.crawler;
+
 //import java.io.ObjectInputStream.GetField;
 import java.sql.*;
+import java.util.ArrayList;
 
 public class DBController {
 
@@ -230,41 +233,48 @@ public class DBController {
 	// get Inverted File Content for specific word
 	public ArrayList<String> getInvertedFile(Connection conn, String word)
 	{
-		ArrayList<String> out;	ResultSet rs;
+		ArrayList<String> out = new ArrayList<String>();	ResultSet rs;
 	
-		Statement stmt = conn.createStatement();
+		Statement stmt;
+		try {
+				stmt = conn.createStatement();
+				
+				rs = stmt.executeQuery(String.format("SELECT * FROM %s"
+						+ " WHERE %s = %s;", word_table, word_col, word));
+				
+				while(rs.next())
+				{
+					out.add(rs.getString(wordURLID_col));
+					out.add(rs.getString(countPlaintxt_col));
+					out.add(rs.getString(countHeader_col));
+					out.add(rs.getString(countTotal_col));
+				}
+		} catch (SQLException e) {	e.printStackTrace();	}
 		
-		rs = stmt.executeQuery(String.format("SELECT * FROM %s"
-				+ " WHERE %s = %s;", word_table, word_col, word));
-		
-		while(rs.next())
-		{
-			out.add(rs.getString(wordURLID_col));
-			out.add(rs.getString(countPlaintxt_col));
-			out.add(rs.getString(countHeader_col));
-			out.add(rs.getString(countTotal_col));
-		}
-		reutrn out;
+		return out;
 	}
 
 	// get Content for specific URL_ID
 	public ArrayList<String> getUrlFile(Connection conn, String URL_ID)
 	{
-		ArrayList<String> out;	ResultSet rs;
+		ArrayList<String> out = new ArrayList<String>();	ResultSet rs;
 	
-		Statement stmt = conn.createStatement();
+		Statement stmt;
+		try {
+				stmt = conn.createStatement();
+				rs = stmt.executeQuery(String.format("SELECT * FROM %s"
+						+ " WHERE %s = %s;", URL_table, URLID_col, URL_ID));
+				
+				while(rs.next())
+				{
+					out.add(rs.getString(URLTitle_col));
+					out.add(rs.getString(URLName_col));
+					out.add(rs.getString(URLContent_col));	
+					out.add(rs.getString(countWords_col));
+				}
+		} catch (SQLException e) {	e.printStackTrace();	}
 		
-		rs = stmt.executeQuery(String.format("SELECT * FROM %s"
-				+ " WHERE %s = %s;", URL_table, URLID_col, URL_ID));
-		
-		while(rs.next())
-		{
-			out.add(rs.getString(URLTitle_col));
-			out.add(rs.getString(URLName_col));
-			out.add(rs.getString(URLContent_col));	
-			out.add(rs.getString(countWords_col));
-		}
-		reutrn out;
+		return out;
 	}
 
 	// Close a database connection

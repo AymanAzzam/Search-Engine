@@ -1,3 +1,4 @@
+package com.crawler;
 
 public class WordValue {
 	

@@ -1,14 +1,9 @@
+package com.crawler;
 
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.URL;
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.LinkedList;

@@ -1,5 +1,9 @@
+package com.crawler;
+
+import java.io.FileNotFoundException;
+import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Hashtable;
 
 public class Main {
 
@@ -9,7 +13,10 @@ public class Main {
 			
 			String query = "Received Request" ;
 			ArrayList<String> queryWords, invertedFileElement, linkFileElement;
+			
+			/********** Abo Shama Should update the following Two lines **************/ 
 			DBController dbController = new DBController();
+			Connection conn = dbController.connect();
 			
 			queryWords = QueryProcessor.query(query);
 
@@ -21,34 +28,20 @@ public class Main {
 				
 				ArrayList<WordValue> invertedFileTempList = new ArrayList<WordValue> ();
 
-				invertedFileElement = dbController.getInvertedFile(queryWords.get(i));
+				invertedFileElement = dbController.getInvertedFile(conn,queryWords.get(i));
 				for(int j=0; j<invertedFileElement.size(); j+=4)
 				{
-					linkFileElement = dbController.getUrlFile(invertedFileElement.get(j));
+					linkFileElement = dbController.getUrlFile(conn,invertedFileElement.get(j));
 					invertedFileElement.set(j,linkFileElement.get(1));
 
-					/************** Comments for Menna ********************/
-					// add the following three elements in the object that you want for linkDatabase 
-					// then add the object to the hashtable that you should create with the defined variables above
-					// linkFileElement.get(0) is the header
-					// linkFileElement.get(1) is the link
-					// linkFileElement.get(2) is the content
-					// linkFileElement.get(3) is the content
-					WebsiteValue websiteValue = new WebsiteValue(linkFileElement.get(3), linkFileElement.get(0), linkFileElement.get(2));
 					
+					WebsiteValue websiteValue = new WebsiteValue(Integer.parseInt(linkFileElement.get(3)), linkFileElement.get(0), linkFileElement.get(2));
 					linkDatabase.put(linkFileElement.get(1), websiteValue);
-					// add the following elements in the object that you want for invertedFile 
-					// then add the object to the ArrayList<WordValue> that you should create with the defined variables above
-					// invertedFileElement.get(j+1) is the URL
-					// invertedFileElement.get(j+2) is the Plain Text Count
-					// invertedFileElement.get(j+3) is the Header Count
-					// invertedFileElement.get(j+4) is the total Count
-					WordValue wordvalue = new WordValue(invertedFileElement.get(j+1), invertedFileElement.get(j+4), invertedFileElement.get(j+2));
+					
+					WordValue wordvalue = new WordValue(invertedFileElement.get(j+1), Integer.parseInt(invertedFileElement.get(j+4)), Integer.parseInt(invertedFileElement.get(j+2)));
 					invertedFileTempList.add(wordvalue);
 				}
 				
-				// And Here you shoud add this ArrayList<WordValue> to hashtable of invertedFile
-				// queryWords.get(i) is the word
 				invertedFile.put(queryWords.get(i), invertedFileTempList);
 			}
 			
@@ -56,7 +49,6 @@ public class Main {
 
 			if(queryWords.get(0) == "1")
 			{
-				// It's a phrase Search and to get the query with alphabitcs, numbers and spaces only
 				query = query.replaceAll("[^a-zA-Z0-9 ]", "");
 				PhraseSearch phSearch = new PhraseSearch(invertedFile, linkDatabase, dummyTotalNumberOfDocuments, query);
 				ArrayList<OutputValue> result = phSearch.phraseSearch();
@@ -64,10 +56,8 @@ public class Main {
 			}
 			else
 			{
-				// It's Normal Search
 				Ranker ranker = new Ranker (invertedFile, linkDatabase, dummyTotalNumberOfDocuments);
 				ArrayList<OutputValue> result = ranker.rank();
-				
 			}
 	     }
 }

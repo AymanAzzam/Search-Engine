@@ -1,3 +1,5 @@
+package com.crawler;
+
 import java.util.ArrayList;
 
 public class TFIDFValue {
