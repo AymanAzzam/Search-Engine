@@ -262,6 +262,7 @@ public class DBController {
 			out.add(rs.getString(URLTitle_col));
 			out.add(rs.getString(URLName_col));
 			out.add(rs.getString(URLContent_col));	
+			out.add(rs.getString(countWords_col));
 		}
 		reutrn out;
 	}
