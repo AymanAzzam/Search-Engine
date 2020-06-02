@@ -226,6 +226,28 @@ public class DBController {
 		}
 		return ID;
 	}
+	
+	// get Url, Content and title for specific word String
+	public ArrayList<String> getWordResults(Connection conn, String word)
+	{
+		ArrayList<String> out;	ResultSet rs1,rs2;
+	
+		Statement stmt = conn.createStatement();
+		
+		rs1 = stmt.executeQuery(String.format("SELECT * FROM %s"
+				+ " WHERE %s = %s;", word_table, URLID_col, word));
+		
+		while(rs1.next())
+		{
+			rs2 = stmt.executeQuery(String.format("SELECT * FROM %s"
+				+ " WHERE %s = %s;", URL_table, word_col, rs1.getString(wordURLID_col)));
+			rs2.next();
+			out.add(rs2.getString(URLTitle_col));
+			out.add(rs2.getString(URLName_col));
+			out.add(rs2.getString(URLContent_col));
+		}
+		reutrn out;
+	}
 
 	// Close a database connection
 	public void close(Connection conn) throws SQLException
