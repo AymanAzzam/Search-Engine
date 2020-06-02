@@ -29,14 +29,11 @@ public class QueryProcessor {
 
 	        /*** Checking Phrase Search ***/
 	    	if(sentence.charAt(0) == '"' && sentence.charAt(sentence.length()-1) == '"')
-		{
 			queryWords.add("1");
-	    		queryWords.add(sentence.replaceAll("[^a-zA-Z0-9 ]", ""))
-			return queryWords;
-		}
+		else
+			queryWords.add("0");
 	    	
 	    	/*** Converting the Sentence into words ***/
-	    	queryWords.add("0");
 		queryWords = steaming(sentence);
 	    	
 	    	/*** For Testing Purpose ***/
