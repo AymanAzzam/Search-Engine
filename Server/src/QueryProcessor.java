@@ -25,29 +25,23 @@ public class QueryProcessor {
 	 
 	 	public static ArrayList<String> query(String sentence) throws FileNotFoundException,Exception
 	 	{
-	        String phraseSearch = "0";
-	        
+	        ArrayList<String> queryWords;
+
 	        /*** Checking Phrase Search ***/
 	    	if(sentence.charAt(0) == '"' && sentence.charAt(sentence.length()-1) == '"')
-	    		 phraseSearch = "1";
+		{
+			queryWords.add("1");
+	    		queryWords.add(sentence.replaceAll("[^a-zA-Z0-9 ]", ""))
+			return queryWords;
+		}
 	    	
 	    	/*** Converting the Sentence into words ***/
-	    	ArrayList<String> queryWords = steaming(sentence);
-	    	queryWords.add(0,phraseSearch);
+	    	queryWords.add("0");
+		queryWords = steaming(sentence);
 	    	
 	    	/*** For Testing Purpose ***/
 	        System.out.println("\nAfter Query: ");
 	        for(String word: queryWords)	System.out.println(word);
-	        
-	        /*** Apply Queries to the DataBase ***/
-	        Class.forName("com.mysql.cj.jdbc.Driver");  
-	        //here sonoo is database name, root is username and admin is password
-			Connection con=DriverManager.getConnection("jdbc:mysql://localhost:3306/sonoo","root","admin");  
-			Statement stmt= con.createStatement();
-			ResultSet rs=stmt.executeQuery("select * from emp");  
-			while(rs.next())  
-				System.out.println(rs.getInt(1)+"  "+rs.getString(2)+"  "+rs.getString(3));  
-			con.close();  
 	    	
 	    	return queryWords;
 	 	}
