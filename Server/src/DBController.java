@@ -227,24 +227,41 @@ public class DBController {
 		return ID;
 	}
 	
-	// get Url, Content and title for specific word String
-	public ArrayList<String> getWordResults(Connection conn, String word)
+	// get Inverted File Content for specific word
+	public ArrayList<String> getInvertedFile(Connection conn, String word)
 	{
-		ArrayList<String> out;	ResultSet rs1,rs2;
+		ArrayList<String> out;	ResultSet rs;
 	
 		Statement stmt = conn.createStatement();
 		
-		rs1 = stmt.executeQuery(String.format("SELECT * FROM %s"
-				+ " WHERE %s = %s;", word_table, URLID_col, word));
+		rs = stmt.executeQuery(String.format("SELECT * FROM %s"
+				+ " WHERE %s = %s;", word_table, word_col, word));
 		
-		while(rs1.next())
+		while(rs.next())
 		{
-			rs2 = stmt.executeQuery(String.format("SELECT * FROM %s"
-				+ " WHERE %s = %s;", URL_table, word_col, rs1.getString(wordURLID_col)));
-			rs2.next();
-			out.add(rs2.getString(URLTitle_col));
-			out.add(rs2.getString(URLName_col));
-			out.add(rs2.getString(URLContent_col));
+			out.add(rs.getString(wordURLID_col));
+			out.add(rs.getString(countPlaintxt_col));
+			out.add(rs.getString(countHeader_col));
+			out.add(rs.getString(countTotal_col));
+		}
+		reutrn out;
+	}
+
+	// get Content for specific URL_ID
+	public ArrayList<String> getUrlFile(Connection conn, String URL_ID)
+	{
+		ArrayList<String> out;	ResultSet rs;
+	
+		Statement stmt = conn.createStatement();
+		
+		rs = stmt.executeQuery(String.format("SELECT * FROM %s"
+				+ " WHERE %s = %s;", URL_table, URLID_col, URL_ID));
+		
+		while(rs.next())
+		{
+			out.add(rs.getString(URLTitle_col));
+			out.add(rs.getString(URLName_col));
+			out.add(rs.getString(URLContent_col));	
 		}
 		reutrn out;
 	}
