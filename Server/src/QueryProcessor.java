@@ -25,16 +25,16 @@ public class QueryProcessor {
 	 
 	 	public static ArrayList<String> query(String sentence) throws FileNotFoundException,Exception
 	 	{
-	        ArrayList<String> queryWords;
+	        ArrayList<String> queryWords = new ArrayList<String>();
 
 	        /*** Checking Phrase Search ***/
 	    	if(sentence.charAt(0) == '"' && sentence.charAt(sentence.length()-1) == '"')
-			queryWords.add("1");
-		else
-			queryWords.add("0");
+	    		queryWords.add("1");
+	    	else
+	    		queryWords.add("0");
 	    	
 	    	/*** Converting the Sentence into words ***/
-		queryWords = steaming(sentence);
+	    	queryWords.addAll(steaming(sentence));
 	    	
 	    	/*** For Testing Purpose ***/
 	        System.out.println("\nAfter Query: ");
