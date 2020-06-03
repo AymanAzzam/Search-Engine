@@ -1,9 +1,18 @@
 package com.crawler;
 
+
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import java.sql.*;
 
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.LinkedList;
@@ -18,18 +27,31 @@ import java.util.regex.Pattern;
 
 public class Crawler {
 	//data members:
+	private static DBController controller;
 	private final int MAX_LINKS_COUNT;
 	private HashSet<String> visitedLinks;
-	Queue <String> toBeProcessedLinks;
+	private Queue <String> toBeProcessedLinks;
+	//Queue <UrlRecord> toBeSavedInDB;
 	private int visitedLinksCnt;
+	private int linksCnt;
+	private java.sql.Connection crawlerConnection;
+	private Object queueMutex,DBMutex,cntMutex;
 
 	//constructor:
-	public Crawler (int maxNoOfLinks) {
+	public Crawler (int maxNoOfLinks, String seederFileName, DBController dbController, Object mutex )
+			throws ClassNotFoundException, SQLException {
 
 		visitedLinks = new HashSet <String>();
 		toBeProcessedLinks = new LinkedList<String>();
 		MAX_LINKS_COUNT = maxNoOfLinks;
 		visitedLinksCnt = 0;
+		linksCnt = 0;
+		controller = dbController;
+		crawlerConnection = controller.connect();
+		DBMutex = mutex;
+		queueMutex = new Object();
+		cntMutex = new Object();
+		seed(seederFileName);
 
 	}
 
@@ -76,181 +98,172 @@ public class Crawler {
 	}
 
 	//save html file contains the webpage content:
-	//url - imgs - title - h1->h6
-	public void saveWebPage(Document webPage, String url) {
+	//imgs - title - h1->h6 - plaintext -bodys
+	public UrlRecord saveWebPage(Document webPage, String url) {
+
+	    try {
+	    	linksCnt++;
+			FileWriter myWriter = new FileWriter("docs/doc"+linksCnt+".txt");
+
+			//images::
+			myWriter.write("#IMAGES\n");
+			Elements images = webPage.select("img");
+			for(Element image : images) {
+				String imageLink = image.attr("src");
+				myWriter.write(imageLink+"\n");
+			}
+
+			//title::
+			myWriter.write("#TITLE\n");
+			String title = webPage.title();
+			title = getEnglishText(title);
+			myWriter.write(title+"\n");
+
+			//headers::
+			myWriter.write("#HEADERS\n");
+			Elements headers = webPage.select("h1, h2, h3, h4, h5, h6");
+			for(Element header : headers) {
+				String headerText = header.text();
+				headerText = getEnglishText(headerText);
+				myWriter.write(headerText+"\n");
+			}
+
+			//plaintext
+			myWriter.write("#PLAINTEXT\n");
+			Elements plains = webPage.select("p");
+			for(Element plain : plains) {
+				String plainText = plain.text();
+				plainText = getEnglishText(plainText);
+				myWriter.write(plainText+"\n");
+			}
+
+			//body
+			myWriter.write("#BODY\n");
+			String body = webPage.body().text();
+			body = getEnglishText(body);
+			myWriter.write(body);
+
+			myWriter.close();
+
+			return new UrlRecord(url,"docs/doc"+linksCnt+".txt");
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			linksCnt--;
+			return new UrlRecord("","");
+		}
 
 	}
-
-	public void crawel(String url) {
-
-	}
-
 
 	//filter webpage content:
 	public static String getEnglishText(String text) {
-	    Pattern pattern = Pattern.compile("[^a-zA-Z 0-9]");
+	    Pattern pattern = Pattern.compile("[^a-zA-Z 0-9\n]");
 	    Matcher matcher = pattern.matcher(text);
 	    String englishText = matcher.replaceAll("");
 	    return englishText;
 	 }
 
 
+	public static class UrlRecord {
+		private String url;
+		private String filePath;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	///////////////////////////////////////////////////////////////////////////////////////
-//	private HashSet<String> links;
-//	private final int MAX_LINKS_CNT;
-//	private int linksCnt;
-//	private int failedCnt;
-//	private int nonenglish;
-
-
-	public static void main(String[] args) {
-
-		Crawler myCrawler = new Crawler(10);
-		myCrawler.seed("seeder.txt");
-
-
-//		for(String link: myCrawler.toBeProcessedLinks) {
-//			System.out.println(link);
-//		}
-//		String url = myCrawler.toBeProcessedLinks.remove();
-//		try {
-//			Document doc = Jsoup.parse(new URL(url).openStream(), "ASCII", url);
-//			myCrawler.extractLinks(doc);
-//			for(String link: myCrawler.toBeProcessedLinks) {
-//				System.out.println(link);
-//			}
-//
-//		} catch (IOException e ) {
-//			System.err.println("for '"+url+"': "+e.getMessage());
-//		}
-
-
-		///////////////////////////////////////////////////////
-//		Crawler myCrawler = new Crawler();
-//		Queue <String> newLinks = new LinkedList <String>();
-//		String URL = new String ("");
-//
-//
-//
-//		newLinks.add("https://www.facebook.com/");
-//		newLinks.add("https://www.geeksforgeeks.org/");
-//		while (newLinks.size()!=0) {
-//			URL = newLinks.remove();
-//			myCrawler.getLinks(URL,newLinks);
-//		}
-//		//for(String s : myCrawler.links) {
-//			//System.out.println(s);
-//		//}
-//		System.out.println("Crawler linked: "+myCrawler.linksCnt);
-//		System.out.println("Crawler failed: "+myCrawler.failedCnt);
-//		System.out.println("Crawler noneng: "+myCrawler.nonenglish);
-//		System.out.println("Crawler finished");
+		public UrlRecord (String urlString, String filePathString) {
+			url = urlString;
+			filePath = filePathString;
+		}
 	}
 
-//	public Crawler() {
-//		// TODO Auto-generated constructor stub
-//		links = new HashSet <String> ();
-//		linksCnt  = 0;
-//		failedCnt = 0;
-//		nonenglish = 0;
-//		MAX_LINKS_CNT = 30;
-//	}
+	public class Crawl extends Thread {
+		private int queueSize;
+		private UrlRecord DBRecord;
+		private String url;
+		private Document webDoc;
+		private boolean docBool;
 
-	//public void crawl()
+		public void run() {
 
-//	public void getLinks(String url, Queue <String> q) {
-//		if (!links.contains(url) && links.size() < MAX_LINKS_CNT) {
-//			try {
-//				if(links.add(url)) {
-//					//linksCnt++;
-//					//System.out.println(url);
-//				}
-//				//Connection.Response html = Jsoup.connect(url).execute();
-//
-//				byte [] bys = Jsoup.connect(url).execute().bodyAsBytes();
-//				//Document doc =Jsoup.connect(url).get();
-//				//Document doc1 = html.parse();
-//				Document document = Jsoup.parse(new URL(url).openStream(), "ASCII", url);
-//				String langu = new String();
-//				Element taglang = document.selectFirst("html");
-//				langu = taglang.attr("lang");
-//
-//				//System.out.println(langu);
-//				//String pg = new String (document.outerHtml());
-////				if(isEnglish(pg)) {
-////					FileWriter myWriter = new FileWriter("doc"+linksCnt+".html");
-////				    myWriter.write(document.outerHtml());
-////				    myWriter.close();
-////
-////				}
-//				if (langu.contains("en"))
-//				{
-//					FileOutputStream fos = new FileOutputStream("doc"+linksCnt+".html");
-//					fos.write(bys);
-//					fos.close();
-//
-//					//FileWriter myWriter = new FileWriter("doc"+linksCnt+".html");
-//				    //myWriter.write(document.outerHtml());
-//				    //myWriter.close();
-//				    linksCnt++;
-//				}else {
-//					nonenglish++;
-//					System.out.println("lang not english: "+nonenglish);
-//				}
-//
-//				//System.out.println(doc1.outerHtml());
-//				//System.out.println("title: "+doc1.title());
-//				System.out.println(url);
-//				//System.out.println(url.text());
-//
-//
-//				Elements linksOnPage = document.select("a[href]");
-//				for(Element page : linksOnPage) {
-//					q.add(page.attr("abs:href"));
-//				}
-//			}catch (IOException e) {
-//				failedCnt++;
-//				System.err.println("for '"+url+"': "+e.getMessage());
-//			}
-//		}
-//	}
-//
-//
-//	public static boolean isEnglish(String text) {
-//		int english = 0, nonEnglish =0;
-//		 for (char character : text.toCharArray()) {
-//		    if (Character.UnicodeBlock.of(character) != Character.UnicodeBlock.BASIC_LATIN
-//		            /*|| Character.UnicodeBlock.of(character) == Character.UnicodeBlock.LATIN_1_SUPPLEMENT
-//		            || Character.UnicodeBlock.of(character) == Character.UnicodeBlock.LATIN_EXTENDED_A
-//		            || Character.UnicodeBlock.of(character) == Character.UnicodeBlock.GENERAL_PUNCTUATION*/) {
-//		       english++;
-//		    } else {nonEnglish++;}
-//		 }
-//		 if((double) english/text.length()>.1) {return true;}else {return false;}
-//	}
-//
+			while(true) {
+
+				docBool = false;
+
+				synchronized(queueMutex) {
+					while(toBeProcessedLinks.isEmpty()) {
+						try {
+							//###############################################
+							System.out.println("Sleep thread no. " + String.valueOf(Thread.currentThread().getId()));
+							//###############################################
+							queueMutex.wait();
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							//###############################################
+							System.out.println("awake thread no. " + String.valueOf(Thread.currentThread().getId()));
+							//###############################################
+							e.printStackTrace();
+						}
+					}
+
+					url = toBeProcessedLinks.poll();
+					try {
+						webDoc = Jsoup.parse(new URL(url).openStream(), "ASCII", url);
+						docBool = true;
+						queueSize = toBeProcessedLinks.size();
+						extractLinks(webDoc);
+						if(queueSize == 0 && (!toBeProcessedLinks.isEmpty())) {
+							queueMutex.notifyAll();
+						}
+
+
+						//###############################################
+						System.out.println(url+"==> done by thread no. " + String.valueOf(Thread.currentThread().getId()));
+						//###############################################
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						System.err.println("for '"+url+"': "+e.getMessage());
+						docBool = false;
+					}
+				}
+
+				synchronized(cntMutex) {
+					if(docBool) {
+						DBRecord = saveWebPage(webDoc,url);
+					}
+				}
+
+				synchronized(DBMutex) {
+					controller.insertURL(crawlerConnection, DBRecord.url, DBRecord.filePath);
+				}
+
+			}
+		}
+	}
+
+	///////////////////////////////////////////////////////////////////////////////////////
+
+
+	public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException, InterruptedException {
+
+		Object mutex = new Object();
+		DBController dbController = new DBController();
+
+		Crawler myCrawler = new Crawler(20, "seeder.txt", dbController, mutex );
+
+		Crawl crawler1 = myCrawler.new Crawl();
+		Crawl crawler2 = myCrawler.new Crawl();
+		Crawl crawler3 = myCrawler.new Crawl();
+		Crawl crawler4 = myCrawler.new Crawl();
+		Crawl crawler5 = myCrawler.new Crawl();
+		Crawl crawler6 = myCrawler.new Crawl();
+		Crawl crawler7 = myCrawler.new Crawl();
+
+		crawler1.start();
+		crawler2.start();
+		crawler3.start();
+		crawler4.start();
+		crawler5.start();
+		crawler6.start();
+		crawler7.start();
+	}
 
 }
