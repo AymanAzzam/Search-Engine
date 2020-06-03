@@ -1,63 +1,99 @@
 package com.crawler;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.Arrays;
+import java.util.Scanner;
+
+import com.crawler.Indexer.Producer;
+
+import opennlp.tools.stemmer.PorterStemmer;
 
 public class Main {
 
-	 public static void main(String []args) throws FileNotFoundException,Exception {
-	       		
-			//Receiving Request called query it's type is query
-			
-			String query = "Received Request" ;
-			ArrayList<String> queryWords, invertedFileElement, linkFileElement;
-			
-			/********** Abo Shama Should update the following Two lines **************/ 
-			DBController dbController = new DBController();
-			Connection conn = dbController.connect();
-			
-			queryWords = QueryProcessor.query(query);
+	static ArrayList<String> stopWords = new ArrayList<String>();
+	final static int INDEXER_CNT = 10;
+	final static int CRAWLER_CNT = 10;
 
-			Hashtable<String, WebsiteValue> linkDatabase = new Hashtable <String, WebsiteValue> ();
-			Hashtable<String, ArrayList<WordValue>> invertedFile = new Hashtable <String, ArrayList<WordValue>> ();
-			
-			for(int i=1; i<queryWords.size(); i++)
-			{
-				
-				ArrayList<WordValue> invertedFileTempList = new ArrayList<WordValue> ();
-
-				invertedFileElement = dbController.getInvertedFile(conn,queryWords.get(i));
-				for(int j=0; j<invertedFileElement.size(); j+=4)
-				{
-					linkFileElement = dbController.getUrlFile(conn,invertedFileElement.get(j));
-					invertedFileElement.set(j,linkFileElement.get(1));
-
-					
-					WebsiteValue websiteValue = new WebsiteValue(Integer.parseInt(linkFileElement.get(3)), linkFileElement.get(0), linkFileElement.get(2));
-					linkDatabase.put(linkFileElement.get(1), websiteValue);
-					
-					WordValue wordvalue = new WordValue(invertedFileElement.get(j+1), Integer.parseInt(invertedFileElement.get(j+4)), Integer.parseInt(invertedFileElement.get(j+2)));
-					invertedFileTempList.add(wordvalue);
-				}
-				
-				invertedFile.put(queryWords.get(i), invertedFileTempList);
-			}
-			
-			Integer dummyTotalNumberOfDocuments = 3;
-
-			if(queryWords.get(0) == "1")
-			{
-				query = query.replaceAll("[^a-zA-Z0-9 ]", "");
-				PhraseSearch phSearch = new PhraseSearch(invertedFile, linkDatabase, dummyTotalNumberOfDocuments, query);
-				ArrayList<OutputValue> result = phSearch.phraseSearch();
 	
-			}
-			else
-			{
-				Ranker ranker = new Ranker (invertedFile, linkDatabase, dummyTotalNumberOfDocuments);
-				ArrayList<OutputValue> result = ranker.rank();
-			}
-	     }
+	public static void main(String[] args) throws FileNotFoundException, ClassNotFoundException, SQLException, InterruptedException {
+
+        /*** Reading the Stop Words ***/
+        File file = new File("stopwords.txt");
+        Scanner scanner = new Scanner(file);
+        while (scanner.hasNextLine()) { stopWords.add(scanner.nextLine());  }
+        scanner.close();
+        
+        File f = new File("docs");
+        f.mkdirs();
+        
+        // Create DB Mutex
+        Object mutex = new Object();
+		
+        // Create DB Controller
+        DBController controller = new DBController();
+        
+        // Create Indexer Instance
+		Indexer indexer = new Indexer(controller, mutex);
+		
+//		// Create Crawler Instance
+//		Crawler crawler = new Crawler(controller, mutex);
+		
+
+		/*
+		 * Create Crawler threads here and start them
+		 */
+		
+		ArrayList<Producer> prodList = new ArrayList<Producer>();
+		
+		for(int i=0 ; i<INDEXER_CNT ; ++i) {
+			prodList.add(indexer.new Producer());
+			prodList.get(i).start();
+		}
+		
+//		while(System.in.read()>-1)
+//		{
+//			synchronized (mutex) {
+//				mutex.notifyAll();
+//			}
+//		}
+		
+
+		/*
+		 * Wait for Crawler threads to join here
+		 */
+		
+		for(int i=0 ; i<INDEXER_CNT ; ++i) {
+			prodList.get(i).join();
+		}
+		
+	}
+
+	
+	
+	public static ArrayList<String> steaming(String sentence) throws FileNotFoundException
+ 	{
+ 		/*** Declare Variables ***/
+ 		ArrayList<String> stopWords = new ArrayList<String>();
+    	 
+ 		/*** Removing the Special Characters ***/
+    	sentence = sentence.replaceAll("[^a-zA-Z0-9 ]", "");
+    	
+    	/*** Converting the Sentence into words ***/
+    	ArrayList<String> queryWords = new ArrayList<String>(Arrays.asList(sentence.split(" ")));
+    	
+        /*** Deleting the Stop Words ***/
+        for(String word : stopWords)	while(queryWords.remove(word));
+        
+        /*** Steaming ***/ 
+        PorterStemmer porterStemmer = new PorterStemmer();
+        for(int i =0; i < queryWords.size(); i++)	queryWords.set(i, porterStemmer.stem(queryWords.get(i)).toLowerCase());
+        
+        return queryWords;	 
+ 	}
+	
+
 }

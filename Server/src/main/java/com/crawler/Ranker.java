@@ -1,6 +1,5 @@
 package com.crawler;
 
-
 import java.util.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +28,11 @@ public class Ranker {
 		while(enumeration.hasMoreElements()) {
 			String key = enumeration.nextElement();
 			Integer listSize = invertedFile.get(key).size();
-			Double idf = Math.log10(totalNumberOfDocuments/listSize);
+			Double idf;
+			if (listSize == 0)
+				idf = 0.0;
+			else 
+				idf = Math.log10(totalNumberOfDocuments/listSize);
 			mapIDF.put(key, idf);
 		}
 	

@@ -230,6 +230,28 @@ public class DBController {
 		return ID;
 	}
 	
+	public int getURLsSize(Connection conn) {
+		int size = 0;
+		
+		try {
+			
+			Statement stmt = conn.createStatement();
+			
+			ResultSet rs = stmt.executeQuery(String.format("SELECT COUNT(*) FROM %s;"
+					, URL_table));
+			
+			rs.next();
+			size = rs.getInt(1);
+
+			stmt.close();
+			rs.close();
+			
+		} catch (SQLException e) {
+			// TODO: handle exception
+		}
+		return size;
+	}
+	
 	// get Inverted File Content for specific word
 	public ArrayList<String> getInvertedFile(Connection conn, String word)
 	{
@@ -249,13 +271,16 @@ public class DBController {
 					out.add(rs.getString(countHeader_col));
 					out.add(rs.getString(countTotal_col));
 				}
+				
+				stmt.close();
+				rs.close();
 		} catch (SQLException e) {	e.printStackTrace();	}
 		
 		return out;
 	}
 
 	// get Content for specific URL_ID
-	public ArrayList<String> getUrlFile(Connection conn, String URL_ID)
+	public ArrayList<String> getUrlFile(Connection conn, int URL_ID)
 	{
 		ArrayList<String> out = new ArrayList<String>();	ResultSet rs;
 	
@@ -263,7 +288,7 @@ public class DBController {
 		try {
 				stmt = conn.createStatement();
 				rs = stmt.executeQuery(String.format("SELECT * FROM %s"
-						+ " WHERE %s = '%s';", URL_table, URLID_col, URL_ID));
+						+ " WHERE %s = %s;", URL_table, URLID_col, URL_ID));
 				
 				while(rs.next())
 				{
@@ -272,6 +297,10 @@ public class DBController {
 					out.add(rs.getString(URLContent_col));	
 					out.add(rs.getString(countWords_col));
 				}
+
+				stmt.close();
+				rs.close();
+				
 		} catch (SQLException e) {	e.printStackTrace();	}
 		
 		return out;
