@@ -39,8 +39,8 @@ public class QueryProcessor {
 	    	queryWords.addAll(steaming(sentence));
 	    	
 	    	/*** For Testing Purpose ***/
-	        System.out.println("\nAfter Query: ");
-	        for(String word: queryWords)	System.out.println(word);
+//	        System.out.println("\nAfter Query: ");
+//	        for(String word: queryWords)	System.out.println(word);
 	    	
 	    	return queryWords;
 	 	}
