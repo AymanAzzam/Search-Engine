@@ -27,6 +27,9 @@ public class Main {
         while (scanner.hasNextLine()) { stopWords.add(scanner.nextLine());  }
         scanner.close();
         
+        File f = new File("docs");
+        f.mkdirs();
+        
         // Create DB Mutex
         Object mutex = new Object();
 		
