@@ -101,7 +101,7 @@ public class DBController {
 			
 			
 		} catch (Exception e) {
-//			e.printStackTrace();
+			e.printStackTrace();
 			System.out.println("Init: Tables exists!");
 		}
 	}
