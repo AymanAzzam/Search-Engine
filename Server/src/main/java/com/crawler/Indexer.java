@@ -192,7 +192,7 @@ public class Indexer {
 				}
 				else {
 					// Stemming the line
-					words = QueryProcessor.steaming(line);
+					words = Main.steaming(line);
 					
 					for(String s:words) {
 						
