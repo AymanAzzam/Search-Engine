@@ -2,6 +2,7 @@ package com.crawler;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -19,10 +20,12 @@ public class Main {
 	final static int CRAWLER_CNT = 10;
 
 	
-	public static void main(String[] args) throws FileNotFoundException, ClassNotFoundException, SQLException, InterruptedException {
+	public static void main(String[] args) throws ClassNotFoundException, SQLException, InterruptedException, IOException {
 
+		
         /*** Reading the Stop Words ***/
         File file = new File("stopwords.txt");
+        file.createNewFile();
         Scanner scanner = new Scanner(file);
         while (scanner.hasNextLine()) { stopWords.add(scanner.nextLine());  }
         scanner.close();
