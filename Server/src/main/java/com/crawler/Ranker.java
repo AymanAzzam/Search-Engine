@@ -1,12 +1,15 @@
-package com.crawler;
-
 import java.util.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Enumeration;
+
+//import TFIDFValue.Inner;
 
 
+
+/*************************************************************************************/
+/*********************************** Ranker ******************************************/
+/*************************************************************************************/
 public class Ranker {
+	
+	
 	
 	Hashtable<String, ArrayList<WordValue>> invertedFile = new Hashtable <String, ArrayList<WordValue>> ();
 	Hashtable<String, WebsiteValue> linkDatabase = new Hashtable <String, WebsiteValue> ();
@@ -139,5 +142,221 @@ public class Ranker {
 		ArrayList<WebsiteTFIDFPair> helperOutput = helper();
 		return rankerOutput(helperOutput);
 	}
+	
+	/*************************************************************************************/
+	/*********************************** OutputValue *************************************/
+	/*************************************************************************************/
+	public static class OutputValue {
+		String websiteName;
+		String headerText;
+		String summary;
+		
+		public OutputValue(String websiteName, String headerText, String summary) {
+			this.websiteName = websiteName;
+			this.headerText = headerText;
+			this.summary = summary;
+		}
+		
+		public String getWebsiteName() {
+			return this.websiteName;
+		}
+		
+		public String getHeaderText() {
+			return this.headerText;
+		}
+		
+		public String getSummary() {
+			return this.summary;
+		}
+
+	}
+	
+	
+	/*************************************************************************************/
+	/*********************************** TFIDFValue **************************************/
+	/*************************************************************************************/
+	public static class TFIDFValue {
+		
+		Integer numberOfWords;
+		ArrayList<Inner> innerArray;
+		
+		
+		class Inner {
+			String word;
+			Integer indexInList;
+			
+			public Inner(String word, Integer indexInList) {
+				this.word = word;
+				this.indexInList = indexInList;
+			}
+		}
+		
+		
+		public TFIDFValue (Integer numberOfWords, String word, Integer indexInList) {
+			this.numberOfWords = numberOfWords;
+			Inner inner = new Inner(word, indexInList);
+			this.innerArray = new ArrayList<Inner>();
+			this.innerArray.add(inner);
+		}
+		
+		public void incrementNumberOfWords() {
+			this.numberOfWords ++;
+		}
+		
+		public Integer getNumberOfWords() {
+			return this.numberOfWords;
+		}
+		
+		public void addToInnerArray(String word, Integer indexInList) {
+			Inner inner = new Inner(word, indexInList);
+			this.innerArray.add(inner);
+		}
+		
+		public int getInnerArraySize() {
+			return innerArray.size();
+		}
+		
+		public String getWordString (Integer index) {
+			return innerArray.get(index).word;
+		}
+		
+		public Integer getWordIndex (Integer index) {
+			return innerArray.get(index).indexInList;
+		}
+			
+		
+	}
+	
+	/*************************************************************************************/
+	/*********************************** WebsiteTFIDFPair ********************************/
+	/*************************************************************************************/
+
+	public static class WebsiteTFIDFPair implements Comparable<WebsiteTFIDFPair> {
+		String websiteName;
+		Double TFIDFValue;
+		Integer numberOfWords;
+		
+		public WebsiteTFIDFPair(String websiteName, Double TFIDFValue, Integer numberOfWords) {
+			this.websiteName = websiteName;
+			this.TFIDFValue = TFIDFValue;
+			this.numberOfWords = numberOfWords;
+		}
+		
+		public Double getTFIDFValue() {
+			return this.TFIDFValue;
+		}
+		
+		public String getWebsiteName() {
+			return this.websiteName;
+		}
+		
+		public Integer getNumberOfWords() {
+			return numberOfWords;
+		}
+		
+		public int compareTo(WebsiteTFIDFPair websiteTFIDFPair) {
+			// for descending order
+			return websiteTFIDFPair.getTFIDFValue().compareTo(this.TFIDFValue);
+		}
+		
+		
+		
+	}
+
+	
+	/*************************************************************************************/
+	/*********************************** WebsiteValue **************************************/
+	/*************************************************************************************/
+
+	public static class WebsiteValue {
+		
+		Integer totalNumberOfWords;
+		String headerText;
+		String content;
+		
+		public WebsiteValue(Integer totalNumberOfWords, String headerText, String content) {
+			this.totalNumberOfWords = totalNumberOfWords;
+			this.headerText = headerText;
+			this.content = content;
+		}
+		
+		public Integer getTotalNumberOfWords() {
+			return totalNumberOfWords;
+		}
+		
+		public String getHeaderText() {
+			return headerText;
+		}
+		
+		public String getContent() {
+			return content;
+		}
+		
+		public String getSummary() {
+			
+			String summary = "";
+			String [] arr = content.split("\\s+"); 
+			for(int i=0; i<50; i++){
+				summary = summary + " " + arr[i] ;         
+	       }
+			return summary;
+		}
+	
+	}
+
+	/*************************************************************************************/
+	/*********************************** WordValue **************************************/
+	/*************************************************************************************/
+	
+	public static class WordValue {
+		
+		String websiteName;
+		Integer numberOfAppearance;
+		Integer numberOfPlain;
+		//Integer numberOfBold;
+		//Integer numberOfHeader;
+		
+		public WordValue(String websiteName, Integer numberOfAppearance,
+				Integer numberOfPlain) {
+			
+			this.websiteName = websiteName;
+			this.numberOfAppearance = numberOfAppearance;
+		}
+		
+		/*
+		public WordValue(String websiteName, Integer numberOfAppearance,
+				Integer numberOfPlain, Integer numberOfBold, 
+				Integer numberOfHeader) {
+			
+			this.websiteName = websiteName;
+			this.numberOfAppearance = numberOfAppearance;
+			this.numberOfPlain = numberOfPlain;
+			//this.numberOfBold = numberOfBold;
+			//this.numberOfHeader = numberOfHeader;
+		}
+		*/
+		public String getWebsiteName() {
+			return websiteName;
+		}
+		
+		public Integer getNumberOfAppearance() {
+			return numberOfAppearance;
+		}
+		
+		public Integer getNumberOfPlain() {
+			return numberOfPlain;
+		}
+		/*
+		public Integer getNumberOfBold() {
+			return numberOfBold;
+		}
+		
+		public Integer getNumberOfHeader() {
+			return numberOfHeader;
+		}
+		*/
+	
+	}
+
 
 }
