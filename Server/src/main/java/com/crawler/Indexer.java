@@ -195,6 +195,9 @@ public class Indexer {
 					words = QueryProcessor.steaming(line);
 					
 					for(String s:words) {
+						
+						if(s.equals(""))	continue;
+						
 						// If word isn't existing, add it with frequency=0
 						header_freq.putIfAbsent(s, 0);
 						plain_freq.putIfAbsent(s, 0);
