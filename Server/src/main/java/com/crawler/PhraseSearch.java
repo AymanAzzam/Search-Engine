@@ -1,17 +1,16 @@
+package com.crawler;
+
 import java.util.*;
-
-
-
 
 public class PhraseSearch {
 	
-	Hashtable<String, ArrayList<Ranker.WordValue>> invertedFile = new Hashtable <String, ArrayList<Ranker.WordValue>> ();
-	Hashtable<String, Ranker.WebsiteValue> linkDatabase = new Hashtable <String, Ranker.WebsiteValue> ();
+	Hashtable<String, ArrayList<WordValue>> invertedFile = new Hashtable <String, ArrayList<WordValue>> ();
+	Hashtable<String, WebsiteValue> linkDatabase = new Hashtable <String, WebsiteValue> ();
 	Integer totalNumberOfDocuments;
 	String phrase;
 	
 	
-	public PhraseSearch(Hashtable<String, ArrayList<Ranker.WordValue>> invertedFile, Hashtable<String, Ranker.WebsiteValue> linkDatabase,
+	public PhraseSearch(Hashtable<String, ArrayList<WordValue>> invertedFile, Hashtable<String, WebsiteValue> linkDatabase,
 			Integer totalNumberOfDocuments, String phrase) {
 		this.invertedFile = invertedFile;
 		this.linkDatabase = linkDatabase;
@@ -19,12 +18,12 @@ public class PhraseSearch {
 		this.phrase = phrase;
 	}
 	
-	public ArrayList<Ranker.OutputValue> phraseSearch() {
+	public ArrayList<OutputValue> phraseSearch() {
 		Ranker rankerObject = new Ranker(invertedFile, linkDatabase, totalNumberOfDocuments);
-		ArrayList<Ranker.WebsiteTFIDFPair>rankerResult = rankerObject.helper();
+		ArrayList<WebsiteTFIDFPair>rankerResult = rankerObject.helper();
 		String[] words = phrase.split("\\s+");
 		Integer numberOfPhraseWords = words.length;
-		ArrayList<Ranker.OutputValue> phraseSearchOutput = new ArrayList<Ranker.OutputValue> ();
+		ArrayList<OutputValue> phraseSearchOutput = new ArrayList<OutputValue> ();
 		
 		for (int i=0; i< rankerResult.size(); i++) {
 			
@@ -36,7 +35,7 @@ public class PhraseSearch {
 			if (linkDatabase.get(websiteName).getContent().contains(phrase)) {
 				String headerText = linkDatabase.get(websiteName).getHeaderText();
 				String summary = linkDatabase.get(websiteName).getSummary();
-				Ranker.OutputValue val = new Ranker.OutputValue(websiteName, headerText, summary);
+				OutputValue val = new OutputValue(websiteName, headerText, summary);
 				phraseSearchOutput.add(val);
 			}
 		}
