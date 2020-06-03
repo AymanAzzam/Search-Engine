@@ -1,10 +1,14 @@
 package com.crawler;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import javax.servlet.http.*;
+
+import org.json.JSONArray;
+
 
 public class SearchEngine extends HttpServlet{
 	
@@ -19,7 +23,7 @@ public class SearchEngine extends HttpServlet{
 		DBController dbController = new DBController();
 		Connection conn = dbController.connect();
 		
-		queryWords = QueryProcessor.query(query);
+		queryWords = query(query);
 		
 		Hashtable<String, WebsiteValue> linkDatabase = new Hashtable <String, WebsiteValue> ();
 		Hashtable<String, ArrayList<WordValue>> invertedFile = new Hashtable <String, ArrayList<WordValue>> ();
@@ -67,21 +71,40 @@ public class SearchEngine extends HttpServlet{
 			System.out.println(o.getWebsiteName() + "\n" + o.getHeaderText() + "\n" + o.getSummary());
 		}
      }
+	
+	public static ArrayList<String> query(String sentence) throws FileNotFoundException,Exception
+ 	{
+        ArrayList<String> queryWords = new ArrayList<String>();
+
+        /*** Checking Phrase Search ***/
+    	if(sentence.charAt(0) == '"' && sentence.charAt(sentence.length()-1) == '"')
+    		queryWords.add("1");
+    	else
+    		queryWords.add("0");
+    	
+    	/*** Converting the Sentence into words ***/
+    	queryWords.addAll(Main.steaming(sentence));
+    	
+    	/*** For Testing Purpose ***/
+//        System.out.println("\nAfter Query: ");
+//        for(String word: queryWords)	System.out.println(word);
+    	
+    	return queryWords;
+ 	}
  
-	public void doGet(HttpServletRequest request, HttpServletResponse response) throws FileNotFoundException {
-		
+	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		try {
 			
 			//Receiving Request called query it's type is query
 			
-			String query = "Test Query" ;
+			String query = request.getParameter("Query") ;
 			ArrayList<String> queryWords, invertedFileElement, linkFileElement;
 			
 			/********** Abo Shama Should update the following Two lines **************/ 
 			DBController dbController = new DBController();
 			Connection conn = dbController.connect();
 			
-			queryWords = QueryProcessor.query(query);
+			queryWords = query(query);
 			
 			Hashtable<String, WebsiteValue> linkDatabase = new Hashtable <String, WebsiteValue> ();
 			Hashtable<String, ArrayList<WordValue>> invertedFile = new Hashtable <String, ArrayList<WordValue>> ();
@@ -124,14 +147,23 @@ public class SearchEngine extends HttpServlet{
 				Ranker ranker = new Ranker (invertedFile, linkDatabase, dummyTotalNumberOfDocuments);
 				result = ranker.rank();
 			}
-			
-			for(OutputValue o:result) {
-				System.out.println(o.getWebsiteName() + "\n" + o.getHeaderText() + "\n" + o.getSummary());
-			}
+
+		    response.setContentType("application/json");
+		    response.setCharacterEncoding("UTF-8");
+
+
+			JSONArray json = new JSONArray(result);
+			response.getWriter().print(json);
+//			for(OutputValue o:result) {
+//				response.getWriter().println(o.getWebsiteName() + "\n" + o.getHeaderText() + "\n" + o.getSummary());
+//			}
 			
 		} catch (Exception e) {
 			// TODO: handle exception
+			e.printStackTrace(response.getWriter());
 		}
+		response.getWriter().flush();
+		
 	}
 	 
 }
