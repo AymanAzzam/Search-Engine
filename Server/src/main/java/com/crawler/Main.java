@@ -39,6 +39,10 @@ public class Main {
         // Create DB Controller
         DBController controller = new DBController();
         
+        // Creating Tables in Database
+        Connection connect = controller.connect();
+        controller.build(connect);
+        
         // Create Indexer Instance
 		Indexer indexer = new Indexer(controller, mutex);
 		
