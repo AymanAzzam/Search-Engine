@@ -238,9 +238,9 @@ public class DBController {
 		Statement stmt;
 		try {
 				stmt = conn.createStatement();
-				
+
 				rs = stmt.executeQuery(String.format("SELECT * FROM %s"
-						+ " WHERE %s = %s;", word_table, word_col, word));
+						+ " WHERE %s = '%s';", word_table, word_col, word));
 				
 				while(rs.next())
 				{
@@ -263,7 +263,7 @@ public class DBController {
 		try {
 				stmt = conn.createStatement();
 				rs = stmt.executeQuery(String.format("SELECT * FROM %s"
-						+ " WHERE %s = %s;", URL_table, URLID_col, URL_ID));
+						+ " WHERE %s = '%s';", URL_table, URLID_col, URL_ID));
 				
 				while(rs.next())
 				{
