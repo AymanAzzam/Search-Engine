@@ -3,12 +3,14 @@ package com.crawler;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import com.crawler.Crawler.Crawl;
 import com.crawler.Indexer.Producer;
 
 import opennlp.tools.stemmer.PorterStemmer;
@@ -18,6 +20,11 @@ public class Main {
 	static ArrayList<String> stopWords = new ArrayList<String>();
 	final static int INDEXER_CNT = 10;
 	final static int CRAWLER_CNT = 10;
+	
+	public static ArrayList<Producer> prodList;
+	public static ArrayList<Crawl> crawlList;
+	
+	public static int currentNonIndexedSize;
 
 	
 	public static void main(String[] args) throws ClassNotFoundException, SQLException, InterruptedException, IOException {
@@ -34,27 +41,35 @@ public class Main {
         f.mkdirs();
         
         // Create DB Mutex
-        Object mutex = new Object();
-		
+        Object DBMutex = new Object();
+
+        // Create Crawling Mutex
+        Object crawlingMutex = new Object();
+
         // Create DB Controller
         DBController controller = new DBController();
         
         // Creating Tables in Database
         Connection connect = controller.connect();
+//        controller.drop(connect);		// For Testing Purpose
         controller.build(connect);
         
+        currentNonIndexedSize = controller.checkNonIndexed(connect);
+        
         // Create Indexer Instance
-		Indexer indexer = new Indexer(controller, mutex);
+		Indexer indexer = new Indexer(controller, DBMutex);
 		
-//		// Create Crawler Instance
-//		Crawler crawler = new Crawler(controller, mutex);
+		// Create Crawler Instance
+		Crawler crawler = new Crawler(30,"seeder.txt", controller, DBMutex, crawlingMutex);
 		
 
-		/*
-		 * Create Crawler threads here and start them
-		 */
+		prodList = new ArrayList<Producer>();
+		crawlList = new ArrayList<Crawl>();
 		
-		ArrayList<Producer> prodList = new ArrayList<Producer>();
+		for(int i=0 ; i<CRAWLER_CNT ; ++i) {
+			crawlList.add(crawler.new Crawl());
+			crawlList.get(i).start();
+		}
 		
 		for(int i=0 ; i<INDEXER_CNT ; ++i) {
 			prodList.add(indexer.new Producer());
@@ -63,15 +78,15 @@ public class Main {
 		
 //		while(System.in.read()>-1)
 //		{
-//			synchronized (mutex) {
-//				mutex.notifyAll();
+//			synchronized (DBMutex) {
+//				DBMutex.notifyAll();
 //			}
 //		}
 		
 
-		/*
-		 * Wait for Crawler threads to join here
-		 */
+		for(int i=0 ; i<CRAWLER_CNT ; ++i) {
+			crawlList.get(i).join();
+		}
 		
 		for(int i=0 ; i<INDEXER_CNT ; ++i) {
 			prodList.get(i).join();
