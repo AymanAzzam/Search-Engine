@@ -17,7 +17,7 @@ sudo mvn install
 ```
 2. Copy the files to Tomcat using the following commands.
 ```sh
-cp -r target/classes/* /opt/tomcat/webapps/ROOT/WEB-INF/classes/
-cp web.xml /opt/tomcat/webapps/ROOT/WEB-INF/
-cp stopwords.txt /opt/tomcat/work/Catalina/localhost/
+sudo cp -r target/classes/* /opt/tomcat/webapps/ROOT/WEB-INF/classes/
+sudo cp web.xml /opt/tomcat/webapps/ROOT/WEB-INF/
+sudo cp stopwords.txt /opt/tomcat/work/Catalina/localhost/
 ```
