@@ -1,8 +1,12 @@
+package com.crawler;
+
+import java.util.ArrayList;
+
 public class OutputImageValue {
 		private String websiteURL;
-		private String imageURL;
+		private ArrayList<String> imageURL;
 		
-		public OutputImageValue (String websiteURL, String imageURL) {
+		public OutputImageValue (String websiteURL, ArrayList<String> imageURL) {
 			this.websiteURL = websiteURL;
 			this.imageURL = imageURL;
 			
@@ -12,7 +16,7 @@ public class OutputImageValue {
 			return this.websiteURL;
 		}
 		
-		public String getImageURL () {
+		public ArrayList<String> getImageURL () {
 			return this.imageURL;
 		}
 		
