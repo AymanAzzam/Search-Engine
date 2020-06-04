@@ -3,7 +3,6 @@ package com.crawler;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -20,6 +19,7 @@ public class Main {
 	static ArrayList<String> stopWords = new ArrayList<String>();
 	final static int INDEXER_CNT = 10;
 	final static int CRAWLER_CNT = 10;
+	final static int MAX_LINKS_CNT = 5000;
 	
 	public static ArrayList<Producer> prodList;
 	public static ArrayList<Crawl> crawlList;
@@ -60,7 +60,7 @@ public class Main {
 		Indexer indexer = new Indexer(controller, DBMutex);
 		
 		// Create Crawler Instance
-		Crawler crawler = new Crawler(30,"seeder.txt", controller, DBMutex, crawlingMutex);
+		Crawler crawler = new Crawler(MAX_LINKS_CNT, "seeder.txt", controller, DBMutex, crawlingMutex);
 		
 
 		prodList = new ArrayList<Producer>();
