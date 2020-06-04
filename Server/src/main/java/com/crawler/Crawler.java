@@ -214,8 +214,12 @@ public class Crawler {
 					filePath = saveWebPage(webDoc, ID);
 					if(!filePath.isEmpty()) {
 						synchronized (DBMutex) {
+							boolean empty = (controller.checkNonIndexed(crawlConnection)==0);
 							controller.insertURL(crawlConnection, url, filePath);
 							
+							if(empty) {
+								DBMutex.notifyAll();
+							}
 						}
 					}
 					
@@ -223,7 +227,7 @@ public class Crawler {
 					//###############################################
 					System.out.println("Done: " + url+"==> by thread no. " + String.valueOf(Thread.currentThread().getId()));
 					//###############################################
-				} catch (IOException e) {
+				} catch (IOException | SQLException e) {
 					// TODO Auto-generated catch block
 					System.err.println("for '"+url+"': "+e.getMessage());
 				}
