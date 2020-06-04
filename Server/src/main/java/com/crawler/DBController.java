@@ -80,7 +80,7 @@ public class DBController {
 					+ "%s INT DEFAULT 0 NOT NULL,"
 					+ "%s TINYTEXT NOT NULL,"
 					+ "%s TINYTEXT,"
-					+ "%s TEXT,"
+					+ "%s MEDIUMTEXT,"
 					+ "%s BOOLEAN DEFAULT FALSE NOT NULL);", 
 					URL_table, URLID_col, URLName_col, countWords_col, 
 					URLFilePath_col, URLTitle_col, URLContent_col, isIndexed_col));
