@@ -19,6 +19,13 @@ innodb_file_format=barracuda
 innodb_file_per_table=true
 innodb_large_prefix=true
 ```
+4. Create database 'Search_Engine' using mysql.
+```sh
+mysql -u root
+create database Search_Engine;
+exit
+```
+
 ## Run Server (on AWS Cloud9)
 1. Install and compile files using the following commands.
 ```sh
@@ -30,9 +37,7 @@ sudo cp -r target/classes/* /opt/tomcat/webapps/ROOT/WEB-INF/classes/
 sudo cp web.xml /opt/tomcat/webapps/ROOT/WEB-INF/
 sudo cp stopwords.txt /opt/tomcat/work/Catalina/localhost/
 ```
-3. Create database 'Search_Engine' using mysql.
+3. Run the following Command to start The Crawler and Indexer.
 ```sh
-mysql -u root
-create database Search_Engine;
-exit
+mvn exec:java -Dexec.mainClass="com.crawler.Main"
 ```
