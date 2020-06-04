@@ -1,21 +1,17 @@
 package com.crawler;
 
 
-import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+
 import java.sql.*;
 
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.Queue;
-import java.util.LinkedList;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -23,34 +19,36 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.sql.rowset.spi.SyncResolver;
+
 
 
 public class Crawler {
 	//data members:
 	private static DBController controller;
 	private final int MAX_LINKS_COUNT;
-	private HashSet<String> visitedLinks;
-	private Queue <String> toBeProcessedLinks;
-	private int visitedLinksCnt;
-	private int linksCnt;
-//	private java.sql.Connection crawlerConnection;
-	private Object queueMutex, DBMutex;
+//	private HashSet<String> visitedLinks;
+//	private Queue <String> toBeProcessedLinks;
+//	private int visitedLinksCnt;
+//	private int linksCnt;
+	private java.sql.Connection mainCrawlerConnection;
+	private Object crawlingMutex, DBMutex;
+	private int totalCrawlingSize;
+	private int currentNonCrawledSize;
 
 	//constructor:
-	public Crawler (int maxNoOfLinks, String seederFileName, DBController dbController, Object mutex)
+	public Crawler (int maxNoOfLinks, String seederFileName, DBController dbController, Object dbmutex, Object crawlmutex)
 			throws ClassNotFoundException, SQLException {
 
-		visitedLinks = new HashSet <String>();
-		toBeProcessedLinks = new LinkedList<String>();
 		MAX_LINKS_COUNT = maxNoOfLinks;
-		visitedLinksCnt = 0;
-		linksCnt = 0;
 		controller = dbController;
-//		crawlerConnection = controller.connect();
-		DBMutex = mutex;
-		queueMutex = new Object();
+		mainCrawlerConnection = controller.connect();
+		DBMutex = dbmutex;
+		crawlingMutex = crawlmutex;
 		seed(seederFileName);
 
+		totalCrawlingSize = controller.getCrawlingSize(mainCrawlerConnection);
+		currentNonCrawledSize = controller.checkNonCrawled(mainCrawlerConnection);
 	}
 
 	//seed
@@ -65,30 +63,25 @@ public class Crawler {
 		      while (reader.hasNextLine()) {
 		    	  //read the link
 				  String url = reader.nextLine();
-				  //if the link is not in the queue then add it
-				  if(!visitedLinks.contains(url)) {
-					  toBeProcessedLinks.add(url);
-					  visitedLinks.add(url);
-					  visitedLinksCnt++;
-				  }
+
+				  controller.insertCrawlingURL(mainCrawlerConnection, url);
 		      }
 		      reader.close();
 		    } catch (FileNotFoundException e) {
 		      System.out.println("An error occurred while open the seeder...");
 		    }
-
 	}
 
 
 
 
 	public class Crawl extends Thread {
-		private int queueSize;
 		private String filePath;
 		private String url;
 		private int ID;
 		private Document webDoc;
 		private java.sql.Connection crawlConnection;
+		private ResultSet res;
 		
 		public Crawl() throws SQLException {
 			crawlConnection = controller.connect();
@@ -98,14 +91,25 @@ public class Crawler {
 		public void extractLinks(Document htmlDocument) {
 
 			Elements webPagesOnHtml = htmlDocument.select("a[href]");
-
+			
 			for (Element webpPage : webPagesOnHtml) {
 				String newURL = webpPage.attr("abs:href");
-				//if the link wasnt visited yet and max count of links not reached then add it to be processed
-				if(!visitedLinks.contains(newURL) && visitedLinksCnt < MAX_LINKS_COUNT) {
-					visitedLinks.add(newURL);
-					toBeProcessedLinks.add(newURL);
-					visitedLinksCnt++;
+				
+				
+				synchronized (crawlingMutex) {
+					
+					if(totalCrawlingSize == MAX_LINKS_COUNT) {
+						return;
+					}
+					
+					boolean success = controller.insertCrawlingURL(mainCrawlerConnection, newURL);
+					
+					totalCrawlingSize += success?1:0;
+					currentNonCrawledSize += success?1:0;
+					
+					if(success && currentNonCrawledSize == 1) {
+						crawlingMutex.notify();
+					}
 				}
 			}
 		}
@@ -160,7 +164,6 @@ public class Crawler {
 				return new String("docs/doc"+docID+".txt");
 
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				//e.printStackTrace();
 				return new String("");
 			}
@@ -179,57 +182,51 @@ public class Crawler {
 
 			while(true) {
 
-				synchronized(queueMutex) {
-					while(toBeProcessedLinks.isEmpty()) {
-						try {
-							//###############################################
-//							System.out.println("Sleep thread no. " + String.valueOf(Thread.currentThread().getId()));
-							//###############################################
-							queueMutex.wait();
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							//###############################################
-//							System.out.println("awake thread no. " + String.valueOf(Thread.currentThread().getId()));
-							//###############################################
-							e.printStackTrace();
-						}
-					}
-
-					url = toBeProcessedLinks.poll();
-					ID = ++linksCnt;
-				}
-				
-				try {
-					webDoc = Jsoup.parse(new URL(url).openStream(), "ASCII", url);
+				synchronized(crawlingMutex) {
 					
-					synchronized (queueMutex) {
-						queueSize = toBeProcessedLinks.size();
-						extractLinks(webDoc);
-						if(queueSize == 0 && (!toBeProcessedLinks.isEmpty())) {
-							queueMutex.notifyAll();
+					try {
+						while(currentNonCrawledSize == 0) {
+							try {
+								crawlingMutex.wait();
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
 						}
 						
+						res = controller.getNonCrawledRows(crawlConnection);
+						controller.markNonCrawledRows(crawlConnection);
+						currentNonCrawledSize--;
+					} catch (SQLException e) {
+						e.printStackTrace();
 					}
+				}
+				
+				
+				
+				try {
+					res.next();
+					ID = res.getInt(1);
+					url = res.getString(2);
+					
+					webDoc = Jsoup.parse(new URL(url).openStream(), "ASCII", url);
 
 					filePath = saveWebPage(webDoc, ID);
+					
 					if(!filePath.isEmpty()) {
 						synchronized (DBMutex) {
-							boolean empty = (controller.checkNonIndexed(crawlConnection)==0);
 							controller.insertURL(crawlConnection, url, filePath);
+							Main.currentNonIndexedSize++;
 							
-							if(empty) {
-								DBMutex.notifyAll();
+							if(Main.currentNonIndexedSize == 1) {
+								DBMutex.notify();
 							}
 						}
 					}
-					
-					
-					//###############################################
-//					System.out.println("Done: " + url+"==> by thread no. " + String.valueOf(Thread.currentThread().getId()));
 					System.out.println("Crawled: " + url);
-					//###############################################
+					
+					extractLinks(webDoc);
+					
 				} catch (IOException | SQLException e) {
-					// TODO Auto-generated catch block
 					System.err.println("for '"+url+"': "+e.getMessage());
 				}
 			}
@@ -241,10 +238,11 @@ public class Crawler {
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException, InterruptedException {
 
-		Object mutex = new Object();
+		Object dbmutex = new Object();
+		Object crawlmutex = new Object();
 		DBController dbController = new DBController();
 
-		Crawler myCrawler = new Crawler(30, "seeder.txt", dbController, mutex);
+		Crawler myCrawler = new Crawler(30, "seeder.txt", dbController, dbmutex, crawlmutex);
 
 		Crawl crawler1 = myCrawler.new Crawl();
 		Crawl crawler2 = myCrawler.new Crawl();
