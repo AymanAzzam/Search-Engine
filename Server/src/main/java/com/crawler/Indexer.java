@@ -195,8 +195,7 @@ public class Indexer {
 					words = Main.steaming(line);
 					
 					for(String s:words) {
-						
-						if(s.equals(""))	continue;
+						if(s.equals("") || s.length() >= 200)	continue;
 						
 						// If word isn't existing, add it with frequency=0
 						header_freq.putIfAbsent(s, 0);
