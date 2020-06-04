@@ -11,12 +11,14 @@ public class Ranker {
 	Hashtable<String, ArrayList<WordValue>> invertedFile = new Hashtable <String, ArrayList<WordValue>> ();
 	Hashtable<String, WebsiteValue> linkDatabase = new Hashtable <String, WebsiteValue> ();
 	Integer totalNumberOfDocuments;
+	Integer normalOrImage;
 	
 	public Ranker(Hashtable<String, ArrayList<WordValue>> invertedFile, Hashtable<String, WebsiteValue> linkDatabase,
-			Integer totalNumberOfDocuments) {
+			Integer totalNumberOfDocuments, Integer normalOrImage) {
 		this.invertedFile = invertedFile;
 		this.linkDatabase = linkDatabase;
 		this.totalNumberOfDocuments = totalNumberOfDocuments;
+		this.normalOrImage = normalOrImage;
 	}
 	
 	// to be private
@@ -134,10 +136,24 @@ public class Ranker {
 		}
 		return outputArray;		
 	}
+
+	public ArrayList<OutputImageValue> rankerImageOutput(ArrayList<WebsiteTFIDFPair> sortedTFIDFList){
+		ArrayList<OutputImageValue> outputImageArray = new ArrayList<OutputImageValue>();
+		for (int i=0; i< Integer.min(SearchEngine.MAX_RESULTS,sortedTFIDFList.size()); i++) {
+			String websiteURL = sortedTFIDFList.get(i).getWebsiteName();
+			String imageURL = DBConnection.getImagesURLs(conn, websiteURL);
+			OutputImageValue outputImageValue = new OutputImageValue(websiteURL, imageURL);
+			outputImageArray.add(outputImageValue);
+		}
+		return outputImageArray;
+	}
 	
 	public ArrayList<OutputValue> rank() {
 		ArrayList<WebsiteTFIDFPair> helperOutput = helper();
-		return rankerOutput(helperOutput);
+		if (normalOrImage == 0 ) //normal search 
+			return rankerOutput(helperOutput);
+		else if (normalOrImage == 1)
+			retutn rankerImageOutput(helperOutput);
 	}
 
 }
