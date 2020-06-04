@@ -19,7 +19,7 @@ public class PhraseSearch {
 	}
 	
 	public ArrayList<OutputValue> phraseSearch() {
-		Ranker rankerObject = new Ranker(invertedFile, linkDatabase, totalNumberOfDocuments);
+		Ranker rankerObject = new Ranker(invertedFile, linkDatabase, totalNumberOfDocuments, 0);
 		ArrayList<WebsiteTFIDFPair>rankerResult = rankerObject.helper();
 		String[] words = phrase.split("\\s+");
 		Integer numberOfPhraseWords = words.length;
