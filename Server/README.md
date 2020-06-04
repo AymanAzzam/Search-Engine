@@ -9,7 +9,11 @@ Run the script tomcat.sh using the following command.
 ./tomcat.sh
 ```
 Then follow Step 5 in the Following link https://www.digitalocean.com/community/tutorials/how-to-install-apache-tomcat-8-on-ubuntu-16-04
-
+3. Make mysql accessible by root'@'localhost' by adding the following lines at the end of /etc/mysql/my.cnf.
+```sh
+[mysqld]
+skip-grant-tables
+```
 ## Run Server (on AWS Cloud9)
 1. Install and compile files using the following commands.
 ```sh
@@ -20,4 +24,10 @@ sudo mvn install
 sudo cp -r target/classes/* /opt/tomcat/webapps/ROOT/WEB-INF/classes/
 sudo cp web.xml /opt/tomcat/webapps/ROOT/WEB-INF/
 sudo cp stopwords.txt /opt/tomcat/work/Catalina/localhost/
+```
+3. Create database 'Search_Engine' using mysql.
+```sh
+mysql -u root
+create database Search_Engine;
+exit
 ```
