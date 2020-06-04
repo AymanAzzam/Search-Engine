@@ -40,6 +40,8 @@ public class Indexer {
 	
 	private Object DBMutex;
 	
+	
+	
 	public Indexer(DBController control, Object mutex) throws ClassNotFoundException, SQLException {
 		controller = control;
 		DBMutex = mutex;
@@ -113,7 +115,7 @@ public class Indexer {
 					try {
 						// Inserting URL from the crawler initializes is_indexed with FALSE
 						// Check if [is_indexed = false] is existing
-						while(controller.checkNonIndexed(producerConnection)==0) {
+						while(Main.currentNonIndexedSize==0) {
 							
 							// Wait untill a notification of insertion
 							try {
@@ -125,7 +127,7 @@ public class Indexer {
 						// Get & Mark available row(s)
 						res = controller.getNonIndexedRows(producerConnection);
 						controller.markNonIndexedRows(producerConnection);
-						
+						Main.currentNonIndexedSize--;
 					} catch (SQLException e) {
 						e.printStackTrace();
 					}
