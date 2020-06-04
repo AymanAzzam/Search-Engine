@@ -3,6 +3,15 @@ A Search-engine Crawler-based that demonstrates the main features of a search en
 
 <img src="crawler.png" height="25%" width="25%">
 
+## Team members
+[Ayman Azzam](https://github.com/AymanAzzam)
+
+[Amr Aboshama](https://github.com/Amr-Aboshama)
+
+[Menna Fekry](https://github.com/MennaFekry)
+
+[Reham Ali](https://github.com/rehamaali)
+
 ## Helpful Links
 1. [How to Create Android Search Interface](https://developer.android.com/guide/topics/search/search-dialog).
 2. [How to send a simple request in Android](https://developer.android.com/training/volley/simple.html).
@@ -15,12 +24,3 @@ A Search-engine Crawler-based that demonstrates the main features of a search en
 9. [Index column size too large. The maximum column size is 767 bytes](https://stackoverflow.com/questions/42043205/how-to-fix-mysql-index-column-size-too-large-laravel-migrate/52778785#52778785).
 10. [Error: java.lang.ClassNotFoundException: com.mysql.jdbc.Driver](https://www.java67.com/2015/07/javalangclassnotfoundexception-com.mysql.jdbc.Driver-solution.html).
 11. [MySQL Error: : 'Access denied for user 'root'@'localhost'](https://stackoverflow.com/questions/41645309/mysql-error-access-denied-for-user-rootlocalhost).
-
-## Team members
-[Ayman Azzam](https://github.com/AymanAzzam)
-
-[Amr Aboshama](https://github.com/Amr-Aboshama)
-
-[Menna Fekry](https://github.com/MennaFekry)
-
-[Reham Ali](https://github.com/rehamaali)
