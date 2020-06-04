@@ -15,15 +15,12 @@ public class Ranker {
 	Integer totalNumberOfDocuments;
 	Integer normalOrImage;
 	
-	DBController controller;
-	
 	public Ranker(Hashtable<String, ArrayList<WordValue>> invertedFile, Hashtable<String, WebsiteValue> linkDatabase,
-			Integer totalNumberOfDocuments, DBController control, Integer normalOrImage) {
+			Integer totalNumberOfDocuments, Integer normalOrImage) {
 		this.invertedFile = invertedFile;
 		this.linkDatabase = linkDatabase;
 		this.totalNumberOfDocuments = totalNumberOfDocuments;
 		this.normalOrImage = normalOrImage;
-		this.controller = control;
 	}
 	
 	// to be private
@@ -142,7 +139,7 @@ public class Ranker {
 		return outputArray;		
 	}
 
-	public ArrayList<OutputImageValue> rankerImageOutput(ArrayList<WebsiteTFIDFPair> sortedTFIDFList, Connection conn){
+	public ArrayList<OutputImageValue> rankerImageOutput(ArrayList<WebsiteTFIDFPair> sortedTFIDFList, Connection conn, DBController controller){
 		ArrayList<OutputImageValue> outputImageArray = new ArrayList<OutputImageValue>();
 		
 		try {
@@ -151,22 +148,27 @@ public class Ranker {
 			e.printStackTrace();
 		}
 		
-		
 		for (int i=0; i< Integer.min(SearchEngine.MAX_RESULTS,sortedTFIDFList.size()); i++) {
 			String websiteURL = sortedTFIDFList.get(i).getWebsiteName();
 			ArrayList<String> imageURL = controller.getImagesURLs(conn, websiteURL);
+			
+			if(imageURL.isEmpty()) {
+				continue;
+			}
+			
 			OutputImageValue outputImageValue = new OutputImageValue(websiteURL, imageURL);
 			outputImageArray.add(outputImageValue);
 		}
+		
 		return outputImageArray;
 	}
 	
-	public Object rank(Connection conn) {
+	public Object rank(Connection conn, DBController control) {
 		ArrayList<WebsiteTFIDFPair> helperOutput = helper();
 		if (normalOrImage == 0 ) //normal search 
 			return rankerOutput(helperOutput);
 		else
-			return rankerImageOutput(helperOutput, conn);
+			return rankerImageOutput(helperOutput, conn, control);
 	}
 
 }
