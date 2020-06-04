@@ -13,9 +13,9 @@ public class Indexer {
 	public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException, InterruptedException {
 		System.out.println("Indexer");
 		
-		Object mutex = new Object();
+		Object dbmutex = new Object();
 		DBController controller = new DBController();
-		Indexer index = new Indexer(controller, mutex);
+		Indexer index = new Indexer(controller, dbmutex);
 		
 		Connection mainConnection = controller.connect();
 		controller.indexerTest(mainConnection);
@@ -29,8 +29,8 @@ public class Indexer {
 		
 		while(System.in.read()>-1)
 		{
-			synchronized (mutex) {
-				mutex.notifyAll();
+			synchronized (dbmutex) {
+				dbmutex.notifyAll();
 			}
 		}
 				
@@ -42,9 +42,9 @@ public class Indexer {
 	
 	
 	
-	public Indexer(DBController control, Object mutex) throws ClassNotFoundException, SQLException {
+	public Indexer(DBController control, Object dbmutex) throws ClassNotFoundException, SQLException {
 		controller = control;
-		DBMutex = mutex;
+		DBMutex = dbmutex;
 	}
 	
 	// Needed data of the URL record
@@ -101,7 +101,9 @@ public class Indexer {
 		private ResultSet res;
 		private Connection producerConnection;
 		
-		public Producer() throws SQLException {
+		public Producer() throws SQLException, InterruptedException {
+			
+			Main.connectionSemaphore.acquire();
 			// Establish a connection for each thread separately
 			producerConnection = controller.connect();
 		}
@@ -136,7 +138,15 @@ public class Indexer {
 				try {
 					// Extract the data from the ResultSet and inserting it into a URL queue
 					while(res.next()) {
-						new Processor(new URLRecord(res.getInt(1), res.getString(2), res.getString(4))).start();
+						try {
+							Main.connectionSemaphore.acquire();
+
+					        System.out.println("Acquire: " + Main.connectionSemaphore.availablePermits());
+					        
+							new Processor(new URLRecord(res.getInt(1), res.getString(2), res.getString(4))).start();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
 					}
 				} catch (SQLException e) {
 					e.printStackTrace();
@@ -268,7 +278,16 @@ public class Indexer {
 			
 			System.out.println("Finished: " + documentInstance.URL);
 			
-			processorConnection.close();
+			try {
+				
+				processorConnection.close();
+		        System.out.println("Release: " + Main.connectionSemaphore.availablePermits());
+				Main.connectionSemaphore.release();
+				
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
 	}	
 

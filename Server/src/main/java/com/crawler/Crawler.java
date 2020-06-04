@@ -19,7 +19,6 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.sql.rowset.spi.SyncResolver;
 
 
 
@@ -49,6 +48,7 @@ public class Crawler {
 
 		totalCrawlingSize = controller.getCrawlingSize(mainCrawlerConnection);
 		currentNonCrawledSize = controller.checkNonCrawled(mainCrawlerConnection);
+		Main.numberOfConnections++;
 	}
 
 	//seed
@@ -83,7 +83,8 @@ public class Crawler {
 		private java.sql.Connection crawlConnection;
 		private ResultSet res;
 		
-		public Crawl() throws SQLException {
+		public Crawl() throws SQLException, InterruptedException {
+			Main.connectionSemaphore.acquire();
 			crawlConnection = controller.connect();
 		}
 		

@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.concurrent.Semaphore;
 
 import com.crawler.Crawler.Crawl;
 import com.crawler.Indexer.Producer;
@@ -20,11 +21,17 @@ public class Main {
 	final static int INDEXER_CNT = 10;
 	final static int CRAWLER_CNT = 10;
 	final static int MAX_LINKS_CNT = 5000;
+	final static int MAX_CONNECTIONS = 150;
 	
 	public static ArrayList<Producer> prodList;
 	public static ArrayList<Crawl> crawlList;
 	
 	public static int currentNonIndexedSize;
+	public static int numberOfConnections;
+	
+	public static Object DBMutex, crawlingMutex;
+	public static DBController controller;
+	public static Semaphore connectionSemaphore;
 
 	
 	public static void main(String[] args) throws ClassNotFoundException, SQLException, InterruptedException, IOException {
@@ -41,20 +48,26 @@ public class Main {
         f.mkdirs();
         
         // Create DB Mutex
-        Object DBMutex = new Object();
+        DBMutex = new Object();
 
         // Create Crawling Mutex
-        Object crawlingMutex = new Object();
+        crawlingMutex = new Object();
+
+        
+        connectionSemaphore = new Semaphore(MAX_CONNECTIONS);
 
         // Create DB Controller
-        DBController controller = new DBController();
+        controller = new DBController();
         
         // Creating Tables in Database
         Connection connect = controller.connect();
-//        controller.drop(connect);		// For Testing Purpose
+        controller.drop(connect);		// For Testing Purpose
         controller.build(connect);
+
         
         currentNonIndexedSize = controller.checkNonIndexed(connect);
+
+        connect.close();
         
         // Create Indexer Instance
 		Indexer indexer = new Indexer(controller, DBMutex);
