@@ -99,11 +99,10 @@ public class Crawler {
 
 	//save html file contains the webpage content:
 	//imgs - title - h1->h6 - plaintext -bodys
-	public UrlRecord saveWebPage(Document webPage, String url) {
+	public String saveWebPage(Document webPage, String url, int docID) {
 
 	    try {
-	    	linksCnt++;
-			FileWriter myWriter = new FileWriter("docs/doc"+linksCnt+".txt");
+			FileWriter myWriter = new FileWriter("docs/doc"+docID+".txt");
 
 			//images::
 			myWriter.write("#IMAGES\n");
@@ -145,13 +144,12 @@ public class Crawler {
 
 			myWriter.close();
 
-			return new UrlRecord(url,"docs/doc"+linksCnt+".txt");
+			return new String("docs/doc"+docID+".txt");
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			//e.printStackTrace();
-			linksCnt--;
-			return new UrlRecord("","");
+			return new String("");
 		}
 
 	}
@@ -165,28 +163,16 @@ public class Crawler {
 	 }
 
 
-	public static class UrlRecord {
-		private String url;
-		private String filePath;
-
-		public UrlRecord (String urlString, String filePathString) {
-			url = urlString;
-			filePath = filePathString;
-		}
-	}
-
 	public class Crawl extends Thread {
 		private int queueSize;
-		private UrlRecord DBRecord;
+		private String filePath;
 		private String url;
+		private int ID;
 		private Document webDoc;
-		private boolean docBool;
 
 		public void run() {
 
 			while(true) {
-
-				docBool = false;
 
 				synchronized(queueMutex) {
 					while(toBeProcessedLinks.isEmpty()) {
@@ -205,36 +191,34 @@ public class Crawler {
 					}
 
 					url = toBeProcessedLinks.poll();
-					try {
-						webDoc = Jsoup.parse(new URL(url).openStream(), "ASCII", url);
-						docBool = true;
+					ID = ++linksCnt;
+				}
+				
+				try {
+					webDoc = Jsoup.parse(new URL(url).openStream(), "ASCII", url);
+					
+					synchronized (queueMutex) {
 						queueSize = toBeProcessedLinks.size();
 						extractLinks(webDoc);
 						if(queueSize == 0 && (!toBeProcessedLinks.isEmpty())) {
 							queueMutex.notifyAll();
 						}
-
-
-						//###############################################
-						System.out.println(url+"==> done by thread no. " + String.valueOf(Thread.currentThread().getId()));
-						//###############################################
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						System.err.println("for '"+url+"': "+e.getMessage());
-						docBool = false;
+						
 					}
-				}
 
-				synchronized(cntMutex) {
-					if(docBool) {
-						DBRecord = saveWebPage(webDoc,url);
+					filePath = saveWebPage(webDoc,url, ID);
+					if(!filePath.isEmpty()) {
+						controller.insertURL(crawlerConnection, url, filePath);
 					}
+					
+					
+					//###############################################
+					System.out.println(url+"==> done by thread no. " + String.valueOf(Thread.currentThread().getId()));
+					//###############################################
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					System.err.println("for '"+url+"': "+e.getMessage());
 				}
-
-				synchronized(DBMutex) {
-					controller.insertURL(crawlerConnection, DBRecord.url, DBRecord.filePath);
-				}
-
 			}
 		}
 	}
