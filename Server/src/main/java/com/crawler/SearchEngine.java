@@ -9,8 +9,10 @@ import javax.servlet.http.*;
 
 import org.json.JSONArray;
 
-
 public class SearchEngine extends HttpServlet{
+	
+	final static int MAX_RESULTS = 100;
+	
 	
 	public static void main(String []args) throws FileNotFoundException,Exception {
        		

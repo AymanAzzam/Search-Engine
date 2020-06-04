@@ -125,7 +125,7 @@ public class Ranker {
 	public ArrayList<OutputValue> rankerOutput(ArrayList<WebsiteTFIDFPair> sortedTFIDFList){
 		
 		ArrayList<OutputValue>  outputArray = new ArrayList<OutputValue> ();
-		for(int i=0; i< sortedTFIDFList.size(); i++) {
+		for(int i=0; i< Integer.min(SearchEngine.MAX_RESULTS,sortedTFIDFList.size()); i++) {
 			String websiteName = sortedTFIDFList.get(i).getWebsiteName();
 			String headerText = linkDatabase.get(websiteName).getHeaderText();
 			String summary = linkDatabase.get(websiteName).getSummary();
