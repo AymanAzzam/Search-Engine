@@ -61,7 +61,7 @@ public class DBController {
 			Statement stmt = conn.createStatement();
 			stmt.executeUpdate(String.format("CREATE TABLE %s ("
 					+ "%s INT PRIMARY KEY AUTO_INCREMENT,"
-					+ "%s TINYTEXT(250) UNIQUE NOT NULL,"
+					+ "%s TINYTEXT UNIQUE NOT NULL,"
 					+ "%s INT DEFAULT 0 NOT NULL,"
 					+ "%s TINYTEXT NOT NULL,"
 					+ "%s TINYTEXT,"
