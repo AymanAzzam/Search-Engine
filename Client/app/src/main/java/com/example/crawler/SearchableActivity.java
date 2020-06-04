@@ -56,8 +56,6 @@ public class SearchableActivity extends AppCompatActivity {
 
         /*** Send GET Request ***/
         RequestQueue queue = Volley.newRequestQueue(this);
-
-        //String url = "http://www.google.ru/?q=" + query.replace(" ","%20");
         String url = "http://ec2-54-90-197-233.compute-1.amazonaws.com:8080/GetResult?Query=" + query.replace(" ","+");
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONArray>() {
@@ -66,9 +64,13 @@ public class SearchableActivity extends AppCompatActivity {
                         ArrayList<String> summary = new ArrayList<String>();
                         ArrayList<String> title = new ArrayList<String>();
                         ArrayList<String> websites = new ArrayList<String>();
+                        JSONObject jObject;
+                        String activateLink;
+
+                        /*** Extracting the Results from the Json Array ***/
                         try {
                             for (int i = 0; i < serverResponse.length(); i++) {
-                                JSONObject jObject = (JSONObject) serverResponse.get(i);
+                                jObject = (JSONObject) serverResponse.get(i);
                                 summary.add(jObject.optString("summary"));
                                 websites.add(jObject.optString("websiteName"));
                                 title.add(jObject.optString("headerText"));
@@ -76,9 +78,18 @@ public class SearchableActivity extends AppCompatActivity {
                         }
                         catch (JSONException e) {   e.printStackTrace();    }
 
+                        /*** Handling when the query doesn't match any document ***/
+                        if(title.size() == 0) {
+                            title.add(query+"");    activateLink = "0";
+                            websites.add("Your search did not match any documents\n");
+                            summary.add("Suggestions:\n\nMake sure that all words are spelled correctly.\n\nTry different keywords.\n\nTry more general keywords.\n\nTry fewer keywords.");
+                        }
+                        else activateLink = "1";
+
                         /*** start the Results Activity ***/
                         Intent intent = new Intent(SearchableActivity.this,ResultsActivity.class);
                         intent.putExtra("EXTRA_PAGE_NUMBER", "0");
+                        intent.putExtra("Activate_Link", activateLink);
                         intent.putExtra("queryRequest", new QueryRequest(title,websites,summary));
                         startActivity(intent);
                         finish();

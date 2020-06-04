@@ -129,6 +129,8 @@ public class ResultsActivity extends AppCompatActivity {
         list_view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if(getIntent().getStringExtra("Activate_Link").equals("0"))
+                    return;
                 String url = links.get(page_number*10+position);
                 if (!url.startsWith("http://") && !url.startsWith("https://")) url = "http://" + url;
 
