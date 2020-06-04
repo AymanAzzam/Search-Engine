@@ -31,14 +31,13 @@ public class Crawler {
 	private final int MAX_LINKS_COUNT;
 	private HashSet<String> visitedLinks;
 	private Queue <String> toBeProcessedLinks;
-	//Queue <UrlRecord> toBeSavedInDB;
 	private int visitedLinksCnt;
 	private int linksCnt;
-	private java.sql.Connection crawlerConnection;
-	private Object queueMutex,DBMutex,cntMutex;
+//	private java.sql.Connection crawlerConnection;
+	private Object queueMutex, DBMutex;
 
 	//constructor:
-	public Crawler (int maxNoOfLinks, String seederFileName, DBController dbController, Object mutex )
+	public Crawler (int maxNoOfLinks, String seederFileName, DBController dbController, Object mutex)
 			throws ClassNotFoundException, SQLException {
 
 		visitedLinks = new HashSet <String>();
@@ -47,10 +46,9 @@ public class Crawler {
 		visitedLinksCnt = 0;
 		linksCnt = 0;
 		controller = dbController;
-		crawlerConnection = controller.connect();
+//		crawlerConnection = controller.connect();
 		DBMutex = mutex;
 		queueMutex = new Object();
-		cntMutex = new Object();
 		seed(seederFileName);
 
 	}
@@ -81,86 +79,7 @@ public class Crawler {
 
 	}
 
-	//extract links:
-	public void extractLinks(Document htmlDocument) {
 
-		Elements webPagesOnHtml = htmlDocument.select("a[href]");
-
-		for (Element webpPage : webPagesOnHtml) {
-			String url = webpPage.attr("abs:href");
-			//if the link wasnt visited yet and max count of links not reached then add it to be processed
-			if(!visitedLinks.contains(url) && visitedLinksCnt < MAX_LINKS_COUNT) {
-				visitedLinks.add(url);
-				toBeProcessedLinks.add(url);
-				visitedLinksCnt++;
-			}
-		}
-	}
-
-	//save html file contains the webpage content:
-	//imgs - title - h1->h6 - plaintext -bodys
-	public String saveWebPage(Document webPage, String url, int docID) {
-
-	    try {
-			FileWriter myWriter = new FileWriter("docs/doc"+docID+".txt");
-
-			//images::
-			myWriter.write("#IMAGES\n");
-			Elements images = webPage.select("img");
-			for(Element image : images) {
-				String imageLink = image.attr("src");
-				myWriter.write(imageLink+"\n");
-			}
-
-			//title::
-			myWriter.write("#TITLE\n");
-			String title = webPage.title();
-			title = getEnglishText(title);
-			myWriter.write(title+"\n");
-
-			//headers::
-			myWriter.write("#HEADERS\n");
-			Elements headers = webPage.select("h1, h2, h3, h4, h5, h6");
-			for(Element header : headers) {
-				String headerText = header.text();
-				headerText = getEnglishText(headerText);
-				myWriter.write(headerText+"\n");
-			}
-
-			//plaintext
-			myWriter.write("#PLAINTEXT\n");
-			Elements plains = webPage.select("p");
-			for(Element plain : plains) {
-				String plainText = plain.text();
-				plainText = getEnglishText(plainText);
-				myWriter.write(plainText+"\n");
-			}
-
-			//body
-			myWriter.write("#BODY\n");
-			String body = webPage.body().text();
-			body = getEnglishText(body);
-			myWriter.write(body);
-
-			myWriter.close();
-
-			return new String("docs/doc"+docID+".txt");
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
-			return new String("");
-		}
-
-	}
-
-	//filter webpage content:
-	public static String getEnglishText(String text) {
-	    Pattern pattern = Pattern.compile("[^a-zA-Z 0-9\n]");
-	    Matcher matcher = pattern.matcher(text);
-	    String englishText = matcher.replaceAll("");
-	    return englishText;
-	 }
 
 
 	public class Crawl extends Thread {
@@ -169,6 +88,92 @@ public class Crawler {
 		private String url;
 		private int ID;
 		private Document webDoc;
+		private java.sql.Connection crawlConnection;
+		
+		public Crawl() throws SQLException {
+			crawlConnection = controller.connect();
+		}
+		
+		//extract links:
+		public void extractLinks(Document htmlDocument) {
+
+			Elements webPagesOnHtml = htmlDocument.select("a[href]");
+
+			for (Element webpPage : webPagesOnHtml) {
+				String newURL = webpPage.attr("abs:href");
+				//if the link wasnt visited yet and max count of links not reached then add it to be processed
+				if(!visitedLinks.contains(newURL) && visitedLinksCnt < MAX_LINKS_COUNT) {
+					visitedLinks.add(newURL);
+					toBeProcessedLinks.add(newURL);
+					visitedLinksCnt++;
+				}
+			}
+		}
+
+		//save html file contains the webpage content:
+		//imgs - title - h1->h6 - plaintext -bodys
+		public String saveWebPage(Document webPage, int docID) {
+
+		    try {
+				FileWriter myWriter = new FileWriter("docs/doc"+docID+".txt");
+
+				//images::
+				myWriter.write("#IMAGES\n");
+				Elements images = webPage.select("img");
+				for(Element image : images) {
+					String imageLink = image.attr("src");
+					myWriter.write(imageLink+"\n");
+				}
+
+				//title::
+				myWriter.write("#TITLE\n");
+				String title = webPage.title();
+				title = getEnglishText(title);
+				myWriter.write(title+"\n");
+
+				//headers::
+				myWriter.write("#HEADERS\n");
+				Elements headers = webPage.select("h1, h2, h3, h4, h5, h6");
+				for(Element header : headers) {
+					String headerText = header.text();
+					headerText = getEnglishText(headerText);
+					myWriter.write(headerText+"\n");
+				}
+
+				//plaintext
+				myWriter.write("#PLAINTEXT\n");
+				Elements plains = webPage.select("p");
+				for(Element plain : plains) {
+					String plainText = plain.text();
+					plainText = getEnglishText(plainText);
+					myWriter.write(plainText+"\n");
+				}
+
+				//body
+				myWriter.write("#BODY\n");
+				String body = webPage.body().text();
+				body = getEnglishText(body);
+				myWriter.write(body);
+
+				myWriter.close();
+
+				return new String("docs/doc"+docID+".txt");
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+				return new String("");
+			}
+
+		}
+
+		//filter webpage content:
+		public String getEnglishText(String text) {
+		    Pattern pattern = Pattern.compile("[^a-zA-Z 0-9\n]");
+		    Matcher matcher = pattern.matcher(text);
+		    String englishText = matcher.replaceAll("");
+		    return englishText;
+		 }
 
 		public void run() {
 
@@ -206,14 +211,17 @@ public class Crawler {
 						
 					}
 
-					filePath = saveWebPage(webDoc,url, ID);
+					filePath = saveWebPage(webDoc, ID);
 					if(!filePath.isEmpty()) {
-						controller.insertURL(crawlerConnection, url, filePath);
+						synchronized (DBMutex) {
+							controller.insertURL(crawlConnection, url, filePath);
+							
+						}
 					}
 					
 					
 					//###############################################
-					System.out.println(url+"==> done by thread no. " + String.valueOf(Thread.currentThread().getId()));
+					System.out.println("Done: " + url+"==> by thread no. " + String.valueOf(Thread.currentThread().getId()));
 					//###############################################
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -231,7 +239,7 @@ public class Crawler {
 		Object mutex = new Object();
 		DBController dbController = new DBController();
 
-		Crawler myCrawler = new Crawler(20, "seeder.txt", dbController, mutex );
+		Crawler myCrawler = new Crawler(30, "seeder.txt", dbController, mutex);
 
 		Crawl crawler1 = myCrawler.new Crawl();
 		Crawl crawler2 = myCrawler.new Crawl();
