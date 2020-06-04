@@ -49,8 +49,17 @@ public class DBController {
 	// Establish a database connection
 	public Connection connect() throws SQLException
 	{
-		System.out.println("Establishing DB Connection...");
+//		System.out.println("Establishing DB Connection...");
 		return DriverManager.getConnection(String.format("jdbc:mysql://localhost:3306/%s?useLegacyDatetimeCode=false&serverTimezone=Africa/Cairo", DBName),username,password);
+	}
+	
+	public void drop(Connection conn) throws SQLException {
+		
+		Statement stmt = conn.createStatement();
+		stmt.executeUpdate(String.format("DROP TABLE %s, %s, %s;",
+				image_table, word_table, URL_table));
+		
+		stmt.close();
 	}
 	
 	// Create the tables
