@@ -4,11 +4,11 @@ import java.util.ArrayList;
 
 public class OutputImageValue {
 		private String websiteURL;
-		private ArrayList<String> imageURL;
+		private ArrayList<String> imagesURL;
 		
 		public OutputImageValue (String websiteURL, ArrayList<String> imageURL) {
 			this.websiteURL = websiteURL;
-			this.imageURL = imageURL;
+			this.imagesURL = imageURL;
 			
 		}
 		
@@ -17,7 +17,7 @@ public class OutputImageValue {
 		}
 		
 		public ArrayList<String> getImageURL () {
-			return this.imageURL;
+			return this.imagesURL;
 		}
 		
 }
