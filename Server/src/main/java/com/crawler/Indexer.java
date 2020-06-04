@@ -268,7 +268,8 @@ public class Indexer {
 			
 			System.out.println("Finished: " + documentInstance.URL);
 			
-			processorConnection.close();
+			try {	processorConnection.close();	}
+			catch (SQLException e)	{	e.printStackTrace();	}
 		}
 	}	
 
