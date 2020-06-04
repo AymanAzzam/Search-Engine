@@ -76,7 +76,7 @@ public class DBController {
 			Statement stmt = conn.createStatement();
 			stmt.executeUpdate(String.format("CREATE TABLE %s ("
 					+ "%s INT PRIMARY KEY AUTO_INCREMENT,"
-					+ "%s VARCHAR(200) UNIQUE NOT NULL,"
+					+ "%s VARCHAR(500) UNIQUE NOT NULL,"
 					+ "%s INT DEFAULT 0 NOT NULL,"
 					+ "%s TINYTEXT NOT NULL,"
 					+ "%s TINYTEXT,"
@@ -89,12 +89,13 @@ public class DBController {
 			
 			// CREATE IMAGE TABLE
 			stmt.executeUpdate(String.format("CREATE TABLE %s ("
-					+ " %s INT PRIMARY KEY AUTO_INCREMENT,"
 					+ " %s INT NOT NULL,"
-					+ " %s TINYTEXT NOT NULL,"
+					+ " %s VARCHAR(500) NOT NULL,"
+					+ "PRIMARY KEY(%s,%s),"
 					+ " FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE"
 					+ ");", 
-					image_table, imageID_col, imageURLID_col, imageURL_col,
+					image_table, imageURLID_col, imageURL_col,
+					imageURLID_col, imageURL_col,
 					imageURLID_col, URL_table, URLID_col));
 			
 			
@@ -114,7 +115,7 @@ public class DBController {
 			// CREATE CRAWLING TABLE
 			stmt.executeUpdate(String.format("CREATE TABLE %s ("
 					+ "%s INT PRIMARY KEY AUTO_INCREMENT,"
-					+ "%s VARCHAR(200) UNIQUE NOT NULL,"
+					+ "%s VARCHAR(500) UNIQUE NOT NULL,"
 					+ "%s BOOLEAN DEFAULT FALSE);",
 					crawl_table, URLID_col, URLName_col, isCrawled_col));
 			
