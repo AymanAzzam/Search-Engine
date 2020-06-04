@@ -2,12 +2,7 @@ package com.example.crawler;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import org.json.JSONArray;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class QueryRequest implements Parcelable {
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
@@ -35,6 +30,9 @@ public class QueryRequest implements Parcelable {
     public ArrayList<String> getWebsites() { return websites;    }
 
     public QueryRequest(Parcel in){
+        this.title = new ArrayList<String>();
+        this.websites = new ArrayList<String>();
+        this.summary = new ArrayList<String>();
         in.readList( this.title, String.class.getClassLoader());
         in.readList( this.websites, String.class.getClassLoader());
         in.readList( this.summary, String.class.getClassLoader());
