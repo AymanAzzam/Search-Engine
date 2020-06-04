@@ -28,7 +28,7 @@ public class WebsiteValue {
 		
 		String summary = "";
 		String [] arr = content.split("\\s+"); 
-		for(int i=0; i<Integer.min(50,content.length()); i++){
+		for(int i=0; i<Integer.min(50,arr.length); i++){
 			summary = summary + ((summary.length()!=0)?" ":"") + arr[i] ;         
        }
 		return summary;
