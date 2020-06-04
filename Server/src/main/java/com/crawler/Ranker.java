@@ -1,5 +1,7 @@
 package com.crawler;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,12 +15,15 @@ public class Ranker {
 	Integer totalNumberOfDocuments;
 	Integer normalOrImage;
 	
+	DBController controller;
+	
 	public Ranker(Hashtable<String, ArrayList<WordValue>> invertedFile, Hashtable<String, WebsiteValue> linkDatabase,
-			Integer totalNumberOfDocuments, Integer normalOrImage) {
+			Integer totalNumberOfDocuments, DBController control, Integer normalOrImage) {
 		this.invertedFile = invertedFile;
 		this.linkDatabase = linkDatabase;
 		this.totalNumberOfDocuments = totalNumberOfDocuments;
 		this.normalOrImage = normalOrImage;
+		this.controller = control;
 	}
 	
 	// to be private
@@ -137,23 +142,31 @@ public class Ranker {
 		return outputArray;		
 	}
 
-	public ArrayList<OutputImageValue> rankerImageOutput(ArrayList<WebsiteTFIDFPair> sortedTFIDFList){
+	public ArrayList<OutputImageValue> rankerImageOutput(ArrayList<WebsiteTFIDFPair> sortedTFIDFList, Connection conn){
 		ArrayList<OutputImageValue> outputImageArray = new ArrayList<OutputImageValue>();
+		
+		try {
+			conn = controller.connect();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		
 		for (int i=0; i< Integer.min(SearchEngine.MAX_RESULTS,sortedTFIDFList.size()); i++) {
 			String websiteURL = sortedTFIDFList.get(i).getWebsiteName();
-			String imageURL = DBConnection.getImagesURLs(conn, websiteURL);
+			ArrayList<String> imageURL = controller.getImagesURLs(conn, websiteURL);
 			OutputImageValue outputImageValue = new OutputImageValue(websiteURL, imageURL);
 			outputImageArray.add(outputImageValue);
 		}
 		return outputImageArray;
 	}
 	
-	public ArrayList<OutputValue> rank() {
+	public Object rank(Connection conn) {
 		ArrayList<WebsiteTFIDFPair> helperOutput = helper();
 		if (normalOrImage == 0 ) //normal search 
 			return rankerOutput(helperOutput);
-		else if (normalOrImage == 1)
-			retutn rankerImageOutput(helperOutput);
+		else
+			return rankerImageOutput(helperOutput, conn);
 	}
 
 }
