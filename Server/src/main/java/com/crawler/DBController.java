@@ -15,7 +15,7 @@ public class DBController {
 	final String username = "root";
 	final String password = "";
 	
-	// URL Database
+	// URL Table
 	final String URL_table = "URL_table";
 	final String URLID_col = "ID";				// PRIMARY
 	final String URLName_col = "URL";
@@ -25,19 +25,25 @@ public class DBController {
 	final String URLContent_col = "content";
 	final String isIndexed_col = "is_indexed";
 	
-	// Image Database
+	// Image Table
 	final String image_table = "image_table";
 	final String imageID_col = "image_ID";		//PRIMARY
 	final String imageURLID_col = "URL_ID";
 	final String imageURL_col = "image_URL";
 	
-	// Inverted File Database
+	// Inverted File Table
 	final String word_table = "word_table";
 	final String word_col = "word";				// PRIMARY
 	final String wordURLID_col = "URL_ID";		// PRIMARY
 	final String countPlaintxt_col = "plaintext_count";
 	final String countHeader_col = "header_count";
 	final String countTotal_col = "total_count";
+	
+	// Crawling Table
+	final String crawl_table = "crawling_table";
+//	final String URLID_col = "ID";				// PRIMARY
+//	final String URLName_col = "URL";
+	final String isCrawled_col = "is_crawled";
 	
 	
 	
@@ -56,8 +62,8 @@ public class DBController {
 	public void drop(Connection conn) throws SQLException {
 		
 		Statement stmt = conn.createStatement();
-		stmt.executeUpdate(String.format("DROP TABLE %s, %s, %s;",
-				image_table, word_table, URL_table));
+		stmt.executeUpdate(String.format("DROP TABLE %s, %s, %s, %s;",
+				image_table, word_table, URL_table, crawl_table));
 		
 		stmt.close();
 	}
@@ -105,12 +111,19 @@ public class DBController {
 					word_col, wordURLID_col,
 					wordURLID_col, URL_table, URLID_col));
 			
+			// CREATE CRAWLING TABLE
+			stmt.executeUpdate(String.format("CREATE TABLE %s ("
+					+ "%s INT PRIMARY KEY AUTO_INCREMENT,"
+					+ "%s VARCHAR(200) UNIQUE NOT NULL,"
+					+ "%s BOOLEAN DEFAULT FALSE);",
+					crawl_table, URLID_col, URLName_col, isCrawled_col));
+			
 			stmt.close();
 			System.out.println("Database Tables Created Successfully!");
 			
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			System.out.println("Database Tables already exists!");
 		}
 	}
@@ -148,6 +161,80 @@ public class DBController {
 		stmt.close();
 		return ret;
 	}
+
+	// Get non-crawled yet rows
+	public ResultSet getNonCrawledRows(Connection conn) throws SQLException
+	{
+		Statement stmt = conn.createStatement();
+		return stmt.executeQuery(String.format("SELECT * FROM %s"
+				+ " WHERE %s = FALSE ORDER BY %s LIMIT 1;", crawl_table, isCrawled_col, URLID_col));
+	}
+	
+	// Mark returned non-crawled rows
+	public void markNonCrawledRows(Connection conn) throws SQLException {
+		Statement stmt = conn.createStatement();
+		
+		stmt.executeUpdate(String.format("UPDATE %s "
+				+ "SET %s = TRUE "
+				+ "WHERE %s = FALSE ORDER BY %s LIMIT 1;",
+				crawl_table, isCrawled_col, isCrawled_col, URLID_col));
+		
+		stmt.close();
+	}
+	
+	// Get the minimum word counts in crawling_table
+	public int checkNonCrawled(Connection conn) throws SQLException {
+
+		Statement stmt = conn.createStatement();
+		ResultSet res = stmt.executeQuery(String.format("SELECT COUNT(*)"
+				+ " FROM %s WHERE %s = FALSE;", crawl_table, isCrawled_col));
+		
+		res.next();
+		int ret = res.getInt(1);
+		res.close();
+		stmt.close();
+		return ret;
+	}
+	
+	public int getCrawlingSize(Connection conn) throws SQLException {
+
+		Statement stmt = conn.createStatement();
+		ResultSet res = stmt.executeQuery(String.format("SELECT COUNT(*)"
+				+ " FROM %s;", crawl_table));
+		
+		res.next();
+		int ret = res.getInt(1);
+		res.close();
+		stmt.close();
+		return ret;
+	}
+	
+	public boolean insertCrawlingURL(Connection conn, String URL) {
+		
+		boolean ret = false;
+		
+		try {
+			Statement stmt = conn.createStatement();
+			
+			try {
+				
+				stmt.executeUpdate(String.format("INSERT INTO %s(%s) "
+						+ "VALUES('%s');",
+						crawl_table, URLName_col, URL));
+				ret = true;
+			} catch (SQLException e) {
+				ret = false;
+			}
+			
+			stmt.close();
+			
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		
+		return ret;
+	}
+	
 	
 	// Insert an image related with a URL
 	public boolean insertImage(Connection conn, int URLID, String imageURL) {
