@@ -267,6 +267,8 @@ public class Indexer {
 			}
 			
 			System.out.println("Finished: " + documentInstance.URL);
+			
+			processorConnection.close();
 		}
 	}	
 
