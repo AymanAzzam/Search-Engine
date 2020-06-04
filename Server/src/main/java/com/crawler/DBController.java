@@ -252,6 +252,35 @@ public class DBController {
 		return true;
 	}
 	
+	public ArrayList<String> getImagesURLs(Connection conn, String url) {
+		
+		
+		ArrayList<String> images = new ArrayList<String>();
+		try {
+			
+			Statement stmt = conn.createStatement();
+			
+			ResultSet res = stmt.executeQuery(String.format("SELECT %s FROM %s"
+					+ " INNER JOIN %s ON %s = %s"
+					+ " WHERE %s = '%s';",
+					imageURL_col, image_table, URL_table, URLID_col, imageURLID_col, URLName_col, url));
+			
+			while(res.next()) {
+				images.add(res.getString(1));
+			}
+			
+			res.close();
+			stmt.close();
+			
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return images;
+	}
+	
 	// Insert a URL with its extracted document path
 	public boolean insertURL(Connection conn, String URL, String filePath) {
 		
