@@ -10,6 +10,9 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+
+import org.json.JSONArray;
+
 import java.util.ArrayList;
 
 public class ResultsActivity extends AppCompatActivity {
@@ -25,9 +28,11 @@ public class ResultsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_results);
 
-        headers = new ArrayList<String>();
-        links = new ArrayList<String>();
-        summaries = new ArrayList<String>();
+        QueryRequest queryRequest = (QueryRequest) getIntent().getExtras().getParcelable("queryRequest");
+
+        headers = queryRequest.getTitles();
+        links = queryRequest.getWebsites();
+        summaries = queryRequest.getSummaries();
 
         list_view = (ListView) findViewById(R.id.list_view);
         image_left = (ImageView) findViewById(R.id.arrow_left);
@@ -38,40 +43,9 @@ public class ResultsActivity extends AppCompatActivity {
         fourth_number = (TextView) findViewById(R.id.fourth_number);
         fifth_number = (TextView) findViewById(R.id.fifth_number);
 
-        /************* Input For Testing *************/
-        headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");
-        headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");
-
-        links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");
-        links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");
-
-        summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");
-        summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");
-
-        headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");
-        headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");
-
-        links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");
-        links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");
-
-        summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");
-        summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");
-
-        headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");headers.add("1");
-        headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");headers.add("2");
-
-        links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");links.add("3");
-        links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");links.add("4");
-
-        summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");summaries.add("5");
-        summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");summaries.add("6");
-
-        headers.add("Computer Architecture");
-        links.add("http://en.wikipedia.org");
-        summaries.add("In computer Engineering. Computer Architecture is a set of rules and methods that describes the functionality");
-
         /************* Update ListView Indices and Page Number *************/
         page_number = Integer.parseInt(getIntent().getStringExtra("EXTRA_PAGE_NUMBER"));
+
         //System.out.println(pageNumber);
         start_index = page_number*10;
         end_index = Math.min(start_index + 10,headers.size());

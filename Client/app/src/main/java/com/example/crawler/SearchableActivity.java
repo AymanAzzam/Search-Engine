@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Parcelable;
 import android.provider.SearchRecentSuggestions;
 import android.widget.Toast;
 
@@ -14,8 +15,16 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 /*** Handling inputs without using the push button ***/
 public class SearchableActivity extends AppCompatActivity {
@@ -48,18 +57,30 @@ public class SearchableActivity extends AppCompatActivity {
         /*** Send GET Request ***/
         RequestQueue queue = Volley.newRequestQueue(this);
 
-        String url = "https://www.google.ru/?q=" + query.replace(" ","%20");
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
+        //String url = "http://www.google.ru/?q=" + query.replace(" ","%20");
+        String url = "http://ec2-54-90-197-233.compute-1.amazonaws.com:8080/GetResult?Query=" + query.replace(" ","+");
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONArray>() {
                     @Override
-                    public void onResponse(String response) {
-                        // Display the first 500 characters of the response string.
-                        System.out.println("Response is: "+ response.substring(0,500));
+                    public void onResponse(JSONArray serverResponse) {
+                        ArrayList<String> summary = new ArrayList<String>();
+                        ArrayList<String> title = new ArrayList<String>();
+                        ArrayList<String> websites = new ArrayList<String>();
+                        try {
+                            for (int i = 0; i < serverResponse.length(); i++) {
+                                JSONObject jObject = (JSONObject) serverResponse.get(i);
+                                summary.add(jObject.optString("summary"));
+                                websites.add(jObject.optString("websiteName"));
+                                title.add(jObject.optString("headerText"));
+                            }
+                        }
+                        catch (JSONException e) {   e.printStackTrace();    }
 
                         /*** start the Results Activity ***/
-                        Intent i = new Intent(SearchableActivity.this,ResultsActivity.class);
-                        i.putExtra("EXTRA_PAGE_NUMBER", "0");
-                        startActivity(i);
+                        Intent intent = new Intent(SearchableActivity.this,ResultsActivity.class);
+                        intent.putExtra("EXTRA_PAGE_NUMBER", "0");
+                        intent.putExtra("queryRequest", new QueryRequest(title,websites,summary));
+                        startActivity(intent);
                         finish();
                     }
                 }, new Response.ErrorListener() {
@@ -70,6 +91,6 @@ public class SearchableActivity extends AppCompatActivity {
                 finish();
             }
         });
-        queue.add(stringRequest);
+        queue.add(jsonArrayRequest);
     }
 }
