@@ -106,12 +106,12 @@ public class DBController {
 					wordURLID_col, URL_table, URLID_col));
 			
 			stmt.close();
-			System.out.println("Init...");
+			System.out.println("Database Tables Created Successfully!");
 			
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("Init: Tables exists!");
+			System.out.println("Database Tables already exists!");
 		}
 	}
 	

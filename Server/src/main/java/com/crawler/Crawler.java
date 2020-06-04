@@ -183,13 +183,13 @@ public class Crawler {
 					while(toBeProcessedLinks.isEmpty()) {
 						try {
 							//###############################################
-							System.out.println("Sleep thread no. " + String.valueOf(Thread.currentThread().getId()));
+//							System.out.println("Sleep thread no. " + String.valueOf(Thread.currentThread().getId()));
 							//###############################################
 							queueMutex.wait();
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							//###############################################
-							System.out.println("awake thread no. " + String.valueOf(Thread.currentThread().getId()));
+//							System.out.println("awake thread no. " + String.valueOf(Thread.currentThread().getId()));
 							//###############################################
 							e.printStackTrace();
 						}
@@ -225,7 +225,8 @@ public class Crawler {
 					
 					
 					//###############################################
-					System.out.println("Done: " + url+"==> by thread no. " + String.valueOf(Thread.currentThread().getId()));
+//					System.out.println("Done: " + url+"==> by thread no. " + String.valueOf(Thread.currentThread().getId()));
+					System.out.println("Crawled: " + url);
 					//###############################################
 				} catch (IOException | SQLException e) {
 					// TODO Auto-generated catch block
