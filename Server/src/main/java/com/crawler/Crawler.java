@@ -138,11 +138,7 @@ public class Crawler {
 						}
 						else if(!imageLink.isEmpty() && imageLink.charAt(0) == '/'){
 							imageLink = url.concat(imageLink);
-						}
-						else {
-							System.err.println(imageLink);
-						}
-						
+						}						
 					}
 					
 					myWriter.write(imageLink+"\n");
