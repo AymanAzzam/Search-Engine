@@ -98,7 +98,7 @@ public class SearchEngine extends HttpServlet{
 			String query = request.getParameter("Query") ;
 			String typeString = request.getParameter("Type");
 			
-			int type = typeString.equals("image")?1:0;
+			int type = typeString.equals("Image")?1:0;
 			
 			ArrayList<String> queryWords, invertedFileElement, linkFileElement;
 			
@@ -155,8 +155,8 @@ public class SearchEngine extends HttpServlet{
 			}
 			else
 			{
-				Ranker ranker = new Ranker (invertedFile, linkDatabase, dummyTotalNumberOfDocuments, dbController, type);
-				result = ranker.rank(conn);
+				Ranker ranker = new Ranker (invertedFile, linkDatabase, dummyTotalNumberOfDocuments, type);
+				result = ranker.rank(conn, dbController);
 				
 				if(type == 0) {
 					json = new JSONArray((ArrayList<OutputValue>)result);
@@ -168,9 +168,6 @@ public class SearchEngine extends HttpServlet{
 			}
 
 			response.getWriter().print(json);
-//			for(OutputValue o:result) {
-//				response.getWriter().println(o.getWebsiteName() + "\n" + o.getHeaderText() + "\n" + o.getSummary());
-//			}
 			
 		} catch (Exception e) {
 			// TODO: handle exception
