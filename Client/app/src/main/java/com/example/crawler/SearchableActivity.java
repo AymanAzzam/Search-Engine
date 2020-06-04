@@ -25,19 +25,23 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /*** Handling inputs without using the push button ***/
 public class SearchableActivity extends AppCompatActivity {
 
     String query;
+    String type;
 
     @Override
     protected void onStart() {
         super.onStart();
 
-        /*** Getting the query search ***/
+        /*** Getting the query search and the type search ***/
         if (Intent.ACTION_SEARCH.equals(getIntent().getAction()))   query = getIntent().getStringExtra(SearchManager.QUERY);
         else                                                        query = getIntent().getStringExtra("query");
+        type = getIntent().getStringExtra("type");
+        if(type ==null) type = "Normal";
 
         /*** Save the Query for Suggestion ***/
         SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
@@ -56,33 +60,53 @@ public class SearchableActivity extends AppCompatActivity {
 
         /*** Send GET Request ***/
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://ec2-54-90-197-233.compute-1.amazonaws.com:8080/GetResult?Query=" + query.replace(" ","+");
+        String url = "http://ec2-3-85-34-39.compute-1.amazonaws.com:8080/GetResult?Query=" + query.replace(" ","+") + "&Type=" + type;
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray serverResponse) {
-                        ArrayList<String> summary = new ArrayList<String>();
-                        ArrayList<String> title = new ArrayList<String>();
-                        ArrayList<String> websites = new ArrayList<String>();
-                        JSONObject jObject;
-                        String activateLink;
+                        ArrayList<String> key1List = new ArrayList<String>();
+                        ArrayList<String> key2List = new ArrayList<String>();
+                        ArrayList<String> key3List = new ArrayList<String>();
+                        JSONObject jObject; JSONArray jArray;
+                        String activateLink,key1,key2,key3;
+
+                        /*** Handling the Json Object Keys ***/
+                        if(type.equals("Image")) {  key1 = "imageURL"; key2 = "websiteURL"; key3="0";}
+                        else { key1 = "headerText";    key2 = "websiteName";   key3 = "summary"; }
 
                         /*** Extracting the Results from the Json Array ***/
                         try {
                             for (int i = 0; i < serverResponse.length(); i++) {
                                 jObject = (JSONObject) serverResponse.get(i);
-                                summary.add(jObject.optString("summary"));
-                                websites.add(jObject.optString("websiteName"));
-                                title.add(jObject.optString("headerText"));
+
+                                /*** Handling the Image Query. Key1 is the IMAGE_URL and Key2 is the IMAGE_WEBSITE_URL ***/
+                                if(key3.equals("0")) {
+                                    //System.out.println("Image Search");
+                                    jArray = jObject.optJSONArray(key1);
+                                    for(int j = 0; j < jArray.length();j++)
+                                    {
+                                        key1List.add((String)jArray.get(j));
+                                        key2List.add(jObject.optString(key2));
+                                    }
+                                }
+                                /*** Handling the Normal Query. Key1 is the title, Key2 is the WEBSITE_URL and Key3 is the summary ***/
+                                else {
+                                    //System.out.println("Normal Search");
+                                    key1List.add(jObject.optString(key1));
+                                    key2List.add(jObject.optString(key2));
+                                    key3List.add(jObject.optString(key3));
+                                }
+
                             }
                         }
                         catch (JSONException e) {   e.printStackTrace();    }
 
                         /*** Handling when the query doesn't match any document ***/
-                        if(title.size() == 0) {
-                            title.add(query+"");    activateLink = "0";
-                            websites.add("Your search did not match any documents\n");
-                            summary.add("Suggestions:\n\nMake sure that all words are spelled correctly.\n\nTry different keywords.\n\nTry more general keywords.\n\nTry fewer keywords.");
+                        if(key1List.size() == 0) {
+                            key1List.add(query+"");    activateLink = "0";
+                            key2List.add("Your search did not match any documents\n");
+                            key3List.add("Suggestions:\n\nMake sure that all words are spelled correctly.\n\nTry different keywords.\n\nTry more general keywords.\n\nTry fewer keywords.");
                         }
                         else activateLink = "1";
 
@@ -90,7 +114,7 @@ public class SearchableActivity extends AppCompatActivity {
                         Intent intent = new Intent(SearchableActivity.this,ResultsActivity.class);
                         intent.putExtra("EXTRA_PAGE_NUMBER", "0");
                         intent.putExtra("Activate_Link", activateLink);
-                        intent.putExtra("queryRequest", new QueryRequest(title,websites,summary));
+                        intent.putExtra("queryRequest", new QueryRequest(key1List,key2List,key3List));
                         startActivity(intent);
                         finish();
                     }

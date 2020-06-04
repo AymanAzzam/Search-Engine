@@ -9,12 +9,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.SearchView;
 
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     SearchView search_view;
-    Button button;
+    Button btNormalSearch,btImageSearch;
     SearchManager search_manager;
 
     @Override
@@ -24,12 +25,19 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         search_manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         search_view = (SearchView)(findViewById(R.id.search_phrase));
-        button = (Button) findViewById(R.id.crawler_search);
+        btNormalSearch = (Button) findViewById(R.id.crawler_search);
+        btImageSearch = (Button) findViewById(R.id.image_search);
 
-        /************* Pressing Search-Button Action *************/
-        button.setOnClickListener(new View.OnClickListener() {
+        /************* Pressing Normal Search Button Action *************/
+        btNormalSearch.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) { searchAction(search_view.getQuery().toString()); }
+            public void onClick(View v) { searchAction(search_view.getQuery().toString(),1); }
+        });
+
+        /************* Pressing Image Search Button Action *************/
+        btImageSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) { searchAction(search_view.getQuery().toString(),0); }
         });
 
         /*** set the searchable configuration ***/
@@ -53,13 +61,16 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         return false;
     }
 
-    void searchAction(String query)
+    void searchAction(String query, int type)
     {
+        Intent intent = new Intent(MainActivity.this,SearchableActivity.class);
         if(query.length() == 0)    return; /*** Do Nothing if Empty String ***/
 
+        if(type == 0)    intent.putExtra("type","Image");
+        else                        intent.putExtra("type","Normal");
+
         /*** start the Searchable Activity ***/
-        Intent i = new Intent(MainActivity.this,SearchableActivity.class);
-        i.putExtra("query", query);
-        startActivity(i);
+        intent.putExtra("query", query);
+        startActivity(intent);
     }
 }

@@ -28,13 +28,38 @@
             android:background="@color/colorWhite"
             android:queryHint="@string/query_hint"/>
 
-        <Button
-            android:id="@+id/crawler_search"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:text="Crawler Search"
-            android:layout_centerHorizontal="true"
-            android:textAllCaps="false"
-            android:layout_below="@id/search_phrase"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/search_phrase">
+
+            <TextView
+                android:id="@+id/dummy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="8dp"/>
+
+            <Button
+                android:id="@+id/image_search"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:text="Image Search"
+                android:layout_toRightOf="@id/dummy"
+                android:layout_margin="8dp"
+                android:textAllCaps="false"/>
+
+            <Button
+                android:id="@+id/crawler_search"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:text="Crawler Search"
+                android:layout_toLeftOf="@id/dummy"
+                android:layout_margin="8dp"
+                android:textAllCaps="false"/>
+
+        </RelativeLayout>
+
     </RelativeLayout>
 </FrameLayout>

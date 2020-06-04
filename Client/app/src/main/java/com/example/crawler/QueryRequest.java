@@ -14,28 +14,22 @@ public class QueryRequest implements Parcelable {
             return new QueryRequest[size];
         }
     };
-    private ArrayList<String> summary;
-    private ArrayList<String> title;
-    private ArrayList<String> websites;
+    private ArrayList<String> key1, key2, key3;
 
-    public QueryRequest(ArrayList<String> title, ArrayList<String> websites, ArrayList<String> summary)
-    {
-        this.summary = summary;
-        this.title = title;
-        this.websites = websites;
-    }
+    public QueryRequest(ArrayList<String> key1, ArrayList<String> key2, ArrayList<String> key3)
+    {   this.key3 = key3;   this.key1 = key1;   this.key2 = key2;   }
 
-    public ArrayList<String> getSummaries() { return summary;    }
-    public ArrayList<String> getTitles() { return title;    }
-    public ArrayList<String> getWebsites() { return websites;    }
+    public ArrayList<String> getKey1() { return key1;    }
+    public ArrayList<String> getKey2() { return key2;    }
+    public ArrayList<String> getKey3() { return key3;    }
 
     public QueryRequest(Parcel in){
-        this.title = new ArrayList<String>();
-        this.websites = new ArrayList<String>();
-        this.summary = new ArrayList<String>();
-        in.readList( this.title, String.class.getClassLoader());
-        in.readList( this.websites, String.class.getClassLoader());
-        in.readList( this.summary, String.class.getClassLoader());
+        this.key1 = new ArrayList<String>();
+        this.key2 = new ArrayList<String>();
+        this.key3 = new ArrayList<String>();
+        in.readList( this.key1, String.class.getClassLoader());
+        in.readList( this.key2, String.class.getClassLoader());
+        in.readList( this.key3, String.class.getClassLoader());
     }
 
     @Override
@@ -45,8 +39,8 @@ public class QueryRequest implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeList( this.title);
-        dest.writeList( this.websites);
-        dest.writeList( this.summary);
+        dest.writeList( this.key1);
+        dest.writeList( this.key2);
+        dest.writeList( this.key3);
     }
 }

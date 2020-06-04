@@ -20,19 +20,24 @@ public class ResultsActivity extends AppCompatActivity {
     ListView list_view;
     ImageView image_left,image_right;
     TextView first_number,second_number,third_number,fourth_number,fifth_number;
-    ArrayList<String> headers,links,summaries;
-    int page_number,start_index,end_index;
+    ArrayList<String> key1List,key2List,key3List;
+    int page_number,start_index,end_index,type;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_results);
 
+        /*** Getting the Parameters from the Previous Activity ***/
         QueryRequest queryRequest = (QueryRequest) getIntent().getExtras().getParcelable("queryRequest");
+        page_number = Integer.parseInt(getIntent().getStringExtra("EXTRA_PAGE_NUMBER"));
 
-        headers = queryRequest.getTitles();
-        links = queryRequest.getWebsites();
-        summaries = queryRequest.getSummaries();
+        key1List = queryRequest.getKey1();
+        key2List = queryRequest.getKey2();
+        key3List = queryRequest.getKey3();
+
+        /*** type = 0 means image search and anything else means normal search ***/
+        type = (key1List.size()==key3List.size())? 1 : 0;
 
         list_view = (ListView) findViewById(R.id.list_view);
         image_left = (ImageView) findViewById(R.id.arrow_left);
@@ -44,20 +49,19 @@ public class ResultsActivity extends AppCompatActivity {
         fifth_number = (TextView) findViewById(R.id.fifth_number);
 
         /************* Update ListView Indices and Page Number *************/
-        page_number = Integer.parseInt(getIntent().getStringExtra("EXTRA_PAGE_NUMBER"));
 
         //System.out.println(pageNumber);
         start_index = page_number*10;
-        end_index = Math.min(start_index + 10,headers.size());
+        end_index = Math.min(start_index + 10,key1List.size());
 
         /************* Update Arrows *************/
         if(start_index == 0)             image_left.setVisibility(View.GONE);
         else                            image_left.setVisibility(View.VISIBLE);
-        if(end_index == headers.size())  image_right.setVisibility(View.GONE);
+        if(end_index == key1List.size())  image_right.setVisibility(View.GONE);
         else                            image_right.setVisibility(View.VISIBLE);
 
         /************* Update Numbers *************/
-        if(headers.size() <= 40)
+        if(key1List.size() <= 40)
         {
             first_number.setVisibility(View.GONE);  second_number.setVisibility(View.GONE);    third_number.setVisibility(View.GONE);
             fourth_number.setVisibility(View.GONE); fifth_number.setVisibility(View.GONE);
@@ -65,7 +69,7 @@ public class ResultsActivity extends AppCompatActivity {
         else
         {
             // to let the page in the middle of the five numbers
-            int first = Math.max(3,Math.min(page_number + 1,headers.size()/10 - 1));
+            int first = Math.max(3,Math.min(page_number + 1,key1List.size()/10 - 2));
             first_number.setVisibility(View.VISIBLE);    first_number.setText(Integer.toString(first - 2));
             second_number.setVisibility(View.VISIBLE);   second_number.setText(Integer.toString(first - 1));
             third_number.setVisibility(View.VISIBLE);    third_number.setText(Integer.toString(first));
@@ -80,7 +84,8 @@ public class ResultsActivity extends AppCompatActivity {
         }
 
         /************* Update ListView *************/
-        CustomListView adapter = new CustomListView(this,headers.subList(start_index,end_index),links.subList(start_index,end_index),summaries.subList(start_index,end_index));
+        CustomListView adapter = new CustomListView(this,key1List.subList(start_index,end_index),
+                key2List.subList(start_index,end_index),key3List.subList(start_index,end_index),type);
         list_view.setAdapter(adapter);
 
         /************* Pressing Right Arrow Action *************/
@@ -131,7 +136,7 @@ public class ResultsActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if(getIntent().getStringExtra("Activate_Link").equals("0"))
                     return;
-                String url = links.get(page_number*10+position);
+                String url = key2List.get(page_number*10+position);
                 if (!url.startsWith("http://") && !url.startsWith("https://")) url = "http://" + url;
 
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
