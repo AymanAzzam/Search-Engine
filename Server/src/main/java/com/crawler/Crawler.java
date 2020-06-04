@@ -117,7 +117,7 @@ public class Crawler {
 
 		//save html file contains the webpage content:
 		//imgs - title - h1->h6 - plaintext -bodys
-		public String saveWebPage(Document webPage, int docID) {
+		public String saveWebPage(Document webPage, int docID, String url) {
 
 		    try {
 				FileWriter myWriter = new FileWriter("docs/doc"+docID+".txt");
@@ -127,6 +127,24 @@ public class Crawler {
 				Elements images = webPage.select("img");
 				for(Element image : images) {
 					String imageLink = image.attr("src");
+					
+					try {
+						
+						URL valid = new URL(imageLink);
+					} catch (Exception e) {
+						
+						if(imageLink.length()>2 && imageLink.substring(0, 2).equals("//")) {
+							imageLink = imageLink.substring(2,imageLink.length());
+						}
+						else if(!imageLink.isEmpty() && imageLink.charAt(0) == '/'){
+							imageLink = url.concat(imageLink);
+						}
+						else {
+							System.err.println(imageLink);
+						}
+						
+					}
+					
 					myWriter.write(imageLink+"\n");
 				}
 
@@ -211,7 +229,7 @@ public class Crawler {
 					
 					webDoc = Jsoup.parse(new URL(url).openStream(), "ASCII", url);
 
-					filePath = saveWebPage(webDoc, ID);
+					filePath = saveWebPage(webDoc, ID, url);
 					
 					if(!filePath.isEmpty()) {
 						synchronized (DBMutex) {
@@ -239,27 +257,32 @@ public class Crawler {
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException, InterruptedException {
 
-		Object dbmutex = new Object();
-		Object crawlmutex = new Object();
-		DBController dbController = new DBController();
-
-		Crawler myCrawler = new Crawler(30, "seeder.txt", dbController, dbmutex, crawlmutex);
-
-		Crawl crawler1 = myCrawler.new Crawl();
-		Crawl crawler2 = myCrawler.new Crawl();
-		Crawl crawler3 = myCrawler.new Crawl();
-		Crawl crawler4 = myCrawler.new Crawl();
-		Crawl crawler5 = myCrawler.new Crawl();
-		Crawl crawler6 = myCrawler.new Crawl();
-		Crawl crawler7 = myCrawler.new Crawl();
-
-		crawler1.start();
-		crawler2.start();
-		crawler3.start();
-		crawler4.start();
-		crawler5.start();
-		crawler6.start();
-		crawler7.start();
+		URL test = new URL("ftp://upload.wikimedia.org/wikipedia/en/thumb/6/6b/Hello_Web_Series_%28Wordmark%29_Logo.png/800px-Hello_Web_Series_%28Wordmark%29_Logo.png");
+		
+		System.out.println(test.getHost());
+		
+		
+//		Object dbmutex = new Object();
+//		Object crawlmutex = new Object();
+//		DBController dbController = new DBController();
+//
+//		Crawler myCrawler = new Crawler(30, "seeder.txt", dbController, dbmutex, crawlmutex);
+//
+//		Crawl crawler1 = myCrawler.new Crawl();
+//		Crawl crawler2 = myCrawler.new Crawl();
+//		Crawl crawler3 = myCrawler.new Crawl();
+//		Crawl crawler4 = myCrawler.new Crawl();
+//		Crawl crawler5 = myCrawler.new Crawl();
+//		Crawl crawler6 = myCrawler.new Crawl();
+//		Crawl crawler7 = myCrawler.new Crawl();
+//
+//		crawler1.start();
+//		crawler2.start();
+//		crawler3.start();
+//		crawler4.start();
+//		crawler5.start();
+//		crawler6.start();
+//		crawler7.start();
 	}
 
 }
