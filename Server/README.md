@@ -19,6 +19,11 @@ innodb_file_format=barracuda
 innodb_file_per_table=true
 innodb_large_prefix=true
 ```
+4. Start Tomcat and Mysql using the following commands.
+```sh
+sudo systemctl start tomcat
+sudo systemctl start mysql
+```
 4. Create database 'Search_Engine' using mysql.
 ```sh
 mysql -u root

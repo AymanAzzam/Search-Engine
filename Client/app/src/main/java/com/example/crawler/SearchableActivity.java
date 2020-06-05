@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Parcelable;
 import android.provider.SearchRecentSuggestions;
 import android.widget.Toast;
 
@@ -16,8 +15,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
@@ -25,7 +22,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /*** Handling inputs without using the push button ***/
 public class SearchableActivity extends AppCompatActivity {
@@ -86,8 +82,11 @@ public class SearchableActivity extends AppCompatActivity {
                                     jArray = jObject.optJSONArray(key1);
                                     for(int j = 0; j < jArray.length();j++)
                                     {
+                                        if(((String)jArray.get(j)).isEmpty())   continue;
+
                                         key1List.add((String)jArray.get(j));
                                         key2List.add(jObject.optString(key2));
+                                        key3List.add("dummy_data");
                                     }
                                 }
                                 /*** Handling the Normal Query. Key1 is the title, Key2 is the WEBSITE_URL and Key3 is the summary ***/
@@ -113,8 +112,9 @@ public class SearchableActivity extends AppCompatActivity {
                         /*** start the Results Activity ***/
                         Intent intent = new Intent(SearchableActivity.this,ResultsActivity.class);
                         intent.putExtra("EXTRA_PAGE_NUMBER", "0");
-                        intent.putExtra("Activate_Link", activateLink);
-                        intent.putExtra("queryRequest", new QueryRequest(key1List,key2List,key3List));
+                        intent.putExtra("ACTIVATE_LINK", activateLink);
+                        intent.putExtra("QUERY_TYPE", key3);
+                        intent.putExtra("QUERY", new QueryRequest(key1List,key2List,key3List));
                         startActivity(intent);
                         finish();
                     }

@@ -11,8 +11,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.json.JSONArray;
-
 import java.util.ArrayList;
 
 public class ResultsActivity extends AppCompatActivity {
@@ -29,15 +27,14 @@ public class ResultsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_results);
 
         /*** Getting the Parameters from the Previous Activity ***/
-        QueryRequest queryRequest = (QueryRequest) getIntent().getExtras().getParcelable("queryRequest");
+        QueryRequest queryRequest = (QueryRequest) getIntent().getExtras().getParcelable("QUERY");
         page_number = Integer.parseInt(getIntent().getStringExtra("EXTRA_PAGE_NUMBER"));
+        if(getIntent().getStringExtra("QUERY_TYPE").equals("0"))    type = 0;
+        else    type = 1;
 
         key1List = queryRequest.getKey1();
         key2List = queryRequest.getKey2();
         key3List = queryRequest.getKey3();
-
-        /*** type = 0 means image search and anything else means normal search ***/
-        type = (key1List.size()==key3List.size())? 1 : 0;
 
         list_view = (ListView) findViewById(R.id.list_view);
         image_left = (ImageView) findViewById(R.id.arrow_left);
@@ -50,7 +47,6 @@ public class ResultsActivity extends AppCompatActivity {
 
         /************* Update ListView Indices and Page Number *************/
 
-        //System.out.println(pageNumber);
         start_index = page_number*10;
         end_index = Math.min(start_index + 10,key1List.size());
 
@@ -69,7 +65,7 @@ public class ResultsActivity extends AppCompatActivity {
         else
         {
             // to let the page in the middle of the five numbers
-            int first = Math.max(3,Math.min(page_number + 1,key1List.size()/10 - 2));
+            int first = (int) Math.max(3,Math.min(page_number + 1,Math.ceil(key1List.size()/10.0) - 2));
             first_number.setVisibility(View.VISIBLE);    first_number.setText(Integer.toString(first - 2));
             second_number.setVisibility(View.VISIBLE);   second_number.setText(Integer.toString(first - 1));
             third_number.setVisibility(View.VISIBLE);    third_number.setText(Integer.toString(first));
@@ -134,7 +130,7 @@ public class ResultsActivity extends AppCompatActivity {
         list_view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if(getIntent().getStringExtra("Activate_Link").equals("0"))
+                if(getIntent().getStringExtra("ACTIVATE_LINK").equals("0"))
                     return;
                 String url = key2List.get(page_number*10+position);
                 if (!url.startsWith("http://") && !url.startsWith("https://")) url = "http://" + url;
