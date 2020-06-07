@@ -89,7 +89,7 @@ public class Crawler {
 		}
 		
 		//extract links:
-		public void extractLinks(Document htmlDocument) {
+		public void extractLinks(Document htmlDocument, String url) {
 
 			Elements webPagesOnHtml = htmlDocument.select("a[href]");
 			
@@ -103,7 +103,8 @@ public class Crawler {
 						return;
 					}
 					
-					boolean success = controller.insertCrawlingURL(mainCrawlerConnection, newURL);
+					boolean success = controller.insertCrawlingURL(crawlConnection, newURL);
+					controller.insertRef(crawlConnection, url, newURL);
 					
 					totalCrawlingSize += success?1:0;
 					currentNonCrawledSize += success?1:0;
@@ -239,7 +240,7 @@ public class Crawler {
 					}
 					System.out.println("Crawled: " + url);
 					
-					extractLinks(webDoc);
+					extractLinks(webDoc, url);
 					
 				} catch (IOException | SQLException e) {
 					System.err.println("for '"+url+"': "+e.getMessage());

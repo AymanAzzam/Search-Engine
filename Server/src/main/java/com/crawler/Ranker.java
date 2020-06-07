@@ -3,18 +3,17 @@ package com.crawler;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Enumeration;
 
 
 public class Ranker {
 	
 	Hashtable<String, ArrayList<WordValue>> invertedFile = new Hashtable <String, ArrayList<WordValue>> ();
 	Hashtable<String, WebsiteValue> linkDatabase = new Hashtable <String, WebsiteValue> ();
+	static Hashtable<String, Double> popularity = new Hashtable<String, Double>();
+	static boolean donePopularity = false;
 	Integer totalNumberOfDocuments;
 	Integer normalOrImage;
-	
+
 	public Ranker(Hashtable<String, ArrayList<WordValue>> invertedFile, Hashtable<String, WebsiteValue> linkDatabase,
 			Integer totalNumberOfDocuments, Integer normalOrImage) {
 		this.invertedFile = invertedFile;
@@ -90,7 +89,7 @@ public class Ranker {
 	
 	
 	public ArrayList<WebsiteTFIDFPair> formSortedTFIDFList (Map<String,Double> mapIDF,
-			Hashtable<String,TFIDFValue> preTFIDFTable) {
+			Hashtable<String,TFIDFValue> preTFIDFTable, Hashtable<String, Double> popularity) {
 		
 		ArrayList<WebsiteTFIDFPair>  websiteTFIDFList = new ArrayList<WebsiteTFIDFPair>  ();
 		Enumeration<String> enumeration = preTFIDFTable.keys(); // to iterate on the preTFIDFTable
@@ -108,6 +107,11 @@ public class Ranker {
 				tf = invertedFile.get(word).get(index).getNumberOfAppearance();
 				idf = mapIDF.get(word);
 				counter = counter + tf*idf;
+				// System.out.println(tf + " " + idf);
+			}
+			if(donePopularity) {
+				// System.out.println(key + "\t" + counter + "\t" + popularity.get(key));
+				counter += popularity.get(key); // add popularity to tf-idf
 			}
 			WebsiteTFIDFPair pair = new WebsiteTFIDFPair(key, counter, preTFIDFTable.get(key).getNumberOfWords());
 			websiteTFIDFList.add(pair);		
@@ -117,12 +121,48 @@ public class Ranker {
 		return websiteTFIDFList;		
 	}
 	
+	public static void calculatePopularity(Hashtable<String, ArrayList<String>> pointingWebsites,
+				Hashtable<String, Integer> pointedToCount) {
+
+		Hashtable<String, Double> previousPopularityTable = new Hashtable<String, Double>();
+	
+		
+		Enumeration<String> enumeration = pointingWebsites.keys();
+		Integer totalNumberOfWebsites = pointingWebsites.size();
+		
+		while(enumeration.hasMoreElements()) { // initiating popularity for all websites
+			String websiteName = enumeration.nextElement(); // key 
+			popularity.put(websiteName, 1.0/totalNumberOfWebsites);
+		}
+		previousPopularityTable = (Hashtable<String, Double>) popularity.clone();
+		
+		Integer i=0;
+		enumeration = pointingWebsites.keys();
+		while(i<100) {
+			i = i+1;
+			while(enumeration.hasMoreElements()) {
+				String websiteName = enumeration.nextElement(); // key 
+				Double temp =0.0;
+				for (int j=0; j<pointingWebsites.get(websiteName).size() ; j++ ) {
+					String web = pointingWebsites.get(websiteName).get(j);
+					temp += previousPopularityTable.get(web)/pointedToCount.get(web);
+					
+				}
+				popularity.put(websiteName, temp);	
+				
+				// System.out.println(websiteName + " " + temp);			
+			}
+			previousPopularityTable = (Hashtable<String, Double>) popularity.clone();
+		}
+	}
+	
 	public ArrayList<WebsiteTFIDFPair> helper(){
 		
 		Map<String,Double> mapIDF = calculateIDF(); //has word-IDF pair values
 		filterSpam(); //remove spam websites
 		Hashtable<String,TFIDFValue> preTFIDFTable = preTFIDF();
-		ArrayList<WebsiteTFIDFPair> sortedTFIDFList = formSortedTFIDFList(mapIDF,preTFIDFTable);
+
+		ArrayList<WebsiteTFIDFPair> sortedTFIDFList = formSortedTFIDFList(mapIDF,preTFIDFTable, popularity);
 		return sortedTFIDFList;
 	}
 	
@@ -171,4 +211,6 @@ public class Ranker {
 			return rankerImageOutput(helperOutput, conn, control);
 	}
 
+
 }
+

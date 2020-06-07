@@ -62,7 +62,7 @@ public class DBController {
 	public void drop(Connection conn) throws SQLException {
 		
 		Statement stmt = conn.createStatement();
-		stmt.executeUpdate(String.format("DROP TABLE %s, %s, %s, %s;",
+		stmt.executeUpdate(String.format("DROP TABLE URL_REF,%s, %s, %s, %s;",
 				image_table, word_table, URL_table, crawl_table));
 		
 		stmt.close();
@@ -76,7 +76,7 @@ public class DBController {
 			Statement stmt = conn.createStatement();
 			stmt.executeUpdate(String.format("CREATE TABLE %s ("
 					+ "%s INT PRIMARY KEY AUTO_INCREMENT,"
-					+ "%s VARCHAR(500) UNIQUE NOT NULL,"
+					+ "%s VARCHAR(300) UNIQUE NOT NULL,"
 					+ "%s INT DEFAULT 0 NOT NULL,"
 					+ "%s TINYTEXT NOT NULL,"
 					+ "%s TINYTEXT,"
@@ -115,18 +115,65 @@ public class DBController {
 			// CREATE CRAWLING TABLE
 			stmt.executeUpdate(String.format("CREATE TABLE %s ("
 					+ "%s INT PRIMARY KEY AUTO_INCREMENT,"
-					+ "%s VARCHAR(500) UNIQUE NOT NULL,"
+					+ "%s VARCHAR(300) UNIQUE NOT NULL,"
 					+ "%s BOOLEAN DEFAULT FALSE);",
 					crawl_table, URLID_col, URLName_col, isCrawled_col));
+
+			stmt.executeUpdate("CREATE TABLE URL_REF ("
+				+ " Pointer VARCHAR(300),"
+				+ " Pointed VARCHAR(300),"
+				+ " PRIMARY KEY(Pointer,Pointed),"
+				+ " FOREIGN KEY(Pointer) REFERENCES CRAWLING_TABLE(URL) ON DELETE CASCADE,"
+				+ " FOREIGN KEY(Pointed) REFERENCES CRAWLING_TABLE(URL) ON DELETE CASCADE);");
 			
 			stmt.close();
 			System.out.println("Database Tables Created Successfully!");
 			
 			
 		} catch (Exception e) {
-//			e.printStackTrace();
+			e.printStackTrace();
 			System.out.println("Database Tables already exists!");
 		}
+	}
+
+	public void insertRef(Connection conn, String pointer, String pointed) {
+
+		try {
+			Statement stmt = conn.createStatement();
+			stmt.executeUpdate(String.format("INSERT INTO URL_REF VALUES('%s','%s');",pointer, pointed));
+		} catch (SQLException e) {
+			//TODO: handle exception
+			// e.printStackTrace();
+		}
+	}
+
+	public int getPointingToCount(Connection conn, String pointer) {
+		int cnt = 0;
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet res = stmt.executeQuery(String.format("SELECT COUNT(*) FROM URL_REF WHERE POINTER = '%s';",pointer));
+			res.next();
+			cnt = res.getInt(1);
+		} catch (SQLException e) {
+			//TODO: handle exception
+		}
+		return cnt;
+	}
+
+	public ArrayList<String> getPointedFromURLs(Connection conn, String pointed) {
+		ArrayList<String> ret = new ArrayList<String>();
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet res = stmt.executeQuery(String.format("SELECT POINTER FROM URL_REF WHERE POINTED = '%s';",pointed));
+			
+			while(res.next()) {
+				ret.add(res.getString(1));
+			}
+
+		} catch (SQLException e) {
+			//TODO: handle exception
+		}
+		return ret;
 	}
 	
 	// Get non-indexed yet rows
@@ -377,6 +424,19 @@ public class DBController {
 		}
 		return size;
 	}
+
+	public ArrayList<String> getAllURLs(Connection conn) throws SQLException {
+		ArrayList<String> ret = new ArrayList<String>();
+
+		Statement stmt = conn.createStatement();
+		ResultSet res = stmt.executeQuery("SELECT URL FROM CRAWLING_TABLE;");
+		
+		while(res.next()) {
+			ret.add(res.getString(1));
+		}
+
+		return ret;
+	}
 	
 	// get Inverted File Content for specific word
 	public ArrayList<String> getInvertedFile(Connection conn, String word)
@@ -430,6 +490,23 @@ public class DBController {
 		} catch (SQLException e) {	e.printStackTrace();	}
 		
 		return out;
+	}
+
+	public ArrayList<OutputValue> getMatchingURLs(Connection conn, String word) throws SQLException{
+		ArrayList<OutputValue> ret = new ArrayList<OutputValue>();
+
+		Statement stmt = conn.createStatement();
+		word = "%" + word + "%";
+		ResultSet res = stmt.executeQuery(String.format("SELECT * FROM %s"
+				+ " WHERE %s like '%s';", URL_table, URLName_col, word));
+
+
+		while(res.next())
+		{
+			String content = res.getString(URLContent_col);
+			ret.add(new OutputValue(res.getString(URLName_col), res.getString(URLTitle_col), content.substring(0,Math.min(500,content.length()))));
+		}
+		return ret;
 	}
 
 	// Close a database connection
