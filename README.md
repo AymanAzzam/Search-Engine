@@ -4,7 +4,7 @@ A Search-engine Crawler-based that demonstrates the main features of a search en
 <img src="crawler.png" height="25%" width="25%">
 
 ## Client Prerequisites
-Follow the README file in Client Folder.
+[Follow the README file in Client Folder](Client/README.md)
 
 ## Server Prerequisites (on AWS Cloud9)
 Follow the README file in Server Folder.
