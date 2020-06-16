@@ -3,9 +3,11 @@ A Search-engine Crawler-based that demonstrates the main features of a search en
 
 <img src="crawler.png" height="25%" width="25%">
 
-## [Client Prerequisites](Client/README.md)
+## Client Prerequisites
+[Client README](Client/README.md)
 
-## [Server Prerequisites (on AWS Cloud9)](Server/README.md)
+## Server Prerequisites (on AWS Cloud9)
+[Server README](Server/README.md)
 
 ## Team members
 [Ayman Azzam](https://github.com/AymanAzzam)
