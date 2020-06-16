@@ -1,7 +1,7 @@
 <div align="center">
   <img src="icon.png" height="10%" width="10%">
   <h3 align="center">Crawler</h3>
-  <h6 align="center">A Search-engine Crawler-based that demonstrates the main features of a search engine (web crawling, indexing and ranking)</h6>
+  <h5 align="center">A Search-engine Crawler-based that demonstrates the main features of a search engine (web crawling, indexing and ranking)</h5>
   <img src="crawler.png" height="25%" width="25%">
 </div>
 
