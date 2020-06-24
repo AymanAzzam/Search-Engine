@@ -42,7 +42,7 @@ sudo mvn install
 ```
 2. Copy the files to Tomcat using the following commands.
 ```sh
-sudo cp -r target/classes/* /opt/tomcat/webapps/ROOT/WEB-INF/classes/
+sudo cp -r target/classes/com /opt/tomcat/webapps/ROOT/WEB-INF/classes/
 sudo cp web.xml /opt/tomcat/webapps/ROOT/WEB-INF/
 sudo cp stopwords.txt /opt/tomcat/work/Catalina/localhost/
 ```
