@@ -58,7 +58,7 @@ public class DBController {
 //		System.out.println("Establishing DB Connection...");
 		return DriverManager.getConnection(String.format("jdbc:mysql://localhost:3306/%s?useLegacyDatetimeCode=false&serverTimezone=Africa/Cairo", DBName),username,password);
 	}
-	
+	/*
 	public void drop(Connection conn) throws SQLException {
 		
 		Statement stmt = conn.createStatement();
@@ -66,7 +66,7 @@ public class DBController {
 				image_table, word_table, URL_table, crawl_table));
 		
 		stmt.close();
-	}
+	}*/
 	
 	// Create the tables
 	public void build(Connection conn) throws SQLException
