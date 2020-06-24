@@ -61,7 +61,7 @@ public class Main {
         
         // Creating Tables in Database
         Connection connect = controller.connect();
-//        controller.drop(connect);		// For Testing Purpose
+        controller.drop(connect);		// For Testing Purpose
         controller.build(connect);
 
         
