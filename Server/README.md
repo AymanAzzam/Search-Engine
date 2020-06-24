@@ -8,6 +8,8 @@ Run the script tomcat.sh using the following command.
 ```sh
 ./tomcat.sh
 ```
+hint: you maybe need to change tomcat verison inside tomcat.sh
+
 Then follow Step 5 in the Following link https://www.digitalocean.com/community/tutorials/how-to-install-apache-tomcat-8-on-ubuntu-16-04
 3. Make mysql accessible by root'@'localhost' and make VARCHAR(200) doesn't give error by adding the following lines at the end of /etc/mysql/my.cnf.
 ```sh
