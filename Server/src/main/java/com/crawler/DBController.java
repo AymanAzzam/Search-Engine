@@ -122,9 +122,10 @@ public class DBController {
 			stmt.executeUpdate("CREATE TABLE URL_REF ("
 				+ " Pointer VARCHAR(300),"
 				+ " Pointed VARCHAR(300),"
-				+ " PRIMARY KEY(Pointer,Pointed),"
-				+ " FOREIGN KEY(Pointer) REFERENCES CRAWLING_TABLE(URL) ON DELETE CASCADE,"
-				+ " FOREIGN KEY(Pointed) REFERENCES CRAWLING_TABLE(URL) ON DELETE CASCADE);");
+				+ " PRIMARY KEY(Pointer,Pointed));");
+				// + " PRIMARY KEY(Pointer,Pointed),"
+				// + " FOREIGN KEY(Pointer) REFERENCES CRAWLING_TABLE(URL) ON DELETE CASCADE,"
+				// + " FOREIGN KEY(Pointed) REFERENCES CRAWLING_TABLE(URL) ON DELETE CASCADE);");
 			
 			stmt.close();
 			System.out.println("Database Tables Created Successfully!");
