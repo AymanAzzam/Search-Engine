@@ -4,6 +4,8 @@ package com.crawler;
 import java.sql.*;
 import java.util.ArrayList;
 
+import com.crawler.Indexer.WordRecord;
+
 public class DBController {
 
 //	private Connection conn;
@@ -137,11 +139,24 @@ public class DBController {
 		}
 	}
 
-	public void insertRef(Connection conn, String pointer, String pointed) {
+	public void insertRefs(Connection conn, String pointer, ArrayList<String> pointeds) {
+
+
+		String query = new String("INSERT IGNORE INTO URL_REF VALUES ");
+		
+		String values = new String();
+		
+		for(String url:pointeds) {
+
+			if(values.length()>0)	values +=",";
+			values+=String.format("('%s','%s')", pointer, url);
+		}
+
+		query+=values+";";
 
 		try {
 			Statement stmt = conn.createStatement();
-			stmt.executeUpdate(String.format("INSERT INTO URL_REF VALUES('%s','%s');",pointer, pointed));
+			stmt.executeUpdate(query);
 		} catch (SQLException e) {
 			//TODO: handle exception
 			// e.printStackTrace();
@@ -258,21 +273,31 @@ public class DBController {
 		return ret;
 	}
 	
-	public boolean insertCrawlingURL(Connection conn, String URL) {
+	public int insertCrawlingURLs(Connection conn, ArrayList<String> URLs) {
 		
-		boolean ret = false;
+		int ret = 0;
+
+		String query = new String(String.format("INSERT IGNORE INTO %s(%s) VALUES",
+			crawl_table, URLName_col));
+		
+		String values = new String();
+		
+		for(String url:URLs) {
+
+			if(values.length()>0)	values +=",";
+			values+=String.format("('%s')", url);
+		}
+
+		query+=values+";";
 		
 		try {
 			Statement stmt = conn.createStatement();
 			
 			try {
 				
-				stmt.executeUpdate(String.format("INSERT INTO %s(%s) "
-						+ "VALUES('%s');",
-						crawl_table, URLName_col, URL));
-				ret = true;
+				ret = stmt.executeUpdate(query);
 			} catch (SQLException e) {
-				ret = false;
+
 			}
 			
 			stmt.close();
@@ -286,14 +311,25 @@ public class DBController {
 	
 	
 	// Insert an image related with a URL
-	public boolean insertImage(Connection conn, int URLID, String imageURL) {
+	public boolean insertImages(Connection conn, int URLID, ArrayList<String> imageURLs) {
 		
+		String query = new String(String.format("INSERT IGNORE INTO %s(%s,%s) VALUES",
+			image_table, imageURLID_col, imageURL_col));
+		
+		String values = new String();
+		
+		for(String img:imageURLs) {
+
+			if(values.length()>0)	values +=",";
+			values+=String.format("(%d,'%s')",URLID, img);
+		}
+
+		query+=values+";";
+
 		try {
 
 			Statement stmt = conn.createStatement();
-			stmt.executeUpdate(String.format("INSERT INTO %s(%s,%s) "
-					+ "VALUES(%d,'%s');",
-					image_table, imageURLID_col, imageURL_col, URLID, imageURL));
+			stmt.executeUpdate(query);
 			stmt.close();
 		} catch (SQLException e) {
 			return false;
@@ -366,15 +402,24 @@ public class DBController {
 	}
 	
 	// Insert a record to word_table
-	public boolean insertWord(Connection conn, String word, int URLID, int plain, int header, int total) {
+	public boolean insertWords(Connection conn, int URLID, ArrayList<WordRecord> wordStat) {
 		
+		if(wordStat.isEmpty())	return false;
+
+		String query = new String(String.format("INSERT INTO %s(%s,%s,%s,%s,%s) VALUES ",
+			word_table, word_col, wordURLID_col, countPlaintxt_col, countHeader_col, countTotal_col));
+		String values = new String();
+		for(WordRecord w:wordStat)
+		{
+			if(values.length()>0)	values +=",";
+			values+=String.format("('%s',%d,%d,%d,%d)",w.word, URLID, w.plainCount, w.headerCount, w.wordCount);
+		}
+		query+=values+";";
+
 		try {
 
 			Statement stmt = conn.createStatement();
-			stmt.executeUpdate(String.format("INSERT INTO %s(%s,%s,%s,%s,%s) "
-					+ "VALUES('%s',%d,%d,%d,%d);", 
-					word_table, word_col, wordURLID_col, countPlaintxt_col, countHeader_col, countTotal_col,
-					word, URLID, plain, header, total));
+			stmt.executeUpdate(query);
 			stmt.close();
 		} catch(SQLException e) {
 			e.printStackTrace();

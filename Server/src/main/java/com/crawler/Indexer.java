@@ -266,15 +266,10 @@ public class Indexer {
 			controller.updateURL(processorConnection, documentInstance.URLID, documentInstance.totalWords, documentInstance.title, documentInstance.content);
 			
 			// Insert words statistics related to a URL
-			for(WordRecord w:documentInstance.wordStats) {
-				controller.insertWord(processorConnection, w.word, documentInstance.URLID, 
-						w.plainCount, w.headerCount, w.wordCount);
-			}
+			controller.insertWords(processorConnection, documentInstance.URLID, documentInstance.wordStats); 
 			
 			// Insert images URLs related to a URL
-			for(String img:documentInstance.imagesURL) {
-				controller.insertImage(processorConnection, documentInstance.URLID, img);
-			}
+			controller.insertImages(processorConnection, documentInstance.URLID, documentInstance.imagesURL);
 			
 			System.out.println("Finished: " + documentInstance.URL);
 			
