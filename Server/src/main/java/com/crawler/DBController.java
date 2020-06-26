@@ -558,6 +558,8 @@ public class DBController {
 			String content = res.getString(URLContent_col);
 			ret.add(new OutputValue(res.getString(URLName_col), res.getString(URLTitle_col), content.substring(0,Math.min(500,content.length()))));
 		}
+		stmt.close();
+		res.close();
 		return ret;
 	}
 
