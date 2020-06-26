@@ -54,7 +54,7 @@ public class SearchEngine extends HttpServlet{
 					WebsiteValue websiteValue = new WebsiteValue(Integer.parseInt(linkFileElement.get(3)), linkFileElement.get(0), linkFileElement.get(2));
 					linkDatabase.put(linkFileElement.get(1), websiteValue);
 					
-					WordValue wordvalue = new WordValue(invertedFileElement.get(j), Integer.parseInt(invertedFileElement.get(j+3)), Integer.parseInt(invertedFileElement.get(j+1)));
+					WordValue wordvalue = new WordValue(invertedFileElement.get(j), Integer.parseInt(invertedFileElement.get(j+3)), Integer.parseInt(invertedFileElement.get(j+1)), Integer.parseInt(invertedFileElement.get(j+2)));
 					invertedFileTempList.add(wordvalue);
 				}
 				
@@ -89,18 +89,20 @@ public class SearchEngine extends HttpServlet{
 			
 			
 			
-		    JSONArray json;
+			JSONArray json;
+			String dummyLocation = "Egypt";
 			if(queryWords.get(0) == "1")
 			{
 				query = query.replaceAll("[^a-zA-Z0-9 ]", "");
-				PhraseSearch phSearch = new PhraseSearch(invertedFile, linkDatabase, dummyTotalNumberOfDocuments, query);
+				
+				PhraseSearch phSearch = new PhraseSearch(invertedFile, linkDatabase, dummyTotalNumberOfDocuments,dummyLocation, query);
 				result = phSearch.phraseSearch();
 				
 				json = new JSONArray((ArrayList<OutputValue>)result);
 			}
 			else
 			{
-				Ranker ranker = new Ranker (invertedFile, linkDatabase, dummyTotalNumberOfDocuments, type);
+				Ranker ranker = new Ranker (invertedFile, linkDatabase, dummyTotalNumberOfDocuments, type, dummyLocation);
 				result = ranker.rank(conn, dbController);
 				
 				if(type == 0) {
@@ -197,7 +199,7 @@ public class SearchEngine extends HttpServlet{
 					WebsiteValue websiteValue = new WebsiteValue(Integer.parseInt(linkFileElement.get(3)), linkFileElement.get(0), linkFileElement.get(2));
 					linkDatabase.put(linkFileElement.get(1), websiteValue);
 					
-					WordValue wordvalue = new WordValue(invertedFileElement.get(j), Integer.parseInt(invertedFileElement.get(j+3)), Integer.parseInt(invertedFileElement.get(j+1)));
+					WordValue wordvalue = new WordValue(invertedFileElement.get(j), Integer.parseInt(invertedFileElement.get(j+3)), Integer.parseInt(invertedFileElement.get(j+1)), Integer.parseInt(invertedFileElement.get(j+2)));
 					invertedFileTempList.add(wordvalue);
 				}
 				
@@ -234,18 +236,19 @@ public class SearchEngine extends HttpServlet{
 			
 		    response.setContentType("application/json");
 		    response.setCharacterEncoding("UTF-8");
-		    JSONArray json;
+			JSONArray json;
+			String dummyLocation = "Egy";
 			if(queryWords.get(0) == "1")
 			{
 				query = query.replaceAll("[^a-zA-Z0-9 ]", "");
-				PhraseSearch phSearch = new PhraseSearch(invertedFile, linkDatabase, dummyTotalNumberOfDocuments, query);
+				PhraseSearch phSearch = new PhraseSearch(invertedFile, linkDatabase, dummyTotalNumberOfDocuments,dummyLocation, query);
 				result = phSearch.phraseSearch();
 
 				json = new JSONArray((ArrayList<OutputValue>)result);
 			}
 			else
 			{
-				Ranker ranker = new Ranker (invertedFile, linkDatabase, dummyTotalNumberOfDocuments, type);
+				Ranker ranker = new Ranker (invertedFile, linkDatabase, dummyTotalNumberOfDocuments, type, dummyLocation);
 				result = ranker.rank(conn, dbController);
 				
 				if(type == 0) {

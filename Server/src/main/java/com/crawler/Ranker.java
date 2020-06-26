@@ -120,7 +120,9 @@ public class Ranker {
 			
 			// System.out.println(key + "\t" + counter + "\t" + popularity.get(key));
 			// add popularity to tf-idf
-			counter += popularity.get(key); 
+			if (donePopularity == true){
+				counter += popularity.get(key);
+			} 
 
 			// add location weight to tf-idf
 			String websiteLocation = linkDatabase.get(key).getLocation();
