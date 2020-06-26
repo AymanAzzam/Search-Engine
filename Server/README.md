@@ -25,10 +25,10 @@ innodb_large_prefix=true
 ```
 4. Start Tomcat and Mysql using the following commands.
 ```sh
-sudo systemctl start tomcat
-sudo systemctl start mysql
+sudo systemctl restart tomcat
+sudo systemctl restart mysql
 ```
-4. Create database 'Search_Engine' using mysql.
+5. Create database 'Search_Engine' using mysql.
 ```sh
 mysql -u root
 create database Search_Engine;
