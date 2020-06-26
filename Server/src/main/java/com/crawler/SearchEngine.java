@@ -208,10 +208,12 @@ public class SearchEngine extends HttpServlet{
 			
 			Integer dummyTotalNumberOfDocuments = dbController.getURLsSize(conn);
 			
+			System.out.println("POP: " + Ranker.donePopularity);
 
 			if(!Ranker.donePopularity) {
 				int siz = dbController.getCrawlingSize(conn);
-				if(siz == Main.MAX_LINKS_CNT) {
+				System.out.println(siz + " #### " + Main.MAX_LINKS_CNT);
+				if(siz >= Main.MAX_LINKS_CNT) {
 					Ranker.donePopularity = true;
 					
 					Hashtable<String, ArrayList<String>> pointingWebsites = new Hashtable<String, ArrayList<String>>();
@@ -223,6 +225,7 @@ public class SearchEngine extends HttpServlet{
 						pointingWebsites.put(url, dbController.getPointedFromURLs(conn, url));
 						pointedToCount.put(url, dbController.getPointingToCount(conn, url));
 					}
+					System.out.println("POPULARITY##########");
 
 					Ranker.calculatePopularity(pointingWebsites, pointedToCount);
 				}
@@ -263,7 +266,6 @@ public class SearchEngine extends HttpServlet{
 					for(int i=0 ; i<siz ; ++i) {
 						for(int j=i+1 ; j<siz ; ++j) {
 							if(tmp.get(i).getWebsiteName().equals(tmp.get(j).getWebsiteName())) {
-								// System.out.println(tmp.get(i).getWebsiteName() + " " + tmp.get(j).getWebsiteName());
 								tmp.remove(j);
 								--j;
 								--siz;
