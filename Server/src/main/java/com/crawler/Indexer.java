@@ -40,6 +40,7 @@ public class Indexer {
 	
 	private Object DBMutex;
 	
+	final int LIMIT = 10;
 	
 	
 	public Indexer(DBController control, Object dbmutex) throws ClassNotFoundException, SQLException {
@@ -127,9 +128,9 @@ public class Indexer {
 							}
 						}
 						// Get & Mark available row(s)
-						res = controller.getNonIndexedRows(producerConnection);
-						controller.markNonIndexedRows(producerConnection);
-						Main.currentNonIndexedSize--;
+						res = controller.getNonIndexedRows(producerConnection,LIMIT);
+						int cnt = controller.markNonIndexedRows(producerConnection,LIMIT);
+						Main.currentNonIndexedSize -= cnt;
 					} catch (SQLException e) {
 						e.printStackTrace();
 					}
