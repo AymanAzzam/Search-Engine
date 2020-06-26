@@ -1,4 +1,14 @@
-https://en.wikipedia.org/wiki/File:Hello_Web_Series_(Wordmark)_Logo.png
+https://en.wikipedia.org/
 https://www.google.com/
 https://soundcloud.com/
 https://www.facebook.com/
+https://twitter.com/
+https://www.amazon.com/
+https://www.imdb.com/
+https://www.microsoft.com/
+https://www.linkedin.com/
+https://www.apple.com/
+https://www.instagram.com/
+https://stackoverflow.com/
+https://www.geeksforgeeks.org/
+https://www.quora.com/
