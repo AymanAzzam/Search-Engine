@@ -112,7 +112,7 @@ public class Ranker {
 				word = preTFIDFTable.get(key).getWordString(i);
 				index = preTFIDFTable.get(key).getWordIndex(i);
 				//tf = invertedFile.get(word).get(index).getNumberOfAppearance();
-				tf = preTFIDFTable.get(key).getWordsWeight(index);
+				tf = preTFIDFTable.get(key).getWordsWeight(i);
 				idf = mapIDF.get(word);
 				counter = counter + tf*idf;
 				// System.out.println(tf + " " + idf);
