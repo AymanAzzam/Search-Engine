@@ -111,6 +111,8 @@ public class Crawler {
 				if(totalCrawlingSize >= MAX_LINKS_COUNT) {
 					return;
 				}
+
+				while(URLs.size()+totalCrawlingSize > MAX_LINKS_COUNT)	URLs.remove(URLs.size()-1);
 				
 				int added = controller.insertCrawlingURLs(crawlConnection, URLs);
 				controller.insertRefs(crawlConnection, url, URLs);
@@ -266,9 +268,15 @@ public class Crawler {
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException, InterruptedException {
 
-		URL test = new URL("ftp://upload.wikimedia.org/wikipedia/en/thumb/6/6b/Hello_Web_Series_%28Wordmark%29_Logo.png/800px-Hello_Web_Series_%28Wordmark%29_Logo.png");
+		URL test = new URL("https://en.wikipedia.org/wiki/File:Black_Moshannon_State_Park_(Revisited).jpg");
 		
 		System.out.println(test.getHost());
+		System.out.println(test.getPort());
+		System.out.println(test.getPath());
+		System.out.println(test.getFile());
+		System.out.println(test.getQuery());
+		System.out.println(test.getRef());
+		System.out.println(test.getUserInfo());
 		
 		
 //		Object dbmutex = new Object();
