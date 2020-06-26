@@ -1,11 +1,9 @@
 package com.crawler;
 
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
 
 import java.sql.*;
 
@@ -15,6 +13,7 @@ import java.net.URL;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,6 +33,8 @@ public class Crawler {
 	private Object crawlingMutex, DBMutex;
 	private int totalCrawlingSize;
 	private int currentNonCrawledSize;
+
+	final int LIMIT = 2;
 
 	//constructor:
 	public Crawler (int maxNoOfLinks, String seederFileName, DBController dbController, Object dbmutex, Object crawlmutex)
@@ -57,15 +58,15 @@ public class Crawler {
 		try {
 
 		      File seeder = new File(fileName);
-		      Scanner reader = new Scanner(seeder);
-
+			  Scanner reader = new Scanner(seeder);
+			  ArrayList<String> URLs = new ArrayList<String>();
 		      //read and add links
 		      while (reader.hasNextLine()) {
-		    	  //read the link
-				  String url = reader.nextLine();
+				  //read the link
+				  URLs.add(reader.nextLine());
 
-				  controller.insertCrawlingURL(mainCrawlerConnection, url);
-		      }
+				}
+				controller.insertCrawlingURLs(mainCrawlerConnection, URLs);
 		      reader.close();
 		    } catch (FileNotFoundException e) {
 		      System.out.println("An error occurred while open the seeder...");
@@ -92,26 +93,33 @@ public class Crawler {
 		public void extractLinks(Document htmlDocument, String url) {
 
 			Elements webPagesOnHtml = htmlDocument.select("a[href]");
+
+			ArrayList<String> URLs = new ArrayList<String>();
 			
 			for (Element webpPage : webPagesOnHtml) {
 				String newURL = webpPage.attr("abs:href");
+
+				/**
+				 * TODO: Validate URL Here
+				 */
+				URLs.add(newURL);
 				
+			}
+			
+			synchronized (crawlingMutex) {
 				
-				synchronized (crawlingMutex) {
-					
-					if(totalCrawlingSize == MAX_LINKS_COUNT) {
-						return;
-					}
-					
-					boolean success = controller.insertCrawlingURL(crawlConnection, newURL);
-					controller.insertRef(crawlConnection, url, newURL);
-					
-					totalCrawlingSize += success?1:0;
-					currentNonCrawledSize += success?1:0;
-					
-					if(success && currentNonCrawledSize == 1) {
-						crawlingMutex.notify();
-					}
+				if(totalCrawlingSize >= MAX_LINKS_COUNT) {
+					return;
+				}
+				
+				int added = controller.insertCrawlingURLs(crawlConnection, URLs);
+				controller.insertRefs(crawlConnection, url, URLs);
+				
+				totalCrawlingSize += added;
+				currentNonCrawledSize += added;
+				
+				if(added>0 && currentNonCrawledSize == added) {
+					crawlingMutex.notifyAll();
 				}
 			}
 		}
@@ -172,6 +180,7 @@ public class Crawler {
 				//body
 				myWriter.write("#BODY\n");
 				String body = webPage.body().text();
+				// TODO: Check Null here 
 				body = getEnglishText(body);
 				myWriter.write(body);
 
@@ -209,41 +218,44 @@ public class Crawler {
 							}
 						}
 						
-						res = controller.getNonCrawledRows(crawlConnection);
-						controller.markNonCrawledRows(crawlConnection);
-						currentNonCrawledSize--;
+						res = controller.getNonCrawledRows(crawlConnection,LIMIT);
+						int cnt = controller.markNonCrawledRows(crawlConnection,LIMIT);
+						currentNonCrawledSize -= cnt;
 					} catch (SQLException e) {
 						e.printStackTrace();
 					}
 				}
 				
 				
-				
 				try {
-					res.next();
-					ID = res.getInt(1);
-					url = res.getString(2);
-					
-					webDoc = Jsoup.parse(new URL(url).openStream(), "ASCII", url);
+					while(res.next()) {
 
-					filePath = saveWebPage(webDoc, ID, url);
-					
-					if(!filePath.isEmpty()) {
-						synchronized (DBMutex) {
-							controller.insertURL(crawlConnection, url, filePath);
-							Main.currentNonIndexedSize++;
-							
-							if(Main.currentNonIndexedSize == 1) {
+						ID = res.getInt(1);
+						url = res.getString(2);
+						
+						webDoc = Jsoup.parse(new URL(url).openStream(), "ASCII", url);
+	
+						filePath = saveWebPage(webDoc, ID, url);
+						
+						if(!filePath.isEmpty()) {
+							synchronized (DBMutex) {
+								controller.insertURL(crawlConnection, url, filePath);
+								Main.currentNonIndexedSize++;
+								
+								// if(Main.currentNonIndexedSize == 1) {
 								DBMutex.notify();
+								// }
 							}
 						}
+						System.out.println("Crawled: " + url);
+						if(totalCrawlingSize < MAX_LINKS_COUNT) {
+							extractLinks(webDoc, url);
+						}
 					}
-					System.out.println("Crawled: " + url);
-					
-					extractLinks(webDoc, url);
-					
+						
 				} catch (IOException | SQLException e) {
 					System.err.println("for '"+url+"': "+e.getMessage());
+					// e.printStackTrace();
 				}
 			}
 		}

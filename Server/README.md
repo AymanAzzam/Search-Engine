@@ -8,7 +8,11 @@ Run the script tomcat.sh using the following command.
 ```sh
 ./tomcat.sh
 ```
+hint: you maybe need to change tomcat verison inside tomcat.sh
+
 Then follow Step 5 in the Following link https://www.digitalocean.com/community/tutorials/how-to-install-apache-tomcat-8-on-ubuntu-16-04
+but delete User and Group from /etc/systemd/system/tomcat.service.
+
 3. Make mysql accessible by root'@'localhost' and make VARCHAR(200) doesn't give error by adding the following lines at the end of /etc/mysql/my.cnf.
 ```sh
 [mysqld]
@@ -21,10 +25,10 @@ innodb_large_prefix=true
 ```
 4. Start Tomcat and Mysql using the following commands.
 ```sh
-sudo systemctl start tomcat
-sudo systemctl start mysql
+sudo systemctl restart tomcat
+sudo systemctl restart mysql
 ```
-4. Create database 'Search_Engine' using mysql.
+5. Create database 'Search_Engine' using mysql.
 ```sh
 mysql -u root
 create database Search_Engine;
@@ -38,7 +42,7 @@ sudo mvn install
 ```
 2. Copy the files to Tomcat using the following commands.
 ```sh
-sudo cp -r target/classes/* /opt/tomcat/webapps/ROOT/WEB-INF/classes/
+sudo cp -r target/classes/com /opt/tomcat/webapps/ROOT/WEB-INF/classes/
 sudo cp web.xml /opt/tomcat/webapps/ROOT/WEB-INF/
 sudo cp stopwords.txt /opt/tomcat/work/Catalina/localhost/
 ```

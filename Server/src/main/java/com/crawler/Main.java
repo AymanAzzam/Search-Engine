@@ -20,7 +20,7 @@ public class Main {
 	static ArrayList<String> stopWords = new ArrayList<String>();
 	final static int INDEXER_CNT = 10;
 	final static int CRAWLER_CNT = 10;
-	final static int MAX_LINKS_CNT = 5000;
+	final static int MAX_LINKS_CNT = 100000;
 	final static int MAX_CONNECTIONS = 120;
 	
 	public static ArrayList<Producer> prodList;
@@ -61,7 +61,7 @@ public class Main {
         
         // Creating Tables in Database
         Connection connect = controller.connect();
-//        controller.drop(connect);		// For Testing Purpose
+        //controller.drop(connect);		// For Testing Purpose
         controller.build(connect);
 
         
