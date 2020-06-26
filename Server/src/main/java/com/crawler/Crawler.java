@@ -34,6 +34,8 @@ public class Crawler {
 	private int totalCrawlingSize;
 	private int currentNonCrawledSize;
 
+	final int LIMIT = 2;
+
 	//constructor:
 	public Crawler (int maxNoOfLinks, String seederFileName, DBController dbController, Object dbmutex, Object crawlmutex)
 			throws ClassNotFoundException, SQLException {
@@ -216,42 +218,44 @@ public class Crawler {
 							}
 						}
 						
-						res = controller.getNonCrawledRows(crawlConnection);
-						controller.markNonCrawledRows(crawlConnection);
-						currentNonCrawledSize--;
+						res = controller.getNonCrawledRows(crawlConnection,LIMIT);
+						int cnt = controller.markNonCrawledRows(crawlConnection,LIMIT);
+						currentNonCrawledSize -= cnt;
 					} catch (SQLException e) {
 						e.printStackTrace();
 					}
 				}
 				
 				
-				
 				try {
-					res.next();
-					ID = res.getInt(1);
-					url = res.getString(2);
-					
-					webDoc = Jsoup.parse(new URL(url).openStream(), "ASCII", url);
+					while(res.next()) {
 
-					filePath = saveWebPage(webDoc, ID, url);
-					
-					if(!filePath.isEmpty()) {
-						synchronized (DBMutex) {
-							controller.insertURL(crawlConnection, url, filePath);
-							Main.currentNonIndexedSize++;
-							
-							if(Main.currentNonIndexedSize == 1) {
+						ID = res.getInt(1);
+						url = res.getString(2);
+						
+						webDoc = Jsoup.parse(new URL(url).openStream(), "ASCII", url);
+	
+						filePath = saveWebPage(webDoc, ID, url);
+						
+						if(!filePath.isEmpty()) {
+							synchronized (DBMutex) {
+								controller.insertURL(crawlConnection, url, filePath);
+								Main.currentNonIndexedSize++;
+								
+								// if(Main.currentNonIndexedSize == 1) {
 								DBMutex.notify();
+								// }
 							}
 						}
+						System.out.println("Crawled: " + url);
+						if(totalCrawlingSize < MAX_LINKS_COUNT) {
+							extractLinks(webDoc, url);
+						}
 					}
-					System.out.println("Crawled: " + url);
-					if(totalCrawlingSize < MAX_LINKS_COUNT) {
-						extractLinks(webDoc, url);
-					}
-					
+						
 				} catch (IOException | SQLException e) {
 					System.err.println("for '"+url+"': "+e.getMessage());
+					// e.printStackTrace();
 				}
 			}
 		}
