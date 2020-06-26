@@ -1,10 +1,13 @@
 package com.crawler;
+import java.util.Date;
 
 public class WebsiteValue {
 	
 	Integer totalNumberOfWords;
 	String headerText;
 	String content;
+	String location;
+	Date publishedDate;
 	
 	public WebsiteValue(Integer totalNumberOfWords, String headerText, String content) {
 		this.totalNumberOfWords = totalNumberOfWords;
@@ -22,6 +25,14 @@ public class WebsiteValue {
 	
 	public String getContent() {
 		return content;
+	}
+
+	public String getLocation(){
+		return location;
+	}
+
+	public Date getPublishedDate(){
+		return publishedDate;
 	}
 	
 	public String getSummary() {

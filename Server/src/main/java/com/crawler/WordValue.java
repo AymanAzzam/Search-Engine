@@ -6,13 +6,15 @@ public class WordValue {
 	Integer numberOfAppearance;
 	Integer numberOfPlain;
 	//Integer numberOfBold;
-	//Integer numberOfHeader;
+	Integer numberOfHeader;
 	
 	public WordValue(String websiteName, Integer numberOfAppearance,
-			Integer numberOfPlain) {
+			Integer numberOfPlain, Integer numberOfHeader) {
 		
 		this.websiteName = websiteName;
 		this.numberOfAppearance = numberOfAppearance;
+		this.numberOfPlain = numberOfPlain;
+		this.numberOfHeader = numberOfHeader;
 	}
 	/*
 	public WordValue(String websiteName, Integer numberOfAppearance,
@@ -41,10 +43,11 @@ public class WordValue {
 	public Integer getNumberOfBold() {
 		return numberOfBold;
 	}
+	*/
 	
 	public Integer getNumberOfHeader() {
 		return numberOfHeader;
 	}
-	*/
+	
 
 }

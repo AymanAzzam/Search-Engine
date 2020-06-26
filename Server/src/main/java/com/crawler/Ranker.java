@@ -13,13 +13,16 @@ public class Ranker {
 	static boolean donePopularity = false;
 	Integer totalNumberOfDocuments;
 	Integer normalOrImage;
+	String userLocation;
 
 	public Ranker(Hashtable<String, ArrayList<WordValue>> invertedFile, Hashtable<String, WebsiteValue> linkDatabase,
-			Integer totalNumberOfDocuments, Integer normalOrImage) {
+			Integer totalNumberOfDocuments, Integer normalOrImage, String userLocation) {
 		this.invertedFile = invertedFile;
 		this.linkDatabase = linkDatabase;
 		this.totalNumberOfDocuments = totalNumberOfDocuments;
 		this.normalOrImage = normalOrImage;
+		this.userLocation = userLocation;
+
 	}
 	
 	// to be private
@@ -72,12 +75,16 @@ public class Ranker {
 			String key = enumeration.nextElement();
 			for(int i =0; i< invertedFile.get(key).size(); i++) {
 				String websiteName = invertedFile.get(key).get(i).getWebsiteName();
+				Double bodyweight = 0.001 * invertedFile.get(key).get(i).getNumberOfAppearance();
+				Double plainWeight = 0.003 * invertedFile.get(key).get(i).getNumberOfPlain();
+				Double headerWeight = 0.009 * invertedFile.get(key).get(i).getNumberOfHeader();
+				Double totalWeight = bodyweight + plainWeight + headerWeight;
 				if (preTFIDFTable.containsKey(websiteName)) {
+					preTFIDFTable.get(websiteName).addToInnerArray(key, totalWeight,i);
 					preTFIDFTable.get(websiteName).incrementNumberOfWords();
-					preTFIDFTable.get(websiteName).addToInnerArray(key, i);
 				}
 				else {
-					TFIDFValue tfidfValue = new TFIDFValue (1, key, i);
+					TFIDFValue tfidfValue = new TFIDFValue (1, key,totalWeight, i);
 					preTFIDFTable.put(websiteName, tfidfValue);
 				}
 			}
@@ -97,23 +104,37 @@ public class Ranker {
 		while (enumeration.hasMoreElements()) {
 			String key = enumeration.nextElement();
 			Double counter = 0.0;
-			Integer tf = 0;
+			Double tf = 0.0;
 			Double idf = 0.0;
 			Integer index = 0;
 			String word;
 			for (int i=0; i< preTFIDFTable.get(key).getInnerArraySize(); i++) {
 				word = preTFIDFTable.get(key).getWordString(i);
 				index = preTFIDFTable.get(key).getWordIndex(i);
-				tf = invertedFile.get(word).get(index).getNumberOfAppearance();
+				//tf = invertedFile.get(word).get(index).getNumberOfAppearance();
+				tf = preTFIDFTable.get(key).getWordsWeight(index);
 				idf = mapIDF.get(word);
 				counter = counter + tf*idf;
 				// System.out.println(tf + " " + idf);
 			}
-			if(donePopularity) {
-				// System.out.println(key + "\t" + counter + "\t" + popularity.get(key));
-				counter += popularity.get(key); // add popularity to tf-idf
+			
+			// System.out.println(key + "\t" + counter + "\t" + popularity.get(key));
+			// add popularity to tf-idf
+			counter += popularity.get(key); 
+
+			// add location weight to tf-idf
+			String websiteLocation = linkDatabase.get(key).getLocation();
+			if (userLocation == websiteLocation){
+				counter += 0.005;
 			}
-			WebsiteTFIDFPair pair = new WebsiteTFIDFPair(key, counter, preTFIDFTable.get(key).getNumberOfWords());
+
+			// add publishedDate weight to tf-idf
+			Date publishedDate = linkDatabase.get(key).getPublishedDate();
+			if (publishedDate != null){
+				counter += 0.005; // to be changed
+			}
+			
+			WebsiteTFIDFPair pair = new WebsiteTFIDFPair(key, counter, preTFIDFTable.get(key).getNumeberOfWords());
 			websiteTFIDFList.add(pair);		
 		}
 		
