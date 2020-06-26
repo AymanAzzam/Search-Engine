@@ -8,10 +8,6 @@ import com.crawler.Indexer.WordRecord;
 
 public class DBController {
 
-//	private Connection conn;
-	
-//	private Statement stmt;
-
 	
 	final String DBName = "Search_Engine";
 	final String username = "root";
@@ -193,23 +189,28 @@ public class DBController {
 	}
 	
 	// Get non-indexed yet rows
-	public ResultSet getNonIndexedRows(Connection conn) throws SQLException
+	public ResultSet getNonIndexedRows(Connection conn, int LIMIT) throws SQLException
 	{
 		Statement stmt = conn.createStatement();
 		return stmt.executeQuery(String.format("SELECT * FROM %s"
-				+ " WHERE %s = FALSE ORDER BY %s LIMIT 1;", URL_table, isIndexed_col, URLID_col));
+				+ " WHERE %s = FALSE ORDER BY %s LIMIT %d;", URL_table, isIndexed_col, URLID_col,LIMIT));
 	}
 	
 	// Mark returned non-indexed rows
-	public void markNonIndexedRows(Connection conn) throws SQLException {
+	public int markNonIndexedRows(Connection conn, int LIMIT) throws SQLException {
+
+		int ret = 0;
+
 		Statement stmt = conn.createStatement();
 		
-		stmt.executeUpdate(String.format("UPDATE %s "
+		ret = stmt.executeUpdate(String.format("UPDATE %s "
 				+ "SET %s = TRUE "
-				+ "WHERE %s = FALSE ORDER BY %s LIMIT 1;",
-				URL_table, isIndexed_col, isIndexed_col, URLID_col));
+				+ "WHERE %s = FALSE ORDER BY %s LIMIT %d;",
+				URL_table, isIndexed_col, isIndexed_col, URLID_col,LIMIT));
 		
 		stmt.close();
+
+		return ret;
 	}
 	
 	// Get the minimum word counts in url_table
@@ -227,23 +228,28 @@ public class DBController {
 	}
 
 	// Get non-crawled yet rows
-	public ResultSet getNonCrawledRows(Connection conn) throws SQLException
+	public ResultSet getNonCrawledRows(Connection conn, int LIMIT) throws SQLException
 	{
 		Statement stmt = conn.createStatement();
 		return stmt.executeQuery(String.format("SELECT * FROM %s"
-				+ " WHERE %s = FALSE ORDER BY %s LIMIT 1;", crawl_table, isCrawled_col, URLID_col));
+				+ " WHERE %s = FALSE ORDER BY %s LIMIT %d;", crawl_table, isCrawled_col, URLID_col, LIMIT));
 	}
 	
 	// Mark returned non-crawled rows
-	public void markNonCrawledRows(Connection conn) throws SQLException {
+	public int markNonCrawledRows(Connection conn, int LIMIT) throws SQLException {
+
+		int ret = 0;
+
 		Statement stmt = conn.createStatement();
 		
-		stmt.executeUpdate(String.format("UPDATE %s "
+		ret = stmt.executeUpdate(String.format("UPDATE %s "
 				+ "SET %s = TRUE "
-				+ "WHERE %s = FALSE ORDER BY %s LIMIT 1;",
-				crawl_table, isCrawled_col, isCrawled_col, URLID_col));
+				+ "WHERE %s = FALSE ORDER BY %s LIMIT %d;",
+				crawl_table, isCrawled_col, isCrawled_col, URLID_col, LIMIT));
 		
 		stmt.close();
+
+		return ret;
 	}
 	
 	// Get the minimum word counts in crawling_table
@@ -562,13 +568,22 @@ public class DBController {
 		conn.close();
 	}
 	
+
+	public static int test(Connection conn) throws SQLException {
+
+		Statement stmt = conn.createStatement();
+		return stmt.executeUpdate("update test2 set id = 2 where id < 10 limit 8;");
+		
+	}
+
 	// Main method
 	public static void main(String []args) throws ClassNotFoundException, SQLException {
 
 		DBController controller = new DBController();
 		Connection conn;
 		conn = controller.connect();
-		controller.build(conn);		
+		// controller.build(conn);		
+		System.out.println(test(conn));
 		controller.close(conn);
 	}
 	
