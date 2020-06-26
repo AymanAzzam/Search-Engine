@@ -20,9 +20,12 @@ public class Main {
 	static ArrayList<String> stopWords = new ArrayList<String>();
 	final static int INDEXER_CNT = 10;
 	final static int CRAWLER_CNT = 10;
-	final static int MAX_LINKS_CNT = 100000;
+	final static int MAX_LINKS_CNT = 50; //100000;
 	final static int MAX_CONNECTIONS = 120;
 	
+	final static boolean DEBUG_MODE = true;
+
+
 	public static ArrayList<Producer> prodList;
 	public static ArrayList<Crawl> crawlList;
 	
@@ -45,7 +48,7 @@ public class Main {
         scanner.close();
         
         File f = new File("docs");
-        f.mkdirs();
+		f.mkdirs();
         
         // Create DB Mutex
         DBMutex = new Object();
@@ -57,11 +60,19 @@ public class Main {
         connectionSemaphore = new Semaphore(MAX_CONNECTIONS);
 
         // Create DB Controller
-        controller = new DBController();
+		controller = new DBController();
         
         // Creating Tables in Database
-        Connection connect = controller.connect();
-        //controller.drop(connect);		// For Testing Purpose
+		Connection connect = controller.connect();
+		if(DEBUG_MODE) {
+			controller.drop(connect);		// For Testing Purpose
+			File[] fi = f.listFiles();
+			for(File ff:fi) {
+				ff.delete();
+			}
+			f.delete();
+			f.mkdirs();
+		}
         controller.build(connect);
 
         
