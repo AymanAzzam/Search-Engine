@@ -20,7 +20,7 @@ public class SearchEngine extends HttpServlet{
 	
 	
 	public static void main(String []args) throws FileNotFoundException,Exception {
-	/*		  
+			  
 		
 		//Receiving Request called query it's type is query
 		
@@ -75,27 +75,28 @@ public class SearchEngine extends HttpServlet{
 			Integer dummyTotalNumberOfDocuments = dbController.getURLsSize(conn);
 			
 
-			if(!Ranker.donePopularity) {
-				int siz = dbController.getCrawlingSize(conn);
-				if(siz == Main.MAX_LINKS_CNT) {
-					Ranker.donePopularity = true;
+			// if(!Ranker.donePopularity) {
+			// 	int siz = dbController.getCrawlingSize(conn);
+			// 	if(siz == Main.MAX_LINKS_CNT) {
+			// 		Ranker.donePopularity = true;
 					
-					Hashtable<String, ArrayList<String>> pointingWebsites = new Hashtable<String, ArrayList<String>>();
-					Hashtable<String, Integer> pointedToCount = new Hashtable<String, Integer>();
+			// 		Hashtable<String, ArrayList<String>> pointingWebsites = new Hashtable<String, ArrayList<String>>();
+			// 		Hashtable<String, Integer> pointedToCount = new Hashtable<String, Integer>();
 					
-					ArrayList<String> URLs = dbController.getAllURLs(conn);
+			// 		ArrayList<String> URLs = dbController.getAllURLs(conn);
 
-					for(String url:URLs) {
-						pointingWebsites.put(url, dbController.getPointedFromURLs(conn, url));
-						pointedToCount.put(url, dbController.getPointingToCount(conn, url));
-					}
+			// 		for(String url:URLs) {
+			// 			pointingWebsites.put(url, dbController.getPointedFromURLs(conn, url));
+			// 			pointedToCount.put(url, dbController.getPointingToCount(conn, url));
+			// 		}
 					
-					Ranker.calculatePopularity(pointingWebsites, pointedToCount);
-				}
-			}
+			// 		Ranker.calculatePopularity(pointingWebsites, pointedToCount);
+			// 	}
+			// }
 
 			
 			
+			Hashtable<String, Double> popularity = dbController.getPopularity(conn);
 			Object result;
 			
 			
@@ -107,13 +108,13 @@ public class SearchEngine extends HttpServlet{
 				query = query.replaceAll("[^a-zA-Z0-9 ]", "");
 				
 				PhraseSearch phSearch = new PhraseSearch(invertedFile, linkDatabase, dummyTotalNumberOfDocuments,dummyLocation, query);
-				result = phSearch.phraseSearch();
+				result = phSearch.phraseSearch(popularity);
 				
 				json = new JSONArray((ArrayList<OutputValue>)result);
 			}
 			else
 			{
-				Ranker ranker = new Ranker (invertedFile, linkDatabase, dummyTotalNumberOfDocuments, type, dummyLocation);
+				Ranker ranker = new Ranker (invertedFile, linkDatabase, dummyTotalNumberOfDocuments, type, dummyLocation, popularity);
 				result = ranker.rank(conn, dbController);
 				
 				if(type == 0) {
@@ -156,7 +157,7 @@ public class SearchEngine extends HttpServlet{
 			e.printStackTrace();
 		}
 		
-		*/
+		
 	}
 	
 	public static ArrayList<String> query(String sentence) throws FileNotFoundException,Exception
