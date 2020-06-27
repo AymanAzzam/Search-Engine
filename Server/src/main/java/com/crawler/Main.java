@@ -21,8 +21,8 @@ public class Main {
 	static ArrayList<String> stopWords = new ArrayList<String>();
 	final static int INDEXER_CNT = 10;
 	final static int CRAWLER_CNT = 10;
-	final static int MAX_LINKS_CNT = 50; //100000;
-	final static int MAX_CONNECTIONS = 145;
+	final static int MAX_LINKS_CNT = 100; //100000;
+	final static int MAX_CONNECTIONS = 130;
 	
 	final static boolean DEBUG_MODE = true;
 
@@ -107,7 +107,6 @@ public class Main {
 			connectionSemaphore.acquire();
 			prodList.get(i).start();
 		}
-		Ranker.donePopularity = true;
 
 		connect = controller.connect();
 		
@@ -144,10 +143,10 @@ public class Main {
 		
 
 		System.out.println("HERE");
-		Ranker.calculatePopularity(pointingWebsites, pointedToCount);
+		Hashtable<String, Double> popularity = Ranker.calculatePopularity(pointingWebsites, pointedToCount);
 		
 		connect = controller.connect();
-		controller.insertPopularity(connect, Ranker.popularity);
+		controller.insertPopularity(connect, popularity);
 		connect.close();
 		
 		System.out.println("DONE!");
