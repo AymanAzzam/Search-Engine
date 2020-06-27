@@ -485,7 +485,7 @@ public class DBController {
 		ArrayList<String> ret = new ArrayList<String>();
 
 		Statement stmt = conn.createStatement();
-		ResultSet res = stmt.executeQuery("SELECT URL FROM CRAWLING_TABLE;");
+		ResultSet res = stmt.executeQuery("SELECT URL FROM %s;", crawl_table);
 		
 		while(res.next()) {
 			ret.add(res.getString(1));
