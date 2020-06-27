@@ -1,5 +1,5 @@
 package com.crawler;
-import java.util.Date;
+import java.time.LocalDate;
 
 public class WebsiteValue {
 	
@@ -7,12 +7,14 @@ public class WebsiteValue {
 	String headerText;
 	String content;
 	String location;
-	Date publishedDate;
+	LocalDate publishedDate;
 	
-	public WebsiteValue(Integer totalNumberOfWords, String headerText, String content) {
+	public WebsiteValue(Integer totalNumberOfWords, String headerText, String content,String location, LocalDate publishedDate) {
 		this.totalNumberOfWords = totalNumberOfWords;
 		this.headerText = headerText;
 		this.content = content;
+		this.location = location;
+		this.publishedDate = publishedDate;
 	}
 	
 	public Integer getTotalNumberOfWords() {
@@ -31,7 +33,7 @@ public class WebsiteValue {
 		return location;
 	}
 
-	public Date getPublishedDate(){
+	public LocalDate getPublishedDate(){
 		return publishedDate;
 	}
 	

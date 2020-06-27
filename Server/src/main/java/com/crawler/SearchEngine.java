@@ -3,6 +3,7 @@ package com.crawler;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import javax.servlet.http.*;
@@ -51,7 +52,15 @@ public class SearchEngine extends HttpServlet{
 					linkFileElement = dbController.getUrlFile(conn,Integer.parseInt(invertedFileElement.get(j)));
 					invertedFileElement.set(j,linkFileElement.get(1));
 					
-					WebsiteValue websiteValue = new WebsiteValue(Integer.parseInt(linkFileElement.get(3)), linkFileElement.get(0), linkFileElement.get(2));
+					/*
+					 ************************************ 
+					 the last two argument will change for website value
+					 ************************************
+					 */
+					
+					String dummyWebsiteLocation = "egypt";
+					LocalDate dummyPublishedDate =  LocalDate.now();
+					WebsiteValue websiteValue = new WebsiteValue(Integer.parseInt(linkFileElement.get(3)), linkFileElement.get(0), linkFileElement.get(2),dummyWebsiteLocation,dummyPublishedDate);
 					linkDatabase.put(linkFileElement.get(1), websiteValue);
 					
 					WordValue wordvalue = new WordValue(invertedFileElement.get(j), Integer.parseInt(invertedFileElement.get(j+3)), Integer.parseInt(invertedFileElement.get(j+1)), Integer.parseInt(invertedFileElement.get(j+2)));
@@ -195,8 +204,16 @@ public class SearchEngine extends HttpServlet{
 				{
 					linkFileElement = dbController.getUrlFile(conn,Integer.parseInt(invertedFileElement.get(j)));
 					invertedFileElement.set(j,linkFileElement.get(1));
+
+					/*
+					 ************************************ 
+					 the last two argument will change for website value
+					 ************************************
+					 */
 					
-					WebsiteValue websiteValue = new WebsiteValue(Integer.parseInt(linkFileElement.get(3)), linkFileElement.get(0), linkFileElement.get(2));
+					String dummyWebsiteLocation = "egypt";
+					LocalDate dummyPublishedDate =  LocalDate.now();
+					WebsiteValue websiteValue = new WebsiteValue(Integer.parseInt(linkFileElement.get(3)), linkFileElement.get(0), linkFileElement.get(2),dummyWebsiteLocation,dummyPublishedDate);
 					linkDatabase.put(linkFileElement.get(1), websiteValue);
 					
 					WordValue wordvalue = new WordValue(invertedFileElement.get(j), Integer.parseInt(invertedFileElement.get(j+3)), Integer.parseInt(invertedFileElement.get(j+1)), Integer.parseInt(invertedFileElement.get(j+2)));
