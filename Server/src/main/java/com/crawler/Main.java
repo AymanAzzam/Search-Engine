@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.Scanner;
 import java.util.concurrent.Semaphore;
 
@@ -21,7 +22,7 @@ public class Main {
 	final static int INDEXER_CNT = 10;
 	final static int CRAWLER_CNT = 10;
 	final static int MAX_LINKS_CNT = 50; //100000;
-	final static int MAX_CONNECTIONS = 120;
+	final static int MAX_CONNECTIONS = 145;
 	
 	final static boolean DEBUG_MODE = true;
 
@@ -74,7 +75,6 @@ public class Main {
 			f.mkdirs();
 		}
         controller.build(connect);
-
         
         currentNonIndexedSize = controller.checkNonIndexed(connect);
 
@@ -92,13 +92,40 @@ public class Main {
 		
 		for(int i=0 ; i<CRAWLER_CNT ; ++i) {
 			crawlList.add(crawler.new Crawl());
+			connectionSemaphore.acquire();
 			crawlList.get(i).start();
 		}
-		
+
+		for(int i=0 ; i<CRAWLER_CNT ; ++i) {
+			crawlList.get(i).join();
+			connectionSemaphore.release();
+		}
+		while(connectionSemaphore.availablePermits() != MAX_CONNECTIONS);
+
 		for(int i=0 ; i<INDEXER_CNT ; ++i) {
 			prodList.add(indexer.new Producer());
+			connectionSemaphore.acquire();
 			prodList.get(i).start();
 		}
+		Ranker.donePopularity = true;
+
+		connect = controller.connect();
+		
+		Hashtable<String, ArrayList<String>> pointingWebsites = new Hashtable<String, ArrayList<String>>();
+		Hashtable<String, Integer> pointedToCount = new Hashtable<String, Integer>();
+
+		controller.removeDefected(connect);
+		
+		ArrayList<String> URLs = controller.getAllURLs(connect);
+
+		for(String url:URLs) {
+			pointingWebsites.put(url, controller.getPointedFromURLs(connect, url));
+			pointedToCount.put(url, controller.getPointingToCount(connect, url));
+		}
+
+		connect.close();
+
+
 		
 //		while(System.in.read()>-1)
 //		{
@@ -107,15 +134,23 @@ public class Main {
 //			}
 //		}
 		
-
-		for(int i=0 ; i<CRAWLER_CNT ; ++i) {
-			crawlList.get(i).join();
-		}
 		
 		for(int i=0 ; i<INDEXER_CNT ; ++i) {
 			prodList.get(i).join();
+			connectionSemaphore.release();
 		}
+
+		while(connectionSemaphore.availablePermits() != MAX_CONNECTIONS);
 		
+
+		System.out.println("HERE");
+		Ranker.calculatePopularity(pointingWebsites, pointedToCount);
+		
+		connect = controller.connect();
+		controller.insertPopularity(connect, Ranker.popularity);
+		connect.close();
+		
+		System.out.println("DONE!");
 	}
 
 	

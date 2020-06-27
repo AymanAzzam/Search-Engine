@@ -3,13 +3,15 @@ package com.crawler;
 //import java.io.ObjectInputStream.GetField;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Map.Entry;
 
 import com.crawler.Indexer.WordRecord;
 
 public class DBController {
 
 	
-	final String DBName = "Search_Engine";
+	final String DBName = "SE";
 	final String username = "root";
 	final String password = "";
 	
@@ -22,6 +24,7 @@ public class DBController {
 	final String URLTitle_col = "title";
 	final String URLContent_col = "content";
 	final String isIndexed_col = "is_indexed";
+	final String popularity_col = "popularity";
 	
 	// Image Table
 	final String image_table = "image_table";
@@ -76,12 +79,13 @@ public class DBController {
 					+ "%s INT PRIMARY KEY AUTO_INCREMENT,"
 					+ "%s VARCHAR(300) UNIQUE NOT NULL,"
 					+ "%s INT DEFAULT 0 NOT NULL,"
-					+ "%s TINYTEXT NOT NULL,"
+					+ "%s TINYTEXT,"
 					+ "%s TINYTEXT,"
 					+ "%s MEDIUMTEXT,"
-					+ "%s BOOLEAN DEFAULT FALSE NOT NULL);", 
+					+ "%s BOOLEAN DEFAULT FALSE NOT NULL,"
+					+ "%s DOUBLE DEFAULT 0);", 
 					URL_table, URLID_col, URLName_col, countWords_col, 
-					URLFilePath_col, URLTitle_col, URLContent_col, isIndexed_col));
+					URLFilePath_col, URLTitle_col, URLContent_col, isIndexed_col, popularity_col));
 			
 			
 			
@@ -120,10 +124,10 @@ public class DBController {
 			stmt.executeUpdate("CREATE TABLE URL_REF ("
 				+ " Pointer VARCHAR(300),"
 				+ " Pointed VARCHAR(300),"
-				+ " PRIMARY KEY(Pointer,Pointed));");
-				// + " PRIMARY KEY(Pointer,Pointed),"
-				// + " FOREIGN KEY(Pointer) REFERENCES CRAWLING_TABLE(URL) ON DELETE CASCADE,"
-				// + " FOREIGN KEY(Pointed) REFERENCES CRAWLING_TABLE(URL) ON DELETE CASCADE);");
+				// + " PRIMARY KEY(Pointer,Pointed));");
+				+ " PRIMARY KEY(Pointer,Pointed),"
+				+ " FOREIGN KEY(Pointer) REFERENCES CRAWLING_TABLE(URL) ON DELETE CASCADE,"
+				+ " FOREIGN KEY(Pointed) REFERENCES CRAWLING_TABLE(URL) ON DELETE CASCADE);");
 			
 			stmt.close();
 			System.out.println("Database Tables Created Successfully!");
@@ -561,6 +565,39 @@ public class DBController {
 		stmt.close();
 		res.close();
 		return ret;
+	}
+
+	public void removeDefected(Connection conn) throws SQLException {
+		
+		Statement stmt = conn.createStatement();
+
+		stmt.executeUpdate(String.format("DELETE FROM %s WHERE NOT EXISTS "
+			+ "(SELECT * FROM %s WHERE %s.%s = %s.%s);"
+			,crawl_table, URL_table, URL_table, URLName_col, crawl_table, URLName_col));
+
+		stmt.close();
+	}
+
+	public void insertPopularity(Connection conn, Hashtable<String, Double> pop) throws SQLException {
+
+		String query = String.format("INSERT INTO %s(%s,%s) VALUES "
+			,URL_table, URLName_col, popularity_col);
+		
+		String values = new String();
+		for(Entry<String,Double> en:pop.entrySet()) {
+
+			if(values.length()>0)	values +=",";
+			values += String.format("('%s',%f)",en.getKey(),en.getValue());
+		}
+
+		query += values + String.format(" ON DUPLICATE KEY UPDATE %s= VALUES(%s);"
+			, popularity_col, popularity_col);
+
+
+		System.out.println(query);
+		Statement stmt = conn.createStatement();
+		stmt.executeUpdate(query);
+		stmt.close();
 	}
 
 	// Close a database connection
