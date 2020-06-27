@@ -20,8 +20,8 @@ public class PhraseSearch {
 		this.phrase = phrase;
 	}
 	
-	public ArrayList<OutputValue> phraseSearch() {
-		Ranker rankerObject = new Ranker(invertedFile, linkDatabase, totalNumberOfDocuments, 0, userLocation);
+	public ArrayList<OutputValue> phraseSearch(Hashtable<String, Double> popularity) {
+		Ranker rankerObject = new Ranker(invertedFile, linkDatabase, totalNumberOfDocuments, 0, userLocation, popularity);
 		ArrayList<WebsiteTFIDFPair>rankerResult = rankerObject.helper();
 		String[] words = phrase.split("\\s+");
 		Integer numberOfPhraseWords = words.length;

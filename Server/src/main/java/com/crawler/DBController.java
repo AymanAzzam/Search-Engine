@@ -594,10 +594,28 @@ public class DBController {
 			, popularity_col, popularity_col);
 
 
-		System.out.println(query);
 		Statement stmt = conn.createStatement();
 		stmt.executeUpdate(query);
 		stmt.close();
+	}
+
+	public Hashtable<String, Double> getPopularity(Connection conn) throws SQLException {
+
+		Statement stmt = conn.createStatement();
+
+		ResultSet res = stmt.executeQuery(String.format("SELECT %s, %s FROM %s;"
+			, URLName_col, popularity_col, URL_table));
+		
+		Hashtable<String, Double> ret = new Hashtable<String, Double>();
+
+		while(res.next()) {
+			ret.put(res.getString(1), res.getDouble(2));
+		}
+
+		res.close();
+		stmt.close();
+
+		return ret;
 	}
 
 	// Close a database connection

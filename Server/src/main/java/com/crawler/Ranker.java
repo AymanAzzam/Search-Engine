@@ -9,20 +9,20 @@ public class Ranker {
 	
 	Hashtable<String, ArrayList<WordValue>> invertedFile = new Hashtable <String, ArrayList<WordValue>> ();
 	Hashtable<String, WebsiteValue> linkDatabase = new Hashtable <String, WebsiteValue> ();
-	static Hashtable<String, Double> popularity = new Hashtable<String, Double>();
-	static boolean donePopularity = false;
+	Hashtable<String, Double> popularity = new Hashtable<String, Double>();
+	// static boolean donePopularity = false;
 	Integer totalNumberOfDocuments;
 	Integer normalOrImage;
 	String userLocation;
 
 	public Ranker(Hashtable<String, ArrayList<WordValue>> invertedFile, Hashtable<String, WebsiteValue> linkDatabase,
-			Integer totalNumberOfDocuments, Integer normalOrImage, String userLocation) {
+			Integer totalNumberOfDocuments, Integer normalOrImage, String userLocation, Hashtable<String, Double> popularity) {
 		this.invertedFile = invertedFile;
 		this.linkDatabase = linkDatabase;
 		this.totalNumberOfDocuments = totalNumberOfDocuments;
 		this.normalOrImage = normalOrImage;
 		this.userLocation = userLocation;
-
+		this.popularity = popularity;
 	}
 	
 	// to be private
@@ -96,7 +96,7 @@ public class Ranker {
 	
 	
 	public ArrayList<WebsiteTFIDFPair> formSortedTFIDFList (Map<String,Double> mapIDF,
-			Hashtable<String,TFIDFValue> preTFIDFTable, Hashtable<String, Double> popularity) {
+			Hashtable<String,TFIDFValue> preTFIDFTable) {
 		
 		ArrayList<WebsiteTFIDFPair>  websiteTFIDFList = new ArrayList<WebsiteTFIDFPair>  ();
 		Enumeration<String> enumeration = preTFIDFTable.keys(); // to iterate on the preTFIDFTable
@@ -106,11 +106,11 @@ public class Ranker {
 			Double counter = 0.0;
 			Double tf = 0.0;
 			Double idf = 0.0;
-			Integer index = 0;
+			// Integer index = 0;
 			String word;
 			for (int i=0; i< preTFIDFTable.get(key).getInnerArraySize(); i++) {
 				word = preTFIDFTable.get(key).getWordString(i);
-				index = preTFIDFTable.get(key).getWordIndex(i);
+				// index = preTFIDFTable.get(key).getWordIndex(i);
 				//tf = invertedFile.get(word).get(index).getNumberOfAppearance();
 				tf = preTFIDFTable.get(key).getWordsWeight(i);
 				idf = mapIDF.get(word);
@@ -120,9 +120,9 @@ public class Ranker {
 			
 			// System.out.println(key + "\t" + counter + "\t" + popularity.get(key));
 			// add popularity to tf-idf
-			if (donePopularity == true){
-				counter += popularity.get(key);
-			} 
+			counter += popularity.get(key);
+			// if (donePopularity == true){
+			// } 
 
 			// add location weight to tf-idf
 			String websiteLocation = linkDatabase.get(key).getLocation();
@@ -144,10 +144,11 @@ public class Ranker {
 		return websiteTFIDFList;		
 	}
 	
-	public static void calculatePopularity(Hashtable<String, ArrayList<String>> pointingWebsites,
+	public static Hashtable<String, Double> calculatePopularity(Hashtable<String, ArrayList<String>> pointingWebsites,
 				Hashtable<String, Integer> pointedToCount) {
 
 		Hashtable<String, Double> previousPopularityTable = new Hashtable<String, Double>();
+		Hashtable<String, Double> popularity = new Hashtable<String, Double>();
 	
 		
 		Enumeration<String> enumeration = pointingWebsites.keys();
@@ -177,6 +178,7 @@ public class Ranker {
 			}
 			previousPopularityTable = (Hashtable<String, Double>) popularity.clone();
 		}
+		return popularity;
 	}
 	
 	public ArrayList<WebsiteTFIDFPair> helper(){
@@ -185,7 +187,7 @@ public class Ranker {
 		filterSpam(); //remove spam websites
 		Hashtable<String,TFIDFValue> preTFIDFTable = preTFIDF();
 
-		ArrayList<WebsiteTFIDFPair> sortedTFIDFList = formSortedTFIDFList(mapIDF,preTFIDFTable, popularity);
+		ArrayList<WebsiteTFIDFPair> sortedTFIDFList = formSortedTFIDFList(mapIDF,preTFIDFTable);
 		return sortedTFIDFList;
 	}
 	
