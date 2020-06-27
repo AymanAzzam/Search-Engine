@@ -3,7 +3,7 @@ https://www.google.com/
 https://soundcloud.com/
 https://www.facebook.com/
 https://twitter.com/
-https://www.amazon.com/
+https://aws.amazon.com/
 https://www.imdb.com/
 https://www.microsoft.com/
 https://www.linkedin.com/
@@ -12,3 +12,7 @@ https://www.instagram.com/
 https://stackoverflow.com/
 https://www.geeksforgeeks.org/
 https://www.quora.com/
+https://www.coursera.org/
+https://www.coursera.org/courses
+https://github.com/
+https://codeforces.com/

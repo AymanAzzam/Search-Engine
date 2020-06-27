@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.Scanner;
 import java.util.concurrent.Semaphore;
 
@@ -20,19 +21,21 @@ public class Main {
 	static ArrayList<String> stopWords = new ArrayList<String>();
 	final static int INDEXER_CNT = 10;
 	final static int CRAWLER_CNT = 10;
-	final static int MAX_LINKS_CNT = 100000;
-	final static int MAX_CONNECTIONS = 120;
+	final static int MAX_LINKS_CNT = 100; //100000;
+	final static int MAX_CONNECTIONS = 130;
 	
+	final static boolean DEBUG_MODE = false;
+
+
 	public static ArrayList<Producer> prodList;
 	public static ArrayList<Crawl> crawlList;
 	
-	public static int currentNonIndexedSize;
+	// public static int currentNonIndexedSize;
 	public static int numberOfConnections;
 	
 	public static Object DBMutex, crawlingMutex;
 	public static DBController controller;
 	public static Semaphore connectionSemaphore;
-
 	
 	public static void main(String[] args) throws ClassNotFoundException, SQLException, InterruptedException, IOException {
 
@@ -45,33 +48,38 @@ public class Main {
         scanner.close();
         
         File f = new File("docs");
-        f.mkdirs();
+		f.mkdirs();
         
         // Create DB Mutex
         DBMutex = new Object();
 
         // Create Crawling Mutex
-        crawlingMutex = new Object();
+		crawlingMutex = new Object();
+		
 
         
         connectionSemaphore = new Semaphore(MAX_CONNECTIONS);
 
         // Create DB Controller
-        controller = new DBController();
+		controller = new DBController();
         
         // Creating Tables in Database
-        Connection connect = controller.connect();
-        //controller.drop(connect);		// For Testing Purpose
+		Connection connect = controller.connect();
+		if(DEBUG_MODE) {
+			controller.drop(connect);		// For Testing Purpose
+			File[] fi = f.listFiles();
+			for(File ff:fi) {
+				ff.delete();
+			}
+			f.delete();
+			f.mkdirs();
+		}
         controller.build(connect);
-
         
-        currentNonIndexedSize = controller.checkNonIndexed(connect);
+        // currentNonIndexedSize = controller.checkNonIndexed(connect);
 
         connect.close();
         
-        // Create Indexer Instance
-		Indexer indexer = new Indexer(controller, DBMutex);
-		
 		// Create Crawler Instance
 		Crawler crawler = new Crawler(MAX_LINKS_CNT, "seeder.txt", controller, DBMutex, crawlingMutex);
 		
@@ -81,13 +89,42 @@ public class Main {
 		
 		for(int i=0 ; i<CRAWLER_CNT ; ++i) {
 			crawlList.add(crawler.new Crawl());
+			connectionSemaphore.acquire();
 			crawlList.get(i).start();
 		}
+
+		for(int i=0 ; i<CRAWLER_CNT ; ++i) {
+			crawlList.get(i).join();
+			connectionSemaphore.release();
+		}
+		while(connectionSemaphore.availablePermits() != MAX_CONNECTIONS);
+
+        // Create Indexer Instance
+		Indexer indexer = new Indexer(controller, DBMutex);
 		
 		for(int i=0 ; i<INDEXER_CNT ; ++i) {
 			prodList.add(indexer.new Producer());
+			connectionSemaphore.acquire();
 			prodList.get(i).start();
 		}
+
+		connect = controller.connect();
+		
+		Hashtable<String, ArrayList<String>> pointingWebsites = new Hashtable<String, ArrayList<String>>();
+		Hashtable<String, Integer> pointedToCount = new Hashtable<String, Integer>();
+
+		controller.removeDefected(connect);
+		
+		ArrayList<String> URLs = controller.getAllURLs(connect);
+
+		for(String url:URLs) {
+			pointingWebsites.put(url, controller.getPointedFromURLs(connect, url));
+			pointedToCount.put(url, controller.getPointingToCount(connect, url));
+		}
+
+		connect.close();
+
+
 		
 //		while(System.in.read()>-1)
 //		{
@@ -96,15 +133,20 @@ public class Main {
 //			}
 //		}
 		
-
-		for(int i=0 ; i<CRAWLER_CNT ; ++i) {
-			crawlList.get(i).join();
-		}
 		
 		for(int i=0 ; i<INDEXER_CNT ; ++i) {
 			prodList.get(i).join();
+			connectionSemaphore.release();
 		}
+
+		while(connectionSemaphore.availablePermits() != MAX_CONNECTIONS);
 		
+		Hashtable<String, Double> popularity = Ranker.calculatePopularity(pointingWebsites, pointedToCount);
+		
+		connect = controller.connect();
+		controller.insertPopularity(connect, popularity);
+		connect.close();
+		System.out.println("DONE!");
 	}
 
 	

@@ -7,17 +7,20 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import javax.servlet.http.*;
-import javax.sound.midi.ControllerEventListener;
 
 import org.json.JSONArray;
 
 public class SearchEngine extends HttpServlet{
 	
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
 	final static int MAX_RESULTS = 100;
 	
 	
 	public static void main(String []args) throws FileNotFoundException,Exception {
-			  
+	/*		  
 		
 		//Receiving Request called query it's type is query
 		
@@ -31,7 +34,6 @@ public class SearchEngine extends HttpServlet{
 			
 			ArrayList<String> queryWords, invertedFileElement, linkFileElement;
 			
-			/********** Abo Shama Should update the following Two lines **************/ 
 			DBController dbController = new DBController();
 			Connection conn = dbController.connect();
 			
@@ -154,7 +156,8 @@ public class SearchEngine extends HttpServlet{
 			e.printStackTrace();
 		}
 		
-    }
+		*/
+	}
 	
 	public static ArrayList<String> query(String sentence) throws FileNotFoundException,Exception
  	{
@@ -225,31 +228,32 @@ public class SearchEngine extends HttpServlet{
 			
 			Integer dummyTotalNumberOfDocuments = dbController.getURLsSize(conn);
 			
+			// System.out.println("POP: " + Ranker.donePopularity);
 
-			if(!Ranker.donePopularity) {
-				int siz = dbController.getCrawlingSize(conn);
-				if(siz == Main.MAX_LINKS_CNT) {
-					Ranker.donePopularity = true;
+			// if(!Ranker.donePopularity) {
+			// 	int siz = dbController.getCrawlingSize(conn);
+			// 	System.out.println(siz + " #### " + Main.MAX_LINKS_CNT);
+			// 	if(siz >= Main.MAX_LINKS_CNT) {
+			// 		Ranker.donePopularity = true;
 					
-					Hashtable<String, ArrayList<String>> pointingWebsites = new Hashtable<String, ArrayList<String>>();
-					Hashtable<String, Integer> pointedToCount = new Hashtable<String, Integer>();
+			// 		Hashtable<String, ArrayList<String>> pointingWebsites = new Hashtable<String, ArrayList<String>>();
+			// 		Hashtable<String, Integer> pointedToCount = new Hashtable<String, Integer>();
 					
-					ArrayList<String> URLs = dbController.getAllURLs(conn);
+			// 		ArrayList<String> URLs = dbController.getAllURLs(conn);
 
-					for(String url:URLs) {
-						pointingWebsites.put(url, dbController.getPointedFromURLs(conn, url));
-						pointedToCount.put(url, dbController.getPointingToCount(conn, url));
-					}
+			// 		for(String url:URLs) {
+			// 			pointingWebsites.put(url, dbController.getPointedFromURLs(conn, url));
+			// 			pointedToCount.put(url, dbController.getPointingToCount(conn, url));
+			// 		}
+			// 		System.out.println("POPULARITY##########");
 
-					Ranker.calculatePopularity(pointingWebsites, pointedToCount);
-				}
-			}
+			// 		Ranker.calculatePopularity(pointingWebsites, pointedToCount);
+			// 	}
+			// }
 
-			
-			
+			Hashtable<String, Double> popularity = dbController.getPopularity(conn);
+
 			Object result;
-			
-			
 			
 		    response.setContentType("application/json");
 		    response.setCharacterEncoding("UTF-8");
@@ -259,13 +263,13 @@ public class SearchEngine extends HttpServlet{
 			{
 				query = query.replaceAll("[^a-zA-Z0-9 ]", "");
 				PhraseSearch phSearch = new PhraseSearch(invertedFile, linkDatabase, dummyTotalNumberOfDocuments,dummyLocation, query);
-				result = phSearch.phraseSearch();
+				result = phSearch.phraseSearch(popularity);
 
 				json = new JSONArray((ArrayList<OutputValue>)result);
 			}
 			else
 			{
-				Ranker ranker = new Ranker (invertedFile, linkDatabase, dummyTotalNumberOfDocuments, type, dummyLocation);
+				Ranker ranker = new Ranker (invertedFile, linkDatabase, dummyTotalNumberOfDocuments, type, dummyLocation, popularity);
 				result = ranker.rank(conn, dbController);
 				
 				if(type == 0) {
@@ -280,7 +284,6 @@ public class SearchEngine extends HttpServlet{
 					for(int i=0 ; i<siz ; ++i) {
 						for(int j=i+1 ; j<siz ; ++j) {
 							if(tmp.get(i).getWebsiteName().equals(tmp.get(j).getWebsiteName())) {
-								// System.out.println(tmp.get(i).getWebsiteName() + " " + tmp.get(j).getWebsiteName());
 								tmp.remove(j);
 								--j;
 								--siz;
