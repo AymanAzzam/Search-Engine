@@ -124,10 +124,10 @@ public class DBController {
 			stmt.executeUpdate("CREATE TABLE URL_REF ("
 				+ " Pointer VARCHAR(300),"
 				+ " Pointed VARCHAR(300),"
-				// + " PRIMARY KEY(Pointer,Pointed));");
-				+ " PRIMARY KEY(Pointer,Pointed),"
-				+ " FOREIGN KEY(Pointer) REFERENCES CRAWLING_TABLE(URL) ON DELETE CASCADE,"
-				+ " FOREIGN KEY(Pointed) REFERENCES CRAWLING_TABLE(URL) ON DELETE CASCADE);");
+				+ " PRIMARY KEY(Pointer,Pointed));");
+				// + " PRIMARY KEY(Pointer,Pointed),"
+				// + " FOREIGN KEY(Pointer) REFERENCES CRAWLING_TABLE(URL) ON DELETE CASCADE,"
+				// + " FOREIGN KEY(Pointed) REFERENCES CRAWLING_TABLE(URL) ON DELETE CASCADE);");
 			
 			stmt.close();
 			System.out.println("Database Tables Created Successfully!");
@@ -573,8 +573,11 @@ public class DBController {
 
 		stmt.executeUpdate(String.format("DELETE FROM %s WHERE NOT EXISTS "
 			+ "(SELECT * FROM %s WHERE %s.%s = %s.%s);"
-			,crawl_table, URL_table, URL_table, URLName_col, crawl_table, URLName_col));
+			,crawl_table, URL_table, crawl_table, URLName_col, URL_table, URLName_col));
 
+		stmt.executeUpdate(String.format("DELETE FROM URL_REF WHERE NOT EXISTS "
+			+ "(SELECT * FROM %s WHERE URL_REF.POINTER = %s.%s AND URL_REF.POINTED = %s.%s);"
+			,URL_table, URL_table, URLName_col, URL_table, URLName_col));
 		stmt.close();
 	}
 
