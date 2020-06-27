@@ -158,10 +158,21 @@ public class Crawler {
 				String newURL = webpPage.attr("abs:href");
 
 				/**
-				 * TODO: Validate URL Here
+				 * TODO: Validate URL Here   --> done
 				 */
-				URLs.add(newURL);
+				
+				try {
+					URL realUrl = new URL(newURL);
+					//clean the url when it has parameters:
+					String cleanUrl = new String (realUrl.getProtocol()+"://"+realUrl.getHost()+realUrl.getPath());
+					if(validateUrl(cleanUrl)){
+						URLs.add(cleanUrl);
+					}
 
+				} catch (MalformedURLException e) {
+					
+				}
+				
 			}
 
 			synchronized (crawlingMutex) {
@@ -261,6 +272,17 @@ public class Crawler {
 			Matcher matcher = pattern.matcher(text);
 			String englishText = matcher.replaceAll("");
 			return englishText;
+		}
+
+		// check if the url is valid or not:
+		public  boolean  validateUrl (String url) {
+			try {
+				
+				new URL(url).toURI();
+				return true;
+			}catch (Exception e) {
+				return false;
+			}
 		}
 
 		public void run() {
