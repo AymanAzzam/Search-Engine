@@ -19,6 +19,9 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
 public class Crawler {
 	// data members:
 	private static DBController controller;
@@ -209,19 +212,20 @@ public class Crawler {
 				for (Element image : images) {
 					String imageLink = image.attr("src");
 
-					try {
+					// try {
 
-						URL valid = new URL(imageLink);
-					} catch (Exception e) {
+					// 	URL valid = new URL(imageLink);
+					// } catch (Exception e) {
 
-						if (imageLink.length() > 2 && imageLink.substring(0, 2).equals("//")) {
-							imageLink = imageLink.substring(2, imageLink.length());
-						} else if (!imageLink.isEmpty() && imageLink.charAt(0) == '/') {
-							imageLink = url.concat(imageLink);
-						}
+					// 	if (imageLink.length() > 2 && imageLink.substring(0, 2).equals("//")) {
+					// 		imageLink = imageLink.substring(2, imageLink.length());
+					// 	} else if (!imageLink.isEmpty() && imageLink.charAt(0) == '/') {
+					// 		imageLink = url.concat(imageLink);
+					// 	}
+					// }
+					if (validateImageUrl(imageLink)){
+						myWriter.write(imageLink + "\n");
 					}
-
-					myWriter.write(imageLink + "\n");
 				}
 
 				// title::
@@ -283,6 +287,24 @@ public class Crawler {
 			}catch (Exception e) {
 				return false;
 			}
+		}
+
+		// check if the url contains image:
+		public boolean  validateImageUrl (String url) {
+			try {
+				BufferedImage img = ImageIO.read(new URL (url));
+				if(img == null) {
+					return false;
+				}
+				else {
+					return true;
+				}
+			} catch (MalformedURLException e) {
+				return false;
+			} catch (IOException e) {
+				return false;
+			}
+			
 		}
 
 		public void run() {
