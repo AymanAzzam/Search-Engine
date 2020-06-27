@@ -20,7 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
+import javax.imageio.ImageIO;
 
 public class Crawler {
 	// data members:
@@ -164,16 +164,10 @@ public class Crawler {
 				 * TODO: Validate URL Here   --> done
 				 */
 				
-				try {
-					URL realUrl = new URL(newURL);
-					//clean the url when it has parameters:
-					String cleanUrl = new String (realUrl.getProtocol()+"://"+realUrl.getHost()+realUrl.getPath());
-					if(validateUrl(cleanUrl)){
-						URLs.add(cleanUrl);
-					}
-
-				} catch (MalformedURLException e) {
-					
+				
+				String cleanURL = validateURL(newURL);
+				if(cleanURL != null){
+					URLs.add(cleanURL);
 				}
 				
 			}
@@ -223,9 +217,22 @@ public class Crawler {
 					// 		imageLink = url.concat(imageLink);
 					// 	}
 					// }
-					if (validateImageUrl(imageLink)){
-						myWriter.write(imageLink + "\n");
+					
+					try {
+						
+						URL realURL = new URL(imageLink);
+						//clean the url when it has parameters:
+						String cleanURL = new String (realURL.getProtocol()+"://"+realURL.getHost()+realURL.getPath());
+	
+						if (validateImageURL(cleanURL)){
+							myWriter.write(cleanURL + "\n");
+						}
+
+					} catch (IOException e) {
+						// e.printStackTrace()
 					}
+
+					// myWriter.write(imageLink + "\n");
 				}
 
 				// title::
@@ -264,10 +271,9 @@ public class Crawler {
 				return new String("docs/doc" + docID + ".txt");
 
 			} catch (IOException e) {
-				// e.printStackTrace();
+				e.printStackTrace();
 				return new String("");
 			}
-
 		}
 
 		// filter webpage content:
@@ -279,32 +285,38 @@ public class Crawler {
 		}
 
 		// check if the url is valid or not:
-		public  boolean  validateUrl (String url) {
+		public String validateURL(String url) {
 			try {
 				
-				new URL(url).toURI();
-				return true;
+				URL realURL = new URL(url);
+				//clean the url when it has parameters:
+				String cleanURL = new String (realURL.getProtocol()+"://"+realURL.getHost()+realURL.getPath());
+
+				new URL(cleanURL).toURI();
+				return cleanURL;
 			}catch (Exception e) {
-				return false;
+				return null;
 			}
 		}
 
 		// check if the url contains image:
-		public boolean  validateImageUrl (String url) {
+		public boolean validateImageURL(String imgURL) {
+
+			// String url = validateURL(imgURL);
+
+			// if(url == null) {
+				// return null;
+			// }
+
 			try {
-				BufferedImage img = ImageIO.read(new URL (url));
-				if(img == null) {
-					return false;
-				}
-				else {
+				BufferedImage img = ImageIO.read(new URL (imgURL));
+				if(img != null) {
 					return true;
 				}
 			} catch (MalformedURLException e) {
-				return false;
 			} catch (IOException e) {
-				return false;
 			}
-			
+			return false;
 		}
 
 		public void run() {
@@ -315,7 +327,7 @@ public class Crawler {
 				filePath = saveWebPage(webDoc, ID, url);
 				if (!filePath.isEmpty()) {
 					controller.insertURL(processorConnection, url, filePath);
-					Main.currentNonIndexedSize++;
+					// Main.currentNonIndexedSize++;
 				}
 
 				System.out.println("Crawled: " + url);
@@ -346,8 +358,9 @@ public class Crawler {
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException, InterruptedException {
 
-		URL test = new URL("https://en.wikipedia.org/wiki/File:Black_Moshannon_State_Park_(Revisited).jpg");
+		URL test = new URL("https://d3njjcbhbojbot.cloudfront.net/api/utilities/v1/imageproxy/https://coursera_assets.s3.amazonaws.com/front-page-story/partners/duke.svg?auto=format%2Ccompress&dpr=1&w=&h=37");
 		
+		System.out.println(test.getProtocol());
 		System.out.println(test.getHost());
 		System.out.println(test.getPort());
 		System.out.println(test.getPath());
