@@ -11,6 +11,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
 import java.util.ArrayList;
 
 public class ResultsActivity extends AppCompatActivity {
@@ -136,6 +143,19 @@ public class ResultsActivity extends AppCompatActivity {
                 if (!url.startsWith("http://") && !url.startsWith("https://")) url = "http://" + url;
 
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+
+                RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+                String urlBackEnd = "http://ec2-3-85-34-39.compute-1.amazonaws.com:8080/IncrementFrequency?Query=" + url + "&Type=" + type;
+
+                StringRequest request = new StringRequest(Request.Method.GET, urlBackEnd,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {}
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {}
+                });
+                queue.add(request);
                 startActivity(browserIntent);
             }
         });
