@@ -24,7 +24,7 @@ public class Main {
 	final static int MAX_LINKS_CNT = 10000;
 	final static int MAX_CONNECTIONS = 130;
 	
-	final static boolean DEBUG_MODE = true;
+	final static boolean DEBUG_MODE = false;
 
 
 	public static ArrayList<Producer> prodList;
