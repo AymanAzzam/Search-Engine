@@ -22,7 +22,7 @@ public class Main {
 	final static int INDEXER_CNT = 10;
 	final static int CRAWLER_CNT = 10;
 	final static int MAX_LINKS_CNT = 10000;
-	final static int MAX_CONNECTIONS = 111;
+	final static int MAX_CONNECTIONS = 130;
 	
 	final static boolean DEBUG_MODE = true;
 
@@ -65,16 +65,16 @@ public class Main {
         
         // Creating Tables in Database
 		Connection connect = controller.connect();
-		// if(DEBUG_MODE) {
-		// 	controller.drop(connect);		// For Testing Purpose
-		// 	File[] fi = f.listFiles();
-		// 	for(File ff:fi) {
-		// 		ff.delete();
-		// 	}
-		// 	f.delete();
-		// 	f.mkdirs();
-		// }
-        // controller.build(connect);
+		if(DEBUG_MODE) {
+			controller.drop(connect);		// For Testing Purpose
+			File[] fi = f.listFiles();
+			for(File ff:fi) {
+				ff.delete();
+			}
+			f.delete();
+			f.mkdirs();
+		}
+        controller.build(connect);
         
         // currentNonIndexedSize = controller.checkNonIndexed(connect);
 
@@ -86,7 +86,7 @@ public class Main {
 
 		prodList = new ArrayList<Producer>();
 		crawlList = new ArrayList<Crawl>();
-		/*
+		
 		for(int i=0 ; i<CRAWLER_CNT ; ++i) {
 			crawlList.add(crawler.new Crawl());
 			connectionSemaphore.acquire();
@@ -98,7 +98,7 @@ public class Main {
 			connectionSemaphore.release();
 		}
 		while(connectionSemaphore.availablePermits() != MAX_CONNECTIONS);
-		*/
+
         // Create Indexer Instance
 		Indexer indexer = new Indexer(controller, DBMutex);
 		
