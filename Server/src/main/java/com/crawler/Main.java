@@ -64,7 +64,7 @@ public class Main {
 		controller = new DBController();
         
         // Creating Tables in Database
-		// Connection connect = controller.connect();
+		Connection connect = controller.connect();
 		// if(DEBUG_MODE) {
 		// 	controller.drop(connect);		// For Testing Purpose
 		// 	File[] fi = f.listFiles();
@@ -78,7 +78,7 @@ public class Main {
         
         // currentNonIndexedSize = controller.checkNonIndexed(connect);
 
-        // connect.close();
+        connect.close();
         
 		// Create Crawler Instance
 		Crawler crawler = new Crawler(MAX_LINKS_CNT, "seeder.txt", controller, DBMutex, crawlingMutex);
