@@ -351,7 +351,8 @@ public class Crawler {
 
 				filePath = saveWebPage(webDoc, ID, url);
 				if (!filePath.isEmpty()) {
-					controller.insertURL(processorConnection, url, filePath);
+					String location = getWebPageLocation(url);
+					controller.insertURL(processorConnection, url, filePath, location);
 					// Main.currentNonIndexedSize++;
 				}
 
