@@ -8,6 +8,7 @@ https://www.imdb.com/
 https://www.microsoft.com/
 https://www.linkedin.com/
 https://www.apple.com/
+https://edition.cnn.com/
 https://www.instagram.com/
 https://stackoverflow.com/
 https://www.geeksforgeeks.org/
@@ -18,5 +19,4 @@ https://github.com/
 https://codeforces.com/
 https://www.w3schools.com/
 https://www.tutorialspoint.com/index.htm
-https://www.codecademy.com/
 https://www.topcoder.com/
