@@ -27,22 +27,27 @@ public class IncrementFrequency extends HttpServlet {
         int type = typeString.equals("Image") ? 1 : 0;
 
         DBController dbController;
+        int success = 0;
         try {
             dbController = new DBController();
             Connection conn = dbController.connect();
 
+
             if(type == 1) {
-                dbController.incrementImageFrequency(conn, url);
+                success = dbController.incrementImageFrequency(conn, url);
             } else {
-                dbController.incrementURLFrequency(conn, url);
+                success = dbController.incrementURLFrequency(conn, url);
             }
-            
-            response.getWriter().print("Successful!");
             
         } catch (SQLException | ClassNotFoundException e1) {
             // e1.printStackTrace();
-            response.getWriter().print("Failed!");
         }
+
+        String responseMsg = new String((success == 1)?"Successful!":"Failed!");
+
+        System.out.println("Frequency:\t" + typeString + "\t" + url + "\t" + responseMsg);
+
+        response.getWriter().print(responseMsg);
         response.getWriter().flush();
     }
     
