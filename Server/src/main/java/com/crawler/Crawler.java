@@ -20,7 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
+import javax.imageio.ImageIO;
 
 public class Crawler {
 	// data members:
@@ -307,6 +307,31 @@ public class Crawler {
 			
 		}
 
+		//return the location of webpage:
+		public String getWebPageLocation(String url){
+
+			try {
+				URL locURL = new URL(url);
+				String host = locURL.getHost();
+
+				char [] loc = new char [3];
+				host.getChars(host.length()-3, host.length(), loc, 0);
+				String location = new String (loc);
+				StringBuilder locationReturned = new StringBuilder(location);
+
+				if(location.charAt(0) == '.'){
+					locationReturned.deleteCharAt(0);
+					return locationReturned.toString();
+				} else {
+					return null;
+				}
+				
+			} catch (MalformedURLException e) {
+				return null;
+			}
+
+		}
+
 		public void run() {
 
 			try {
@@ -346,15 +371,67 @@ public class Crawler {
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException, InterruptedException {
 
-		URL test = new URL("https://en.wikipedia.org/wiki/File:Black_Moshannon_State_Park_(Revisited).jpg");
+		 String url = new String ("https://www.google.com.eg/");
+		 URL test = new URL(url);
 		
-		System.out.println(test.getHost());
-		System.out.println(test.getPort());
-		System.out.println(test.getPath());
-		System.out.println(test.getFile());
-		System.out.println(test.getQuery());
-		System.out.println(test.getRef());
-		System.out.println(test.getUserInfo());
+		// System.out.println(url);
+		// Document doc = Jsoup.parse(test.openStream(), "ASCII", url);
+		// Elements times = doc.select("time");
+		// for (Element time : times) {
+			
+		// 	String item = time.attr("itemprop");
+		// 	String dateTime = time.attr("datetime");
+		// 	String pubDate = time.attr("pubdate");
+		// 	if(item == null){
+		// 		System.out.println("item is null");
+		// 	}
+		// 	else if (item.equals("")){
+		// 		System.out.println("item is empty");
+		// 	}
+		// 	if(dateTime == null){
+		// 		System.out.println("dateTime is null");
+		// 	}
+		// 	else if (dateTime.equals("")){
+		// 		System.out.println("dateTime is empty");
+		// 	}
+		// 	if(pubDate == null){
+		// 		System.out.println("pubDate is null");
+		// 	}
+		// 	else if (pubDate.equals("")){
+		// 		System.out.println("pubDate is empty");
+		// 	}
+		// 	System.out.println("item prob: " + item);
+		// 	System.out.println("datetime: " + dateTime);
+		// 	System.out.println("pubDate: " + pubDate);
+
+
+		// }
+
+		//////////////////////////////////////////////////////////////////////////////////////////////////
+		String host = test.getHost();
+		char [] loc = new char [3];
+		host.getChars(host.length()-3, host.length(), loc, 0);
+		String location = new String (loc);
+		System.out.println(location);
+		StringBuilder locationReturned = new StringBuilder(location);
+
+		if(location.charAt(0)=='.'){
+			locationReturned.deleteCharAt(0);
+		} else {
+			locationReturned.delete(0, 3);
+		}
+		System.out.println(locationReturned.toString());
+
+		/////////////////////////////////////////////////////////////////////////////////////////////////
+		
+
+		// System.out.println(test.getHost());
+		// System.out.println(test.getPort());
+		// System.out.println(test.getPath());
+		// System.out.println(test.getFile());
+		// System.out.println(test.getQuery());
+		// System.out.println(test.getRef());
+		// System.out.println(test.getUserInfo());
 		
 		
 //		Object dbmutex = new Object();
