@@ -261,6 +261,9 @@ public class Indexer {
 			}
 			// Close the File reader connection
 			reader.close();
+
+			File file = new File(r.filePath);
+			file.delete();
 			
 			for(String w:header_freq.keySet()) {
 				// Add a word statistics
