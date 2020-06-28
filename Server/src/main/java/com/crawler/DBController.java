@@ -25,12 +25,16 @@ public class DBController {
 	final String URLContent_col = "content";
 	final String isIndexed_col = "is_indexed";
 	final String popularity_col = "popularity";
+	final String frequency_col = "frequency";
+	final String location_col = "location";
+	final String date_col = "date";
 	
 	// Image Table
 	final String image_table = "image_table";
 	final String imageID_col = "image_ID";		//PRIMARY
 	final String imageURLID_col = "URL_ID";
 	final String imageURL_col = "image_URL";
+	// final String frequency_col = "frequency";
 	
 	// Inverted File Table
 	final String word_table = "word_table";
@@ -83,9 +87,12 @@ public class DBController {
 					+ "%s TINYTEXT,"
 					+ "%s MEDIUMTEXT,"
 					+ "%s BOOLEAN DEFAULT FALSE NOT NULL,"
-					+ "%s DOUBLE DEFAULT 0);", 
+					+ "%s DOUBLE DEFAULT 0,"
+					+ "%s INT DEFAULT 0,"
+					// + "%s DEFAULT NULL,"	// DATE	
+					+ "%s VARCHAR(50) DEFAULT NULL);", 
 					URL_table, URLID_col, URLName_col, countWords_col, 
-					URLFilePath_col, URLTitle_col, URLContent_col, isIndexed_col, popularity_col));
+					URLFilePath_col, URLTitle_col, URLContent_col, isIndexed_col, popularity_col, frequency_col, location_col));
 			
 			
 			
@@ -93,10 +100,11 @@ public class DBController {
 			stmt.executeUpdate(String.format("CREATE TABLE %s ("
 					+ " %s INT NOT NULL,"
 					+ " %s VARCHAR(500) NOT NULL,"
-					+ "PRIMARY KEY(%s,%s),"
+					+ " %s INT DEFAULT 0,"
+					+ " PRIMARY KEY(%s,%s),"
 					+ " FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE"
 					+ ");", 
-					image_table, imageURLID_col, imageURL_col,
+					image_table, imageURLID_col, imageURL_col, frequency_col,
 					imageURLID_col, imageURL_col,
 					imageURLID_col, URL_table, URLID_col));
 			
@@ -619,6 +627,26 @@ public class DBController {
 		stmt.close();
 
 		return ret;
+	}
+
+	public void incrementURLFrequency(Connection conn, String url) throws SQLException {
+
+		Statement stmt = conn.createStatement();
+
+		stmt.executeUpdate(String.format("UPDATE %s SET %s = %s + 1 where %s ='%s';"
+			, URL_table, frequency_col, frequency_col, URLName_col, url));
+
+		stmt.close();
+	}
+
+	public void incrementImageFrequency(Connection conn, String url) throws SQLException {
+
+		Statement stmt = conn.createStatement();
+
+		stmt.executeUpdate(String.format("UPDATE %s SET %s = %s + 1 where %s ='%s';"
+			, image_table, frequency_col, frequency_col, imageURL_col, url));
+
+		stmt.close();
 	}
 
 	// Close a database connection
