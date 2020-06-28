@@ -164,16 +164,10 @@ public class Crawler {
 				 * TODO: Validate URL Here   --> done
 				 */
 				
-				try {
-					URL realUrl = new URL(newURL);
-					//clean the url when it has parameters:
-					String cleanUrl = new String (realUrl.getProtocol()+"://"+realUrl.getHost()+realUrl.getPath());
-					if(validateUrl(cleanUrl)){
-						URLs.add(cleanUrl);
-					}
-
-				} catch (MalformedURLException e) {
-					
+				
+				String cleanURL = validateURL(newURL);
+				if(cleanURL != null){
+					URLs.add(cleanURL);
 				}
 				
 			}
@@ -223,9 +217,22 @@ public class Crawler {
 					// 		imageLink = url.concat(imageLink);
 					// 	}
 					// }
-					if (validateImageUrl(imageLink)){
-						myWriter.write(imageLink + "\n");
+					
+					try {
+						
+						URL realURL = new URL(imageLink);
+						//clean the url when it has parameters:
+						String cleanURL = new String (realURL.getProtocol()+"://"+realURL.getHost()+realURL.getPath());
+	
+						if (validateImageURL(cleanURL)){
+							myWriter.write(cleanURL + "\n");
+						}
+
+					} catch (IOException e) {
+						// e.printStackTrace()
 					}
+
+					// myWriter.write(imageLink + "\n");
 				}
 
 				// title::
@@ -264,10 +271,9 @@ public class Crawler {
 				return new String("docs/doc" + docID + ".txt");
 
 			} catch (IOException e) {
-				// e.printStackTrace();
+				e.printStackTrace();
 				return new String("");
 			}
-
 		}
 
 		// filter webpage content:
@@ -279,32 +285,38 @@ public class Crawler {
 		}
 
 		// check if the url is valid or not:
-		public  boolean  validateUrl (String url) {
+		public String validateURL(String url) {
 			try {
 				
-				new URL(url).toURI();
-				return true;
+				URL realURL = new URL(url);
+				//clean the url when it has parameters:
+				String cleanURL = new String (realURL.getProtocol()+"://"+realURL.getHost()+realURL.getPath());
+
+				new URL(cleanURL).toURI();
+				return cleanURL;
 			}catch (Exception e) {
-				return false;
+				return null;
 			}
 		}
 
 		// check if the url contains image:
-		public boolean  validateImageUrl (String url) {
+		public boolean validateImageURL(String imgURL) {
+
+			// String url = validateURL(imgURL);
+
+			// if(url == null) {
+				// return null;
+			// }
+
 			try {
-				BufferedImage img = ImageIO.read(new URL (url));
-				if(img == null) {
-					return false;
-				}
-				else {
+				BufferedImage img = ImageIO.read(new URL (imgURL));
+				if(img != null) {
 					return true;
 				}
 			} catch (MalformedURLException e) {
-				return false;
 			} catch (IOException e) {
-				return false;
 			}
-			
+			return false;
 		}
 
 		//return the location of webpage:
@@ -340,7 +352,7 @@ public class Crawler {
 				filePath = saveWebPage(webDoc, ID, url);
 				if (!filePath.isEmpty()) {
 					controller.insertURL(processorConnection, url, filePath);
-					Main.currentNonIndexedSize++;
+					// Main.currentNonIndexedSize++;
 				}
 
 				System.out.println("Crawled: " + url);

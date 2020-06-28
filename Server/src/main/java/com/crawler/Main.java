@@ -21,7 +21,7 @@ public class Main {
 	static ArrayList<String> stopWords = new ArrayList<String>();
 	final static int INDEXER_CNT = 10;
 	final static int CRAWLER_CNT = 10;
-	final static int MAX_LINKS_CNT = 100; //100000;
+	final static int MAX_LINKS_CNT = 10000;
 	final static int MAX_CONNECTIONS = 130;
 	
 	final static boolean DEBUG_MODE = true;
@@ -30,13 +30,12 @@ public class Main {
 	public static ArrayList<Producer> prodList;
 	public static ArrayList<Crawl> crawlList;
 	
-	public static int currentNonIndexedSize;
+	// public static int currentNonIndexedSize;
 	public static int numberOfConnections;
 	
 	public static Object DBMutex, crawlingMutex;
 	public static DBController controller;
 	public static Semaphore connectionSemaphore;
-
 	
 	public static void main(String[] args) throws ClassNotFoundException, SQLException, InterruptedException, IOException {
 
@@ -55,7 +54,8 @@ public class Main {
         DBMutex = new Object();
 
         // Create Crawling Mutex
-        crawlingMutex = new Object();
+		crawlingMutex = new Object();
+		
 
         
         connectionSemaphore = new Semaphore(MAX_CONNECTIONS);
@@ -76,13 +76,10 @@ public class Main {
 		}
         controller.build(connect);
         
-        currentNonIndexedSize = controller.checkNonIndexed(connect);
+        // currentNonIndexedSize = controller.checkNonIndexed(connect);
 
         connect.close();
         
-        // Create Indexer Instance
-		Indexer indexer = new Indexer(controller, DBMutex);
-		
 		// Create Crawler Instance
 		Crawler crawler = new Crawler(MAX_LINKS_CNT, "seeder.txt", controller, DBMutex, crawlingMutex);
 		
@@ -102,6 +99,9 @@ public class Main {
 		}
 		while(connectionSemaphore.availablePermits() != MAX_CONNECTIONS);
 
+        // Create Indexer Instance
+		Indexer indexer = new Indexer(controller, DBMutex);
+		
 		for(int i=0 ; i<INDEXER_CNT ; ++i) {
 			prodList.add(indexer.new Producer());
 			connectionSemaphore.acquire();
@@ -141,14 +141,11 @@ public class Main {
 
 		while(connectionSemaphore.availablePermits() != MAX_CONNECTIONS);
 		
-
-		System.out.println("HERE");
 		Hashtable<String, Double> popularity = Ranker.calculatePopularity(pointingWebsites, pointedToCount);
 		
 		connect = controller.connect();
 		controller.insertPopularity(connect, popularity);
 		connect.close();
-		
 		System.out.println("DONE!");
 	}
 

@@ -36,4 +36,14 @@
     <servlet-name>SearchEngineHandler</servlet-name>
     <url-pattern>/GetResult</url-pattern>
   </servlet-mapping>
+
+  <servlet>
+    <servlet-name>URLFrequencyHandler</servlet-name>
+    <servlet-class>com.crawler.IncrementFrequency</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>URLFrequencyHandler</servlet-name>
+    <url-pattern>/IncrementFrequency</url-pattern>
+  </servlet-mapping>
 </web-app>

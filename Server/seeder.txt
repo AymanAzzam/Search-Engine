@@ -16,3 +16,7 @@ https://www.coursera.org/
 https://www.coursera.org/courses
 https://github.com/
 https://codeforces.com/
+https://www.w3schools.com/
+https://www.tutorialspoint.com/index.htm
+https://www.codecademy.com/
+https://www.topcoder.com/

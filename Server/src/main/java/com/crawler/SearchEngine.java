@@ -3,6 +3,7 @@ package com.crawler;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import javax.servlet.http.*;
@@ -19,7 +20,7 @@ public class SearchEngine extends HttpServlet{
 	
 	
 	public static void main(String []args) throws FileNotFoundException,Exception {
-	/*		  
+			  
 		
 		//Receiving Request called query it's type is query
 		
@@ -53,7 +54,15 @@ public class SearchEngine extends HttpServlet{
 					linkFileElement = dbController.getUrlFile(conn,Integer.parseInt(invertedFileElement.get(j)));
 					invertedFileElement.set(j,linkFileElement.get(1));
 					
-					WebsiteValue websiteValue = new WebsiteValue(Integer.parseInt(linkFileElement.get(3)), linkFileElement.get(0), linkFileElement.get(2));
+					/*
+					 ************************************ 
+					 the last two argument will change for website value
+					 ************************************
+					 */
+					
+					String dummyWebsiteLocation = "egypt";
+					LocalDate dummyPublishedDate =  LocalDate.now();
+					WebsiteValue websiteValue = new WebsiteValue(Integer.parseInt(linkFileElement.get(3)), linkFileElement.get(0), linkFileElement.get(2),dummyWebsiteLocation,dummyPublishedDate);
 					linkDatabase.put(linkFileElement.get(1), websiteValue);
 					
 					WordValue wordvalue = new WordValue(invertedFileElement.get(j), Integer.parseInt(invertedFileElement.get(j+3)), Integer.parseInt(invertedFileElement.get(j+1)), Integer.parseInt(invertedFileElement.get(j+2)));
@@ -66,27 +75,28 @@ public class SearchEngine extends HttpServlet{
 			Integer dummyTotalNumberOfDocuments = dbController.getURLsSize(conn);
 			
 
-			if(!Ranker.donePopularity) {
-				int siz = dbController.getCrawlingSize(conn);
-				if(siz == Main.MAX_LINKS_CNT) {
-					Ranker.donePopularity = true;
+			// if(!Ranker.donePopularity) {
+			// 	int siz = dbController.getCrawlingSize(conn);
+			// 	if(siz == Main.MAX_LINKS_CNT) {
+			// 		Ranker.donePopularity = true;
 					
-					Hashtable<String, ArrayList<String>> pointingWebsites = new Hashtable<String, ArrayList<String>>();
-					Hashtable<String, Integer> pointedToCount = new Hashtable<String, Integer>();
+			// 		Hashtable<String, ArrayList<String>> pointingWebsites = new Hashtable<String, ArrayList<String>>();
+			// 		Hashtable<String, Integer> pointedToCount = new Hashtable<String, Integer>();
 					
-					ArrayList<String> URLs = dbController.getAllURLs(conn);
+			// 		ArrayList<String> URLs = dbController.getAllURLs(conn);
 
-					for(String url:URLs) {
-						pointingWebsites.put(url, dbController.getPointedFromURLs(conn, url));
-						pointedToCount.put(url, dbController.getPointingToCount(conn, url));
-					}
+			// 		for(String url:URLs) {
+			// 			pointingWebsites.put(url, dbController.getPointedFromURLs(conn, url));
+			// 			pointedToCount.put(url, dbController.getPointingToCount(conn, url));
+			// 		}
 					
-					Ranker.calculatePopularity(pointingWebsites, pointedToCount);
-				}
-			}
+			// 		Ranker.calculatePopularity(pointingWebsites, pointedToCount);
+			// 	}
+			// }
 
 			
 			
+			Hashtable<String, Double> popularity = dbController.getPopularity(conn);
 			Object result;
 			
 			
@@ -98,13 +108,13 @@ public class SearchEngine extends HttpServlet{
 				query = query.replaceAll("[^a-zA-Z0-9 ]", "");
 				
 				PhraseSearch phSearch = new PhraseSearch(invertedFile, linkDatabase, dummyTotalNumberOfDocuments,dummyLocation, query);
-				result = phSearch.phraseSearch();
+				result = phSearch.phraseSearch(popularity);
 				
 				json = new JSONArray((ArrayList<OutputValue>)result);
 			}
 			else
 			{
-				Ranker ranker = new Ranker (invertedFile, linkDatabase, dummyTotalNumberOfDocuments, type, dummyLocation);
+				Ranker ranker = new Ranker (invertedFile, linkDatabase, dummyTotalNumberOfDocuments, type, dummyLocation, popularity);
 				result = ranker.rank(conn, dbController);
 				
 				if(type == 0) {
@@ -147,7 +157,7 @@ public class SearchEngine extends HttpServlet{
 			e.printStackTrace();
 		}
 		
-		*/
+		
 	}
 	
 	public static ArrayList<String> query(String sentence) throws FileNotFoundException,Exception
@@ -198,8 +208,16 @@ public class SearchEngine extends HttpServlet{
 				{
 					linkFileElement = dbController.getUrlFile(conn,Integer.parseInt(invertedFileElement.get(j)));
 					invertedFileElement.set(j,linkFileElement.get(1));
+
+					/*
+					 ************************************ 
+					 the last two argument will change for website value
+					 ************************************
+					 */
 					
-					WebsiteValue websiteValue = new WebsiteValue(Integer.parseInt(linkFileElement.get(3)), linkFileElement.get(0), linkFileElement.get(2));
+					String dummyWebsiteLocation = "egypt";
+					LocalDate dummyPublishedDate =  LocalDate.now();
+					WebsiteValue websiteValue = new WebsiteValue(Integer.parseInt(linkFileElement.get(3)), linkFileElement.get(0), linkFileElement.get(2),dummyWebsiteLocation,dummyPublishedDate);
 					linkDatabase.put(linkFileElement.get(1), websiteValue);
 					
 					WordValue wordvalue = new WordValue(invertedFileElement.get(j), Integer.parseInt(invertedFileElement.get(j+3)), Integer.parseInt(invertedFileElement.get(j+1)), Integer.parseInt(invertedFileElement.get(j+2)));

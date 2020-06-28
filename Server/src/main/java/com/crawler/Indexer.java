@@ -37,13 +37,17 @@ public class Indexer {
 	}
 	
 	private DBController controller;
-	
+	private Connection mainIndexerConnection;
 	private Object DBMutex;
+	static int currentNonIndexedSize;
 	
 	
 	public Indexer(DBController control, Object dbmutex) throws ClassNotFoundException, SQLException {
 		controller = control;
 		DBMutex = dbmutex;
+		mainIndexerConnection = controller.connect();
+		currentNonIndexedSize = controller.checkNonIndexed(mainIndexerConnection);
+		mainIndexerConnection.close();
 	}
 	
 	// Needed data of the URL record
@@ -106,12 +110,6 @@ public class Indexer {
 			// Establish a connection for each thread separately
 			producerConnection = controller.connect();
 		}
-
-		@Override
-		protected void finalize() throws Throwable {
-			// TODO Auto-generated method stub
-			super.finalize();
-		}
 		
 		public void run()
 		{
@@ -122,7 +120,7 @@ public class Indexer {
 					try {
 						// Inserting URL from the crawler initializes is_indexed with FALSE
 						// Check if [is_indexed = false] is existing
-						// while(Main.currentNonIndexedSize==0) {
+						// while(currentNonIndexedSize==0) {
 							
 						// 	// Wait untill a notification of insertion
 						// 	try {
@@ -134,7 +132,7 @@ public class Indexer {
 						// Get & Mark available row(s)
 
 						
-						int limit = (Main.currentNonIndexedSize + Main.INDEXER_CNT - 1) / Main.INDEXER_CNT;
+						int limit = (currentNonIndexedSize + Main.INDEXER_CNT - 1) / Main.INDEXER_CNT;
 
 						res = controller.getNonIndexedRows(producerConnection,limit);
 						int cnt = controller.markNonIndexedRows(producerConnection,limit);
@@ -146,7 +144,7 @@ public class Indexer {
 							return;
 						}
 
-						Main.currentNonIndexedSize -= cnt;
+						currentNonIndexedSize -= cnt;
 					} catch (SQLException e) {
 						e.printStackTrace();
 						continue;

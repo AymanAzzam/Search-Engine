@@ -3,6 +3,8 @@ package com.crawler;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 
 public class Ranker {
@@ -131,9 +133,11 @@ public class Ranker {
 			}
 
 			// add publishedDate weight to tf-idf
-			Date publishedDate = linkDatabase.get(key).getPublishedDate();
+			//Date publishedDate = linkDatabase.get(key).getPublishedDate();
+			/// date format yyyy/mm/dd as string
+			LocalDate publishedDate = linkDatabase.get(key).getPublishedDate();
 			if (publishedDate != null){
-				counter += 0.005; // to be changed
+				counter += calculateDateWeight(publishedDate); 
 			}
 			
 			WebsiteTFIDFPair pair = new WebsiteTFIDFPair(key, counter, preTFIDFTable.get(key).getNumeberOfWords());
@@ -142,6 +146,20 @@ public class Ranker {
 		
 		Collections.sort(websiteTFIDFList); //sort descendingly -- override CompareTo
 		return websiteTFIDFList;		
+	}
+
+	private Double calculateDateWeight(LocalDate publishedDate) {
+		Double weight = 0.003;
+		LocalDate currentDate = LocalDate.now(); // Create a date object
+		long noOfDaysBetween = ChronoUnit.DAYS.between(publishedDate, currentDate);
+		if (noOfDaysBetween == 0){
+			weight *= 1;
+		}
+		else{
+			weight *= 1/noOfDaysBetween;
+		}
+		
+		return weight;
 	}
 	
 	public static Hashtable<String, Double> calculatePopularity(Hashtable<String, ArrayList<String>> pointingWebsites,
