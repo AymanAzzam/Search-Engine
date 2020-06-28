@@ -217,7 +217,7 @@ public class SearchEngine extends HttpServlet{
 					
 					String dummyWebsiteLocation = "egypt";
 					LocalDate dummyPublishedDate =  LocalDate.now();
-					WebsiteValue websiteValue = new WebsiteValue(Integer.parseInt(linkFileElement.get(3)), linkFileElement.get(0), linkFileElement.get(2),dummyWebsiteLocation,dummyPublishedDate);
+					WebsiteValue websiteValue = new WebsiteValue(Integer.parseInt(linkFileElement.get(3)), linkFileElement.get(0), linkFileElement.get(2), linkFileElement.get(5), dummyPublishedDate, Integer.parseInt(linkFileElement.get(4)));
 					linkDatabase.put(linkFileElement.get(1), websiteValue);
 					
 					WordValue wordvalue = new WordValue(invertedFileElement.get(j), Integer.parseInt(invertedFileElement.get(j+3)), Integer.parseInt(invertedFileElement.get(j+1)), Integer.parseInt(invertedFileElement.get(j+2)));
