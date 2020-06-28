@@ -120,16 +120,16 @@ public class Ranker {
 				// System.out.println(tf + " " + idf);
 			}
 			
-			// System.out.println(key + "\t" + counter + "\t" + popularity.get(key));
 			// add popularity to tf-idf
 			counter += popularity.get(key);
-			// if (donePopularity == true){
-			// } 
+			
+			// add frequency weight to tf-idf
+			counter += 0.05 * linkDatabase.get(key).getFrequency();
 
 			// add location weight to tf-idf
 			String websiteLocation = linkDatabase.get(key).getLocation();
 			if (userLocation == websiteLocation){
-				counter += 0.005;
+				counter += 0.05;
 			}
 
 			// add publishedDate weight to tf-idf
