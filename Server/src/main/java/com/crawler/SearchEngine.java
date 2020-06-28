@@ -21,14 +21,13 @@ public class SearchEngine extends HttpServlet{
 	
 	public static void main(String []args) throws FileNotFoundException,Exception {
 			  
-		
 		//Receiving Request called query it's type is query
 		
 		try {
 			
 			//Receiving Request called query it's type is query
 			
-			String query = "youtube" ;
+			String query = "top rated movies" ;
 			
 			int type = 0;
 			
@@ -44,40 +43,66 @@ public class SearchEngine extends HttpServlet{
 			
 			for(int i=1; i<queryWords.size(); i++)
 			{
-				
+
 				ArrayList<WordValue> invertedFileTempList = new ArrayList<WordValue> ();
 				
 				invertedFileElement = dbController.getInvertedFile(conn,queryWords.get(i));
 				
+				String dummyWebsiteLocation = "egypt";
+				LocalDate dummyPublishedDate =  LocalDate.now();
 				for(int j=0; j<invertedFileElement.size(); j+=4)
 				{
 					linkFileElement = dbController.getUrlFile(conn,Integer.parseInt(invertedFileElement.get(j)));
 					invertedFileElement.set(j,linkFileElement.get(1));
-					
+
 					/*
 					 ************************************ 
 					 the last two argument will change for website value
 					 ************************************
 					 */
 					
-					String dummyWebsiteLocation = "egypt";
-					LocalDate dummyPublishedDate =  LocalDate.now();
 					WebsiteValue websiteValue = new WebsiteValue(Integer.parseInt(linkFileElement.get(3)), linkFileElement.get(0), linkFileElement.get(2), linkFileElement.get(5), dummyPublishedDate, Integer.parseInt(linkFileElement.get(4)));
-					linkDatabase.put(linkFileElement.get(1), websiteValue);
 					
+					linkDatabase.putIfAbsent(linkFileElement.get(1), websiteValue);
+					
+
 					WordValue wordvalue = new WordValue(invertedFileElement.get(j), Integer.parseInt(invertedFileElement.get(j+3)), Integer.parseInt(invertedFileElement.get(j+1)), Integer.parseInt(invertedFileElement.get(j+2)));
 					invertedFileTempList.add(wordvalue);
 				}
 				
+				ArrayList<String> matchingURLs = dbController.getMatchingURLsAndTitle(conn, queryWords.get(i));
+
+				for(int j=0 ; j<matchingURLs.size() ; j+=6) {
+					String url = matchingURLs.get(j);
+					WebsiteValue websiteValue = new WebsiteValue(Integer.parseInt(matchingURLs.get(j+1)), matchingURLs.get(j+2), matchingURLs.get(j+3), matchingURLs.get(j+4), dummyPublishedDate, Integer.parseInt(matchingURLs.get(j+5)));
+					linkDatabase.putIfAbsent(url, websiteValue);
+
+					boolean exists = false;
+
+					for(WordValue w:invertedFileTempList) {
+						if(w.websiteName.equals(url)) {
+							exists = true;
+							break;
+						}
+					}
+
+					if(!exists) {
+						invertedFileTempList.add(new WordValue(url, 0, 0, 0));
+					}
+				}
+
+
 				invertedFile.put(queryWords.get(i), invertedFileTempList);
 			}
 			
 			Integer dummyTotalNumberOfDocuments = dbController.getURLsSize(conn);
 			
+			// System.out.println("POP: " + Ranker.donePopularity);
 
 			// if(!Ranker.donePopularity) {
 			// 	int siz = dbController.getCrawlingSize(conn);
-			// 	if(siz == Main.MAX_LINKS_CNT) {
+			// 	System.out.println(siz + " #### " + Main.MAX_LINKS_CNT);
+			// 	if(siz >= Main.MAX_LINKS_CNT) {
 			// 		Ranker.donePopularity = true;
 					
 			// 		Hashtable<String, ArrayList<String>> pointingWebsites = new Hashtable<String, ArrayList<String>>();
@@ -89,27 +114,24 @@ public class SearchEngine extends HttpServlet{
 			// 			pointingWebsites.put(url, dbController.getPointedFromURLs(conn, url));
 			// 			pointedToCount.put(url, dbController.getPointingToCount(conn, url));
 			// 		}
-					
+			// 		System.out.println("POPULARITY##########");
+
 			// 		Ranker.calculatePopularity(pointingWebsites, pointedToCount);
 			// 	}
 			// }
 
-			
-			
 			Hashtable<String, Double> popularity = dbController.getPopularity(conn);
+
 			Object result;
 			
-			
-			
 			JSONArray json;
-			String dummyLocation = "Egypt";
+			String dummyLocation = "Egy";
 			if(queryWords.get(0) == "1")
 			{
 				query = query.replaceAll("[^a-zA-Z0-9 ]", "");
-				
 				PhraseSearch phSearch = new PhraseSearch(invertedFile, linkDatabase, dummyTotalNumberOfDocuments,dummyLocation, query);
 				result = phSearch.phraseSearch(popularity);
-				
+
 				json = new JSONArray((ArrayList<OutputValue>)result);
 			}
 			else
@@ -119,24 +141,23 @@ public class SearchEngine extends HttpServlet{
 				
 				if(type == 0) {
 					
-					ArrayList<OutputValue> tmp = ((ArrayList<OutputValue>)result);
-					for(int i=1 ; i<queryWords.size() ; ++i) {
-						ArrayList<OutputValue> ret = dbController.getMatchingURLs(conn, queryWords.get(i));
-						tmp.addAll(0, ret);
-					}
-
-					int siz = tmp.size();
-					for(int i=0 ; i<siz ; ++i) {
-						for(int j=i+1 ; j<siz ; ++j) {
-							if(tmp.get(i).getWebsiteName().equals(tmp.get(j).getWebsiteName())) {
-								// System.out.println(tmp.get(i).getWebsiteName() + " " + tmp.get(j).getWebsiteName());
-								tmp.remove(j);
-								--j;
-								--siz;
-							}
-						}
-					}
-
+					// ArrayList<OutputValue> tmp = ((ArrayList<OutputValue>)result);
+					// for(int i=1 ; i<queryWords.size() ; ++i) {
+					// 	ArrayList<OutputValue> ret = dbController.getMatchingURLs(conn, queryWords.get(i));
+					// 	tmp.addAll(0, ret);
+					// }
+					
+					// int siz = tmp.size();
+					// for(int i=0 ; i<siz ; ++i) {
+					// 	for(int j=i+1 ; j<siz ; ++j) {
+					// 		if(tmp.get(i).getWebsiteName().equals(tmp.get(j).getWebsiteName())) {
+					// 			tmp.remove(j);
+					// 			--j;
+					// 			--siz;
+					// 		}
+					// 	}
+					// }
+					
 					json = new JSONArray((ArrayList<OutputValue>)result);
 				}
 				else {
@@ -204,6 +225,8 @@ public class SearchEngine extends HttpServlet{
 				
 				invertedFileElement = dbController.getInvertedFile(conn,queryWords.get(i));
 				
+				String dummyWebsiteLocation = "egypt";
+				LocalDate dummyPublishedDate =  LocalDate.now();
 				for(int j=0; j<invertedFileElement.size(); j+=4)
 				{
 					linkFileElement = dbController.getUrlFile(conn,Integer.parseInt(invertedFileElement.get(j)));
@@ -215,13 +238,34 @@ public class SearchEngine extends HttpServlet{
 					 ************************************
 					 */
 					
-					String dummyWebsiteLocation = "egypt";
-					LocalDate dummyPublishedDate =  LocalDate.now();
 					WebsiteValue websiteValue = new WebsiteValue(Integer.parseInt(linkFileElement.get(3)), linkFileElement.get(0), linkFileElement.get(2), linkFileElement.get(5), dummyPublishedDate, Integer.parseInt(linkFileElement.get(4)));
-					linkDatabase.put(linkFileElement.get(1), websiteValue);
 					
+					linkDatabase.putIfAbsent(linkFileElement.get(1), websiteValue);
+					
+
 					WordValue wordvalue = new WordValue(invertedFileElement.get(j), Integer.parseInt(invertedFileElement.get(j+3)), Integer.parseInt(invertedFileElement.get(j+1)), Integer.parseInt(invertedFileElement.get(j+2)));
 					invertedFileTempList.add(wordvalue);
+				}
+				
+				ArrayList<String> matchingURLs = dbController.getMatchingURLsAndTitle(conn, queryWords.get(i));
+
+				for(int j=0 ; j<matchingURLs.size() ; j+=6) {
+					String url = matchingURLs.get(j);
+					WebsiteValue websiteValue = new WebsiteValue(Integer.parseInt(matchingURLs.get(j+1)), matchingURLs.get(j+2), matchingURLs.get(j+3), matchingURLs.get(j+4), dummyPublishedDate, Integer.parseInt(matchingURLs.get(j+5)));
+					linkDatabase.putIfAbsent(url, websiteValue);
+
+					boolean exists = false;
+
+					for(WordValue w:invertedFileTempList) {
+						if(w.websiteName.equals(url)) {
+							exists = true;
+							break;
+						}
+					}
+
+					if(!exists) {
+						invertedFileTempList.add(new WordValue(url, 0, 0, 0));
+					}
 				}
 				
 				invertedFile.put(queryWords.get(i), invertedFileTempList);
@@ -275,22 +319,22 @@ public class SearchEngine extends HttpServlet{
 				
 				if(type == 0) {
 					
-					ArrayList<OutputValue> tmp = ((ArrayList<OutputValue>)result);
-					for(int i=1 ; i<queryWords.size() ; ++i) {
-						ArrayList<OutputValue> ret = dbController.getMatchingURLs(conn, queryWords.get(i));
-						tmp.addAll(0, ret);
-					}
+					// ArrayList<OutputValue> tmp = ((ArrayList<OutputValue>)result);
+					// for(int i=1 ; i<queryWords.size() ; ++i) {
+					// 	ArrayList<OutputValue> ret = dbController.getMatchingURLs(conn, queryWords.get(i));
+					// 	tmp.addAll(0, ret);
+					// }
 					
-					int siz = tmp.size();
-					for(int i=0 ; i<siz ; ++i) {
-						for(int j=i+1 ; j<siz ; ++j) {
-							if(tmp.get(i).getWebsiteName().equals(tmp.get(j).getWebsiteName())) {
-								tmp.remove(j);
-								--j;
-								--siz;
-							}
-						}
-					}
+					// int siz = tmp.size();
+					// for(int i=0 ; i<siz ; ++i) {
+					// 	for(int j=i+1 ; j<siz ; ++j) {
+					// 		if(tmp.get(i).getWebsiteName().equals(tmp.get(j).getWebsiteName())) {
+					// 			tmp.remove(j);
+					// 			--j;
+					// 			--siz;
+					// 		}
+					// 	}
+					// }
 					
 					json = new JSONArray((ArrayList<OutputValue>)result);
 				}
