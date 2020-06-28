@@ -48,7 +48,8 @@ public class Crawler {
 
 		totalCrawlingSize = controller.getCrawlingSize(mainCrawlerConnection);
 		currentNonCrawledSize = controller.checkNonCrawled(mainCrawlerConnection);
-		Main.numberOfConnections++;
+		mainCrawlerConnection.close();
+		// Main.numberOfConnections++;
 	}
 
 	// seed
@@ -160,11 +161,7 @@ public class Crawler {
 			for (Element webpPage : webPagesOnHtml) {
 				String newURL = webpPage.attr("abs:href");
 
-				/**
-				 * TODO: Validate URL Here   --> done
-				 */
-				
-				
+				// Validate URL
 				String cleanURL = validateURL(newURL);
 				if(cleanURL != null){
 					URLs.add(cleanURL);
@@ -218,6 +215,7 @@ public class Crawler {
 					// 	}
 					// }
 					
+					// Validate Image
 					try {
 						
 						URL realURL = new URL(imageLink);
