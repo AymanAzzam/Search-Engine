@@ -8,13 +8,16 @@ public class WebsiteValue {
 	String content;
 	String location;
 	LocalDate publishedDate;
+	int frequency;
 	
-	public WebsiteValue(Integer totalNumberOfWords, String headerText, String content,String location, LocalDate publishedDate) {
+	public WebsiteValue(Integer totalNumberOfWords, String headerText, String content,String location, LocalDate publishedDate
+		, int frequency) {
 		this.totalNumberOfWords = totalNumberOfWords;
 		this.headerText = headerText;
 		this.content = content;
 		this.location = location;
 		this.publishedDate = publishedDate;
+		this.frequency = frequency;
 	}
 	
 	public Integer getTotalNumberOfWords() {
@@ -35,6 +38,10 @@ public class WebsiteValue {
 
 	public LocalDate getPublishedDate(){
 		return publishedDate;
+	}
+
+	public int getFrequency() {
+		return frequency;
 	}
 	
 	public String getSummary() {
