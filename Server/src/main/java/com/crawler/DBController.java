@@ -642,24 +642,30 @@ public class DBController {
 		return ret;
 	}
 
-	public void incrementURLFrequency(Connection conn, String url) throws SQLException {
+	public int incrementURLFrequency(Connection conn, String url) throws SQLException {
 
+		int ret = 0;
 		Statement stmt = conn.createStatement();
 
-		stmt.executeUpdate(String.format("UPDATE %s SET %s = %s + 1 where %s ='%s';"
-			, URL_table, frequency_col, frequency_col, URLName_col, url));
+		ret = stmt.executeUpdate(String.format("UPDATE %s SET %s = %s + 1 where %s ='%s';"
+				, URL_table, frequency_col, frequency_col, URLName_col, url));
 
 		stmt.close();
+
+		return ret;
 	}
 
-	public void incrementImageFrequency(Connection conn, String url) throws SQLException {
+	public int incrementImageFrequency(Connection conn, String url) throws SQLException {
+
+		int ret = 0;
 
 		Statement stmt = conn.createStatement();
 
-		stmt.executeUpdate(String.format("UPDATE %s SET %s = %s + 1 where %s ='%s';"
-			, image_table, frequency_col, frequency_col, imageURL_col, url));
+		ret = stmt.executeUpdate(String.format("UPDATE %s SET %s = %s + 1 where %s ='%s';"
+				, image_table, frequency_col, frequency_col, imageURL_col, url));
 
 		stmt.close();
+		return ret;
 	}
 
 	// Close a database connection
