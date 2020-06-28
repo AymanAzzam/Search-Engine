@@ -385,14 +385,20 @@ public class DBController {
 	}
 	
 	// Insert a URL with its extracted document path
-	public boolean insertURL(Connection conn, String URL, String filePath) {
+	public boolean insertURL(Connection conn, String URL, String filePath, String location) {
 		
+		if(location == null) {
+			location = new String("NULL");
+		} else {
+			location = "'" + location + "'";
+		}
+
 		try {
 
 			Statement stmt = conn.createStatement();
-			stmt.executeUpdate(String.format("INSERT INTO %s(%s,%s) "
-					+ "VALUES('%s','%s');",
-					URL_table, URLName_col, URLFilePath_col, URL, filePath));
+			stmt.executeUpdate(String.format("INSERT INTO %s(%s,%s,%s) "
+					+ "VALUES('%s','%s',%s);",
+					URL_table, URLName_col, URLFilePath_col, location_col, URL, filePath, location));
 			stmt.close();
 		} catch (SQLException e) {
 			return false;
@@ -546,6 +552,8 @@ public class DBController {
 					out.add(rs.getString(URLName_col));
 					out.add(rs.getString(URLContent_col));	
 					out.add(rs.getString(countWords_col));
+					out.add(rs.getString(frequency_col));
+					out.add(rs.getString(location_col));
 				}
 
 				stmt.close();
