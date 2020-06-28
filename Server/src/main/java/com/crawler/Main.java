@@ -66,7 +66,7 @@ public class Main {
         // Creating Tables in Database
 		Connection connect = controller.connect();
 		if(DEBUG_MODE) {
-			controller.drop(connect);		// For Testing Purpose
+			//controller.drop(connect);		// For Testing Purpose
 			File[] fi = f.listFiles();
 			for(File ff:fi) {
 				ff.delete();
