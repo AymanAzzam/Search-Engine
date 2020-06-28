@@ -206,6 +206,9 @@ public class SearchEngine extends HttpServlet{
 			String typeString = request.getParameter("Type");
 			
 			int type = typeString.equals("Image")?1:0;
+
+			
+			System.out.println("Search:\t\t" + typeString + "\t" + query);
 			
 			ArrayList<String> queryWords, invertedFileElement, linkFileElement;
 			
