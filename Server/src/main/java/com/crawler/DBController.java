@@ -11,7 +11,7 @@ import com.crawler.Indexer.WordRecord;
 public class DBController {
 
 	
-	final String DBName = "SE";
+	final String DBName = "Search_Engine";
 	final String username = "root";
 	final String password = "";
 	
@@ -564,19 +564,24 @@ public class DBController {
 		return out;
 	}
 
-	public ArrayList<OutputValue> getMatchingURLs(Connection conn, String word) throws SQLException{
-		ArrayList<OutputValue> ret = new ArrayList<OutputValue>();
+	public ArrayList<String> getMatchingURLsAndTitle(Connection conn, String word) throws SQLException{
+		ArrayList<String> ret = new ArrayList<String>();
 
 		Statement stmt = conn.createStatement();
 		word = "%" + word + "%";
 		ResultSet res = stmt.executeQuery(String.format("SELECT * FROM %s"
-				+ " WHERE %s like '%s';", URL_table, URLName_col, word));
+				+ " WHERE (%s LIKE '%s') OR (%s LIKE '%s');"
+				, URL_table, URLName_col, word, URLTitle_col, word));
 
 
-		while(res.next())
-		{
-			String content = res.getString(URLContent_col);
-			ret.add(new OutputValue(res.getString(URLName_col), res.getString(URLTitle_col), content.substring(0,Math.min(500,content.length()))));
+		while(res.next()) {
+			ret.add(res.getString(URLName_col));
+			ret.add(res.getString(countWords_col));
+			ret.add(res.getString(URLTitle_col));
+			ret.add(res.getString(URLContent_col));
+			ret.add(res.getString(location_col));
+			// Add Date Here
+			ret.add(res.getString(frequency_col));
 		}
 		stmt.close();
 		res.close();
