@@ -86,7 +86,7 @@ public class Main {
 
 		prodList = new ArrayList<Producer>();
 		crawlList = new ArrayList<Crawl>();
-		
+		/*
 		for(int i=0 ; i<CRAWLER_CNT ; ++i) {
 			crawlList.add(crawler.new Crawl());
 			connectionSemaphore.acquire();
@@ -98,7 +98,7 @@ public class Main {
 			connectionSemaphore.release();
 		}
 		while(connectionSemaphore.availablePermits() != MAX_CONNECTIONS);
-
+		*/
         // Create Indexer Instance
 		Indexer indexer = new Indexer(controller, DBMutex);
 		
