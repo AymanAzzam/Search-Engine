@@ -108,8 +108,12 @@ public class Ranker {
 			Double counter = 0.0;
 			Double tf = 0.0;
 			Double idf = 0.0;
+			Double titleWeight = 0.0;
+			Integer URLMatchingWeight = 0;
 			// Integer index = 0;
 			String word;
+
+
 			for (int i=0; i< preTFIDFTable.get(key).getInnerArraySize(); i++) {
 				word = preTFIDFTable.get(key).getWordString(i);
 				// index = preTFIDFTable.get(key).getWordIndex(i);
@@ -117,20 +121,39 @@ public class Ranker {
 				tf = preTFIDFTable.get(key).getWordsWeight(i);
 				idf = mapIDF.get(word);
 				counter = counter + tf*idf;
+
 				// System.out.println(tf + " " + idf);
+			}
+
+			for(String w:invertedFile.keySet()) {
+				
+				if(key.toLowerCase().contains(w)) {
+					URLMatchingWeight += 1;
+				}
+
+				if(linkDatabase.get(key).getHeaderText().toLowerCase().contains(w)) {
+					titleWeight += idf;		// Check if IDF is appropriate
+				}
 			}
 			
 			// add popularity to tf-idf
 			counter += popularity.get(key);
 			
 			// add frequency weight to tf-idf
-			counter += 0.05 * linkDatabase.get(key).getFrequency();
+			counter += 0.005 * linkDatabase.get(key).getFrequency();
+			
+			// add title match weight to tf-idf
+			counter += titleWeight;
+			
+			// add url match weight to tf-idf
+			counter += URLMatchingWeight;
 
 			// add location weight to tf-idf
 			String websiteLocation = linkDatabase.get(key).getLocation();
 			if (userLocation == websiteLocation){
 				counter += 0.05;
 			}
+
 
 			// add publishedDate weight to tf-idf
 			//Date publishedDate = linkDatabase.get(key).getPublishedDate();
@@ -145,6 +168,13 @@ public class Ranker {
 		}
 		
 		Collections.sort(websiteTFIDFList); //sort descendingly -- override CompareTo
+		
+		for(WebsiteTFIDFPair e:websiteTFIDFList) {
+			System.out.println(e.TFIDFValue + "\t" + e.websiteName);
+			
+		}
+
+
 		return websiteTFIDFList;		
 	}
 
