@@ -22,6 +22,8 @@ innodb_default_row_format=dynamic
 innodb_file_format=barracuda
 innodb_file_per_table=true
 innodb_large_prefix=true
+
+max_allowed_packet = 256M
 ```
 4. Start Tomcat and Mysql using the following commands.
 ```sh
