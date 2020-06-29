@@ -64,6 +64,13 @@
       <artifactId>stanford-corenlp</artifactId>
       <version>4.0.0</version>
   </dependency>
+
+  <dependency>
+    <groupId>com.github.crawler-commons</groupId>
+    <artifactId>crawler-commons</artifactId>
+    <version>1.0</version>
+  </dependency>
+
   
   <dependency>
       <groupId>edu.stanford.nlp</groupId>
