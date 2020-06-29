@@ -3,20 +3,67 @@ package com.crawler;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Properties;
+
 import javax.servlet.http.*;
 
 import org.json.JSONArray;
 
-public class SearchEngine extends HttpServlet{
-	
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.util.CoreMap;
+
+public class SearchEngine extends HttpServlet {
+
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
 	final static int MAX_RESULTS = 100;
+
+	public class TrendsProcessor extends Thread {
+		String query, location;
+		DBController controller;
+		Connection conn;
+
+		public TrendsProcessor(String q, String loc, DBController dbController) throws SQLException {
+			query = new String(q);
+			location = new String(loc);
+			controller = dbController;
+			conn = dbController.connect();
+		}
+
+		public void run() {
+
+			Annotation annotator = new Annotation(query);
+
+			Properties properties = new Properties();
+			properties.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,entitymentions");
+
+			StanfordCoreNLP pipeline = new StanfordCoreNLP(properties);
+			pipeline.annotate(annotator);
+	
+			for(CoreMap sentence : annotator.get(CoreAnnotations.SentencesAnnotation.class)) {
+				for(CoreMap entityMention : sentence.get(CoreAnnotations.MentionsAnnotation.class)) {
+					String type = entityMention.get(CoreAnnotations.EntityTypeAnnotation.class);
+					String name = entityMention.toString();
+
+					if(type.equals("PERSON")) {
+						try {
+							controller.insertTrend(conn, name, location);
+						} catch (SQLException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+	}
 	
 	
 	public static void main(String []args) throws FileNotFoundException,Exception {
@@ -48,7 +95,6 @@ public class SearchEngine extends HttpServlet{
 				
 				invertedFileElement = dbController.getInvertedFile(conn,queryWords.get(i));
 				
-				String dummyWebsiteLocation = "egypt";
 				LocalDate dummyPublishedDate =  LocalDate.now();
 				for(int j=0; j<invertedFileElement.size(); j+=4)
 				{
@@ -125,18 +171,18 @@ public class SearchEngine extends HttpServlet{
 			Object result;
 			
 			JSONArray json;
-			String dummyLocation = "Egy";
+			String location = "Egy";
 			if(queryWords.get(0) == "1")
 			{
 				query = query.replaceAll("[^a-zA-Z0-9 ]", "");
-				PhraseSearch phSearch = new PhraseSearch(invertedFile, linkDatabase, dummyTotalNumberOfDocuments,dummyLocation, query);
+				PhraseSearch phSearch = new PhraseSearch(invertedFile, linkDatabase, dummyTotalNumberOfDocuments,location, query);
 				result = phSearch.phraseSearch(popularity);
 
 				json = new JSONArray((ArrayList<OutputValue>)result);
 			}
 			else
 			{
-				Ranker ranker = new Ranker (invertedFile, linkDatabase, dummyTotalNumberOfDocuments, type, dummyLocation, popularity);
+				Ranker ranker = new Ranker (invertedFile, linkDatabase, dummyTotalNumberOfDocuments, type, location, popularity);
 				result = ranker.rank(conn, dbController);
 				
 				if(type == 0) {
@@ -196,7 +242,7 @@ public class SearchEngine extends HttpServlet{
     	
     	return queryWords;
  	}
- 
+	
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		try {
 			
@@ -204,8 +250,10 @@ public class SearchEngine extends HttpServlet{
 			
 			String query = request.getParameter("Query") ;
 			String typeString = request.getParameter("Type");
+			String location = request.getParameter("Location");
 			
 			int type = typeString.equals("Image")?1:0;
+
 
 			
 			System.out.println("Search:\t\t" + typeString + "\t" + query);
@@ -216,6 +264,10 @@ public class SearchEngine extends HttpServlet{
 			DBController dbController = new DBController();
 			Connection conn = dbController.connect();
 			
+			// Processing the Trend
+			new TrendsProcessor(query, location, dbController).start();
+
+
 			queryWords = query(query);
 			
 			Hashtable<String, WebsiteValue> linkDatabase = new Hashtable <String, WebsiteValue> ();
@@ -228,7 +280,6 @@ public class SearchEngine extends HttpServlet{
 				
 				invertedFileElement = dbController.getInvertedFile(conn,queryWords.get(i));
 				
-				String dummyWebsiteLocation = "egypt";
 				LocalDate dummyPublishedDate =  LocalDate.now();
 				for(int j=0; j<invertedFileElement.size(); j+=4)
 				{
@@ -306,18 +357,18 @@ public class SearchEngine extends HttpServlet{
 		    response.setContentType("application/json");
 		    response.setCharacterEncoding("UTF-8");
 			JSONArray json;
-			String dummyLocation = "Egy";
+			// String location = "Egy";
 			if(queryWords.get(0) == "1")
 			{
 				query = query.replaceAll("[^a-zA-Z0-9 ]", "");
-				PhraseSearch phSearch = new PhraseSearch(invertedFile, linkDatabase, dummyTotalNumberOfDocuments,dummyLocation, query);
+				PhraseSearch phSearch = new PhraseSearch(invertedFile, linkDatabase, dummyTotalNumberOfDocuments,location, query);
 				result = phSearch.phraseSearch(popularity);
 
 				json = new JSONArray((ArrayList<OutputValue>)result);
 			}
 			else
 			{
-				Ranker ranker = new Ranker (invertedFile, linkDatabase, dummyTotalNumberOfDocuments, type, dummyLocation, popularity);
+				Ranker ranker = new Ranker (invertedFile, linkDatabase, dummyTotalNumberOfDocuments, type, location, popularity);
 				result = ranker.rank(conn, dbController);
 				
 				if(type == 0) {
