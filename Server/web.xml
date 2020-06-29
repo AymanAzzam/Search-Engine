@@ -46,4 +46,14 @@
     <servlet-name>URLFrequencyHandler</servlet-name>
     <url-pattern>/IncrementFrequency</url-pattern>
   </servlet-mapping>
+
+  <servlet>
+    <servlet-name>TrendsHandler</servlet-name>
+    <servlet-class>com.crawler.Trends</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>TrendsHandler</servlet-name>
+    <url-pattern>/GetTrends</url-pattern>
+  </servlet-mapping>
 </web-app>
