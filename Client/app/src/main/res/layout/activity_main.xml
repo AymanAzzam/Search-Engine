@@ -30,6 +30,7 @@
 
 
         <RelativeLayout
+            android:id="@+id/search_buttons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/search_phrase">
@@ -60,6 +61,16 @@
                 android:textAllCaps="false"/>
 
         </RelativeLayout>
+
+        <Button
+            android:id="@+id/trend_button"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:text="Trends"
+            android:layout_below="@+id/search_buttons"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="8dp"
+            android:textAllCaps="false"/>
 
     </RelativeLayout>
 </FrameLayout>

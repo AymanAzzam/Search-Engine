@@ -56,7 +56,7 @@ public class SearchableActivity extends AppCompatActivity {
 
         /*** Send GET Request ***/
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://ec2-3-85-34-39.compute-1.amazonaws.com:8080/GetResult?Query=" + query.replace(" ","+") + "&Type=" + type;
+        String url = "http://ec2-54-224-132-31.compute-1.amazonaws.com:8080/GetResult?Query=" + query.replace(" ","+") + "&Type=" + type;
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONArray>() {
                     @Override

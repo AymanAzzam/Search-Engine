@@ -6,15 +6,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SearchView;
+import android.widget.Toast;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     SearchView search_view;
-    Button btNormalSearch,btImageSearch;
+    Button btNormalSearch,btImageSearch,btTrends;
     SearchManager search_manager;
 
     @Override
@@ -26,6 +32,16 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         search_view = (SearchView)(findViewById(R.id.search_phrase));
         btNormalSearch = (Button) findViewById(R.id.crawler_search);
         btImageSearch = (Button) findViewById(R.id.image_search);
+        btTrends = (Button) findViewById(R.id.trend_button);
+
+        /******************* Pressing Trends Button *********************/
+        btTrends.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this,TrendsActivity.class);
+                startActivity(intent);
+            }
+        });
 
         /************* Pressing Normal Search Button Action *************/
         btNormalSearch.setOnClickListener(new View.OnClickListener() {
