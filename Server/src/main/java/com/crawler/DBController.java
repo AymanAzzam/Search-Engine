@@ -49,7 +49,17 @@ public class DBController {
 //	final String URLID_col = "ID";				// PRIMARY
 //	final String URLName_col = "URL";
 	final String isCrawled_col = "is_crawled";
+
+	// URL REF Table
+	final String URL_REF_table = "URL_REF_table";
+	final String pointer_col = "pointer";
+	final String pointed_col = "pointed";
 	
+	// Trends Table
+	final String trends_table = "trends_table";
+	final String person_col = "person";
+	final String country_col = "country";
+	// final String frequency_col = "frequency";
 	
 	
 	public DBController() throws ClassNotFoundException 
@@ -67,8 +77,8 @@ public class DBController {
 	public void drop(Connection conn) throws SQLException {
 		
 		Statement stmt = conn.createStatement();
-		stmt.executeUpdate(String.format("DROP TABLE URL_REF,%s, %s, %s, %s;",
-				image_table, word_table, URL_table, crawl_table));
+		stmt.executeUpdate(String.format("DROP TABLE %s, %s, %s, %s, %s, %s;",
+				trends_table, URL_REF_table, image_table, word_table, URL_table, crawl_table));
 		
 		stmt.close();
 	}
@@ -129,13 +139,23 @@ public class DBController {
 					+ "%s BOOLEAN DEFAULT FALSE);",
 					crawl_table, URLID_col, URLName_col, isCrawled_col));
 
-			stmt.executeUpdate("CREATE TABLE URL_REF ("
-				+ " Pointer VARCHAR(300),"
-				+ " Pointed VARCHAR(300),"
-				+ " PRIMARY KEY(Pointer,Pointed));");
+			// CREATE URL REFERENCE TABLE
+			stmt.executeUpdate(String.format("CREATE TABLE %s ("
+				+ " %s VARCHAR(300),"
+				+ " %s VARCHAR(300),"
+				+ " PRIMARY KEY(%s,%s));"
+				, URL_REF_table, pointer_col, pointed_col, pointer_col, pointed_col));
 				// + " PRIMARY KEY(Pointer,Pointed),"
 				// + " FOREIGN KEY(Pointer) REFERENCES CRAWLING_TABLE(URL) ON DELETE CASCADE,"
 				// + " FOREIGN KEY(Pointed) REFERENCES CRAWLING_TABLE(URL) ON DELETE CASCADE);");
+
+			// CREATE TRENDS TABLE
+			stmt.executeUpdate(String.format("CREATE TABLE %s ("
+				+ " %s VARCHAR(100),"
+				+ " %s VARCHAR(100),"
+				+ " %s INT DEFAULT 0,"
+				+ " PRIMARY KEY(%s, %s));"
+				, trends_table, person_col, country_col, frequency_col, person_col, country_col));
 			
 			stmt.close();
 			System.out.println("Database Tables Created Successfully!");
@@ -150,7 +170,7 @@ public class DBController {
 	public void insertRefs(Connection conn, String pointer, ArrayList<String> pointeds) {
 
 
-		String query = new String("INSERT IGNORE INTO URL_REF VALUES ");
+		String query = new String(String.format("INSERT IGNORE INTO %S VALUES ",URL_REF_table));
 		
 		String values = new String();
 		
@@ -175,7 +195,8 @@ public class DBController {
 		int cnt = 0;
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet res = stmt.executeQuery(String.format("SELECT COUNT(*) FROM URL_REF WHERE POINTER = '%s';",pointer));
+			ResultSet res = stmt.executeQuery(String.format("SELECT COUNT(*) FROM %s WHERE %s = '%s';"
+				, URL_REF_table, pointer_col, pointer));
 			res.next();
 			cnt = res.getInt(1);
 		} catch (SQLException e) {
@@ -188,7 +209,8 @@ public class DBController {
 		ArrayList<String> ret = new ArrayList<String>();
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet res = stmt.executeQuery(String.format("SELECT POINTER FROM URL_REF WHERE POINTED = '%s';",pointed));
+			ResultSet res = stmt.executeQuery(String.format("SELECT POINTER FROM %s WHERE %s = '%s';"
+			, URL_REF_table, pointed_col, pointed));
 			
 			while(res.next()) {
 				ret.add(res.getString(1));
@@ -596,9 +618,9 @@ public class DBController {
 			+ "(SELECT * FROM %s WHERE %s.%s = %s.%s);"
 			,crawl_table, URL_table, crawl_table, URLName_col, URL_table, URLName_col));
 
-		stmt.executeUpdate(String.format("DELETE FROM URL_REF WHERE NOT EXISTS "
-			+ "(SELECT * FROM %s WHERE URL_REF.POINTER = %s.%s AND URL_REF.POINTED = %s.%s);"
-			,URL_table, URL_table, URLName_col, URL_table, URLName_col));
+		stmt.executeUpdate(String.format("DELETE FROM %s WHERE NOT EXISTS "
+			+ "(SELECT * FROM %s WHERE %s.%s = %s.%s AND %s.%s = %s.%s);"
+			, URL_REF_table, URL_table, URL_REF_table, pointer_col, URL_table, URLName_col, URL_REF_table, pointed_col, URL_table, URLName_col));
 		stmt.close();
 	}
 
@@ -665,6 +687,36 @@ public class DBController {
 				, image_table, frequency_col, frequency_col, imageURL_col, url));
 
 		stmt.close();
+		return ret;
+	}
+
+	public void insertTrend(Connection conn, String person, String country) throws SQLException {
+
+		Statement stmt = conn.createStatement();
+		
+		stmt.executeUpdate(String.format("INSERT INTO %s(%s,%s) VALUES ('%s','%s')"
+			+ " ON DUPLICATE KEY UPDATE %s = %s + 1;"
+			, trends_table, person_col, country_col, person, country, frequency_col, frequency_col));
+
+		stmt.close();
+	}
+
+	public ArrayList<String> getTopTrend(Connection conn, String country) throws SQLException {
+
+		ArrayList<String> ret = new ArrayList<String>();
+
+		Statement stmt = conn.createStatement();
+
+		ResultSet res = stmt.executeQuery(String.format("SELECT %s FROM %s WHERE %s = '%s' ORDER BY %s DESC LIMIT 10;"
+			, person_col, trends_table, country_col, country, frequency_col));
+
+		while(res.next()) {
+			ret.add(res.getString(person_col));
+		}
+
+		res.close();
+		stmt.close();
+		
 		return ret;
 	}
 
