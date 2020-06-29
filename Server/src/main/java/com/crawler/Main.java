@@ -65,39 +65,39 @@ public class Main {
         
         // Creating Tables in Database
 		Connection connect = controller.connect();
-		if(DEBUG_MODE) {
-			controller.drop(connect);		// For Testing Purpose
-			File[] fi = f.listFiles();
-			for(File ff:fi) {
-				ff.delete();
-			}
-			f.delete();
-			f.mkdirs();
-		}
-        controller.build(connect);
+		// if(DEBUG_MODE) {
+		// 	controller.drop(connect);		// For Testing Purpose
+		// 	File[] fi = f.listFiles();
+		// 	for(File ff:fi) {
+		// 		ff.delete();
+		// 	}
+		// 	f.delete();
+		// 	f.mkdirs();
+		// }
+        // controller.build(connect);
         
         // currentNonIndexedSize = controller.checkNonIndexed(connect);
 
         connect.close();
         
 		// Create Crawler Instance
-		Crawler crawler = new Crawler(MAX_LINKS_CNT, "seeder.txt", controller, DBMutex, crawlingMutex);
+		// Crawler crawler = new Crawler(MAX_LINKS_CNT, "seeder.txt", controller, DBMutex, crawlingMutex);
 		
 
 		prodList = new ArrayList<Producer>();
-		crawlList = new ArrayList<Crawl>();
+		// crawlList = new ArrayList<Crawl>();
 		
-		for(int i=0 ; i<CRAWLER_CNT ; ++i) {
-			crawlList.add(crawler.new Crawl());
-			connectionSemaphore.acquire();
-			crawlList.get(i).start();
-		}
+		// for(int i=0 ; i<CRAWLER_CNT ; ++i) {
+		// 	crawlList.add(crawler.new Crawl());
+		// 	connectionSemaphore.acquire();
+		// 	crawlList.get(i).start();
+		// }
 
-		for(int i=0 ; i<CRAWLER_CNT ; ++i) {
-			crawlList.get(i).join();
-			connectionSemaphore.release();
-		}
-		while(connectionSemaphore.availablePermits() != MAX_CONNECTIONS);
+		// for(int i=0 ; i<CRAWLER_CNT ; ++i) {
+		// 	crawlList.get(i).join();
+		// 	connectionSemaphore.release();
+		// }
+		// while(connectionSemaphore.availablePermits() != MAX_CONNECTIONS);
 
         // Create Indexer Instance
 		Indexer indexer = new Indexer(controller, DBMutex);
