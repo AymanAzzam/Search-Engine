@@ -5,11 +5,14 @@ import androidx.core.app.ActivityCompat;
 
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -94,6 +97,20 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         if(type == 0)    intent.putExtra("type","Image");
         else                        intent.putExtra("type","Normal");
+
+        /*** Checking GPS is Enabled or not ***/
+        LocationManager manager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
+        if ( !manager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
+            System.out.println("GPS isn't Enabled");
+            new AlertDialog.Builder(MainActivity.this).setMessage("Your GPS seems to be disabled, do you want to enable it?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,final int id) {
+                            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        }
+                    })
+                    .setNegativeButton("No", null).show();
+            return;
+        }
 
         /*** start the Searchable Activity ***/
         intent.putExtra("query", query);

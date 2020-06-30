@@ -1,8 +1,10 @@
 package com.example.crawler;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -155,19 +157,25 @@ public class SearchableActivity extends AppCompatActivity {
             System.out.println("Asking for Permissions");
         }
 
-        /******************* Getting the Location *********************/
+        /******************* Getting the Location and Country *********************/
         LocationManager mLocationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
         List<String> providers = mLocationManager.getProviders(true);
         Geocoder geocoder = new Geocoder(getApplicationContext());
         for (String provider : providers) {
-            Location location = mLocationManager.getLastKnownLocation(provider);
-            if(location == null)    continue;
-            if (bestLocation == null || location.getAccuracy() < bestLocation.getAccuracy()) bestLocation = location;
-        }
+            try {
+                Location location = mLocationManager.getLastKnownLocation(provider);
+                if(location == null)    continue;
+                if (bestLocation == null || location.getAccuracy() < bestLocation.getAccuracy()) bestLocation = location;
+                List<Address> addresses = geocoder.getFromLocation(bestLocation.getLatitude(), bestLocation.getLongitude(), 1);
+                if(addresses != null && addresses.size() > 0) country_name = addresses.get(0).getCountryName();
+            } catch (IOException e) { e.printStackTrace(); }
+            }
 
         /******************* Getting the Country Name *********************/
         try {
-            List<Address> addresses = geocoder.getFromLocation(bestLocation.getLatitude(), bestLocation.getLongitude(), 1);
+            List<Address> addresses = null;
+            if(bestLocation != null)
+                addresses = geocoder.getFromLocation(bestLocation.getLatitude(), bestLocation.getLongitude(), 1);
             if(addresses != null && addresses.size() > 0) country_name = addresses.get(0).getCountryName();
         } catch (IOException e) { e.printStackTrace(); }
 
