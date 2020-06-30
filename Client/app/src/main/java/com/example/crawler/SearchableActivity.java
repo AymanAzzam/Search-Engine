@@ -1,14 +1,21 @@
 package com.example.crawler;
 
+import android.Manifest;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.SearchRecentSuggestions;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -21,13 +28,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /*** Handling inputs without using the push button ***/
 public class SearchableActivity extends AppCompatActivity {
 
     String query;
     String type;
+    String country;
 
     @Override
     protected void onStart() {
@@ -44,6 +54,9 @@ public class SearchableActivity extends AppCompatActivity {
                 SuggestionProvider.AUTHORITY, SuggestionProvider.MODE);
         suggestions.saveRecentQuery(query, null);
 
+        /*** Get the Location ***/
+        country = getMyCountry();
+
         /*** Checking the internet Connection before send GET Request ***/
         Toast errorToast = Toast.makeText(SearchableActivity.this, "No internet Connection !", Toast.LENGTH_SHORT);
         ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -56,7 +69,7 @@ public class SearchableActivity extends AppCompatActivity {
 
         /*** Send GET Request ***/
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://ec2-54-224-132-31.compute-1.amazonaws.com:8080/GetResult?Query=" + query.replace(" ","+") + "&Type=" + type;
+        String url = "http://ec2-54-224-132-31.compute-1.amazonaws.com:8080/GetResult?Query=" + query.replace(" ","+") + "&Type=" + type + "&Location=" + country;
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONArray>() {
                     @Override
@@ -127,5 +140,38 @@ public class SearchableActivity extends AppCompatActivity {
             }
         });
         queue.add(jsonArrayRequest);
+    }
+
+    private String getMyCountry(){
+        Location bestLocation = null;
+        String country_name = null;
+
+        /******************* Checking location permissions *********************/
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            String[] arr = new String[2];
+            arr[0] = Manifest.permission.ACCESS_COARSE_LOCATION;
+            arr[1] = Manifest.permission.ACCESS_FINE_LOCATION;
+            ActivityCompat.requestPermissions(this,arr,0);
+            System.out.println("Asking for Permissions");
+        }
+
+        /******************* Getting the Location *********************/
+        LocationManager mLocationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
+        List<String> providers = mLocationManager.getProviders(true);
+        Geocoder geocoder = new Geocoder(getApplicationContext());
+        for (String provider : providers) {
+            Location location = mLocationManager.getLastKnownLocation(provider);
+            if(location == null)    continue;
+            if (bestLocation == null || location.getAccuracy() < bestLocation.getAccuracy()) bestLocation = location;
+        }
+
+        /******************* Getting the Country Name *********************/
+        try {
+            List<Address> addresses = geocoder.getFromLocation(bestLocation.getLatitude(), bestLocation.getLongitude(), 1);
+            if(addresses != null && addresses.size() > 0) country_name = addresses.get(0).getCountryName();
+        } catch (IOException e) { e.printStackTrace(); }
+
+        System.out.println(country_name);
+        return country_name;
     }
 }

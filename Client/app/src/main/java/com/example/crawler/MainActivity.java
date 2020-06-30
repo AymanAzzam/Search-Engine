@@ -1,11 +1,14 @@
 package com.example.crawler;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 
+import android.Manifest;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
@@ -27,6 +30,14 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        /******************* Asking for location permission *********************/
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            String[] arr = new String[2];
+            arr[0] = Manifest.permission.ACCESS_COARSE_LOCATION;    arr[1] = Manifest.permission.ACCESS_FINE_LOCATION;
+            ActivityCompat.requestPermissions(this,arr,0);
+            System.out.println("Asking for Permissions");
+        }
 
         search_manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         search_view = (SearchView)(findViewById(R.id.search_phrase));
