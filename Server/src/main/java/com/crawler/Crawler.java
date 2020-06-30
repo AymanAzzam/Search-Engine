@@ -1,20 +1,28 @@
 package com.crawler;
 
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import crawlercommons.robots.BaseRobotRules;
+import crawlercommons.robots.SimpleRobotRules;
+import crawlercommons.robots.SimpleRobotRulesParser;
+import crawlercommons.robots.SimpleRobotRules.RobotRulesMode;
+
 import java.sql.*;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,6 +34,7 @@ public class Crawler {
 	// data members:
 	private static DBController controller;
 	private final int MAX_LINKS_COUNT;
+	private String USER_AGENT = "HogwartsBot";
 	// private HashSet<String> visitedLinks;
 	// private Queue <String> toBeProcessedLinks;
 	// private int visitedLinksCnt;
@@ -35,11 +44,16 @@ public class Crawler {
 	private int totalCrawlingSize;
 	private int currentNonCrawledSize;
 
+	Map<String, BaseRobotRules> robotsRules;
+
+	
+
 	// constructor:
 	public Crawler(int maxNoOfLinks, String seederFileName, DBController dbController, Object dbmutex,
-			Object crawlmutex) throws ClassNotFoundException, SQLException {
+			Object crawlmutex) throws ClassNotFoundException, SQLException, MalformedURLException, IOException {
 
 		MAX_LINKS_COUNT = maxNoOfLinks;
+		robotsRules = new HashMap<String, BaseRobotRules>();
 		controller = dbController;
 		mainCrawlerConnection = controller.connect();
 		DBMutex = dbmutex;
@@ -53,7 +67,7 @@ public class Crawler {
 	}
 
 	// seed
-	public void seed(String fileName) {
+	public void seed(String fileName) throws MalformedURLException, IOException {
 
 		try {
 
@@ -63,7 +77,10 @@ public class Crawler {
 			// read and add links
 			while (reader.hasNextLine()) {
 				// read the link
-				URLs.add(reader.nextLine());
+				String url = reader.nextLine();
+				if(checkAllowedByRobots(url)) {
+					URLs.add(url);	
+				}
 
 			}
 			controller.insertCrawlingURLs(mainCrawlerConnection, URLs);
@@ -72,6 +89,31 @@ public class Crawler {
 			System.out.println("An error occurred while open the seeder...");
 		}
 	}
+
+	// Allowed URL to be crawled
+	public boolean checkAllowedByRobots(String url) throws MalformedURLException, IOException {
+	
+		BaseRobotRules rules = robotsRules.get(url);
+
+		if (rules == null) {
+
+			try {
+				URL UR = new URL(url);
+				InputStream robotContent = new URL(UR.getProtocol() + "://" + UR.getHost() + "/robots.txt").openStream();
+				byte[] robotFile = new byte[robotContent.available()];
+				robotContent.read(robotFile);
+
+				SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+				rules = robotParser.parseContent(url, robotFile, "text/plain", USER_AGENT);
+
+				robotsRules.put(url, rules);
+			} catch (Exception e) {
+				rules = new SimpleRobotRules(RobotRulesMode.ALLOW_ALL);
+			}
+		}
+		return rules.isAllowed(url);
+	}
+	
 
 	public class Crawl extends Thread {
 		private java.sql.Connection crawlConnection;
@@ -160,13 +202,13 @@ public class Crawler {
 
 			for (Element webpPage : webPagesOnHtml) {
 				String newURL = webpPage.attr("abs:href");
-
+				// System.out.println("L");
 				// Validate URL
 				String cleanURL = validateURL(newURL);
-				if(cleanURL != null){
+				if (cleanURL != null) {
 					URLs.add(cleanURL);
 				}
-				
+
 			}
 
 			synchronized (crawlingMutex) {
@@ -202,27 +244,29 @@ public class Crawler {
 				Elements images = webPage.select("img");
 				for (Element image : images) {
 					String imageLink = image.attr("src");
+					// System.out.println("I");
 
 					// try {
 
-					// 	URL valid = new URL(imageLink);
+					// URL valid = new URL(imageLink);
 					// } catch (Exception e) {
 
-					// 	if (imageLink.length() > 2 && imageLink.substring(0, 2).equals("//")) {
-					// 		imageLink = imageLink.substring(2, imageLink.length());
-					// 	} else if (!imageLink.isEmpty() && imageLink.charAt(0) == '/') {
-					// 		imageLink = url.concat(imageLink);
-					// 	}
+					// if (imageLink.length() > 2 && imageLink.substring(0, 2).equals("//")) {
+					// imageLink = imageLink.substring(2, imageLink.length());
+					// } else if (!imageLink.isEmpty() && imageLink.charAt(0) == '/') {
+					// imageLink = url.concat(imageLink);
 					// }
-					
+					// }
+
 					// Validate Image
 					try {
-						
+
 						URL realURL = new URL(imageLink);
-						//clean the url when it has parameters:
-						String cleanURL = new String (realURL.getProtocol()+"://"+realURL.getHost()+realURL.getPath());
-	
-						if (validateImageURL(cleanURL)){
+						// clean the url when it has parameters:
+						String cleanURL = new String(
+								realURL.getProtocol() + "://" + realURL.getHost() + realURL.getPath());
+
+						if (validateImageURL(cleanURL)) {
 							myWriter.write(cleanURL + "\n");
 						}
 
@@ -243,6 +287,7 @@ public class Crawler {
 				myWriter.write("#HEADERS\n");
 				Elements headers = webPage.select("h1, h2, h3, h4, h5, h6");
 				for (Element header : headers) {
+					// System.out.println("H");
 					String headerText = header.text();
 					headerText = getEnglishText(headerText);
 					myWriter.write(headerText + "\n");
@@ -252,6 +297,7 @@ public class Crawler {
 				myWriter.write("#PLAINTEXT\n");
 				Elements plains = webPage.select("p");
 				for (Element plain : plains) {
+					// System.out.println("P");
 					String plainText = plain.text();
 					plainText = getEnglishText(plainText);
 					myWriter.write(plainText + "\n");
@@ -282,19 +328,23 @@ public class Crawler {
 			return englishText;
 		}
 
+
 		// check if the url is valid or not:
 		public String validateURL(String url) {
 			try {
-				
+
 				URL realURL = new URL(url);
-				//clean the url when it has parameters:
-				String cleanURL = new String (realURL.getProtocol()+"://"+realURL.getHost()+realURL.getPath());
+				// clean the url when it has parameters:
+				String cleanURL = new String(realURL.getProtocol() + "://" + realURL.getHost() + realURL.getPath());
 
 				new URL(cleanURL).toURI();
-				return cleanURL;
-			}catch (Exception e) {
-				return null;
-			}
+
+				if(checkAllowedByRobots(cleanURL)) {
+					return cleanURL;
+				}
+			
+			} catch (Exception e) {}
+			return null;
 		}
 
 		// check if the url contains image:
@@ -303,12 +353,12 @@ public class Crawler {
 			// String url = validateURL(imgURL);
 
 			// if(url == null) {
-				// return null;
+			// return null;
 			// }
 
 			try {
-				BufferedImage img = ImageIO.read(new URL (imgURL));
-				if(img != null) {
+				BufferedImage img = ImageIO.read(new URL(imgURL));
+				if (img != null) {
 					return true;
 				}
 			} catch (MalformedURLException e) {
@@ -317,25 +367,25 @@ public class Crawler {
 			return false;
 		}
 
-		//return the location of webpage:
-		public String getWebPageLocation(String url){
+		// return the location of webpage:
+		public String getWebPageLocation(String url) {
 
 			try {
 				URL locURL = new URL(url);
 				String host = locURL.getHost();
 
-				char [] loc = new char [3];
-				host.getChars(host.length()-3, host.length(), loc, 0);
-				String location = new String (loc);
+				char[] loc = new char[3];
+				host.getChars(host.length() - 3, host.length(), loc, 0);
+				String location = new String(loc);
 				StringBuilder locationReturned = new StringBuilder(location);
 
-				if(location.charAt(0) == '.'){
+				if (location.charAt(0) == '.') {
 					locationReturned.deleteCharAt(0);
 					return locationReturned.toString();
 				} else {
 					return null;
 				}
-				
+
 			} catch (MalformedURLException e) {
 				return null;
 			}
@@ -367,23 +417,58 @@ public class Crawler {
 			try {
 
 				processorConnection.close();
-		        System.out.println("Release: " + Main.connectionSemaphore.availablePermits());
-				Main.connectionSemaphore.release();
+				System.out.println("Release: " + Main.connectionSemaphore.availablePermits());
 
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
+			Main.connectionSemaphore.release();
 		}
 	}
 
-	
 	///////////////////////////////////////////////////////////////////////////////////////
 
+	public static void main(String[] args)
+			throws IOException, ClassNotFoundException, SQLException, InterruptedException {
+		
+		// robotsRules = new HashMap<String, BaseRobotRules>();
+		// System.out.println(checkAllowedByRobots("https://www.geeksforgeeks.org/"));
+		// System.out.println(checkAllowedByRobots("https://www.geeksforgeeks.org/content-override.php"));
+	
+		// String USER_AGENT = "HogwartsBot";
+		// String url = "https://www.geeksforgeeks.org/wp-admins/7moda-pasta";
+		// URL urlObj = new URL(url);
+		// String hostId = urlObj.getProtocol() + "://" + urlObj.getHost();
+		// Map<String, BaseRobotRules> robotsRules = new HashMap<String, BaseRobotRules>();
+		// BaseRobotRules rules = robotsRules.get(hostId);
+		// if (rules == null) {
+		// 	HttpClient httpclient = HttpClientBuilder.create().build();
+		// 	HttpGet httpget = new HttpGet(hostId + "/robots.txt");
+		// 	BasicHttpContext context = new BasicHttpContext();
+		// 	HttpResponse response = httpclient.execute(httpget, context);
+		// 	if (response.getStatusLine() != null && response.getStatusLine().getStatusCode() == 404) {
+		// 		rules = new SimpleRobotRules(RobotRulesMode.ALLOW_ALL);
+		// 		// consume entity to deallocate connection
+		// 		EntityUtils.consumeQuietly(response.getEntity());
+		// 	} else {
+		// 		BufferedHttpEntity entity = new BufferedHttpEntity(response.getEntity());
+		// 		SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+		// 		byte[] targetArray = new byte[entity.getContent().available()];
+		// 	    entity.getContent().read(targetArray);
+		// 		rules = robotParser.parseContent(hostId, targetArray,
+		// 				"text/plain", USER_AGENT);
+		// 	}
+		// 	robotsRules.put(hostId, rules);
+		// }
+		// for(String r:robotsRules.keySet()) {
+		// 	System.out.println(r);
+		// }
+		// boolean urlAllowed = rules.isAllowed(url);
+		// System.out.println(rules.isAllowed("https://www.geeksforgeeks.org/"));
+		// System.out.println(rules.isAllowed("https://www.geeksforgeeks.org/content-override.php"));
 
-	public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException, InterruptedException {
-
-		 String url = new String ("https://www.google.com.eg/");
-		 URL test = new URL(url);
+		//  String url = new String ("https://www.google.com.eg/");
+		//  URL test = new URL(url);
 		
 		// System.out.println(url);
 		// Document doc = Jsoup.parse(test.openStream(), "ASCII", url);
@@ -419,19 +504,19 @@ public class Crawler {
 		// }
 
 		//////////////////////////////////////////////////////////////////////////////////////////////////
-		String host = test.getHost();
-		char [] loc = new char [3];
-		host.getChars(host.length()-3, host.length(), loc, 0);
-		String location = new String (loc);
-		System.out.println(location);
-		StringBuilder locationReturned = new StringBuilder(location);
+		// String host = test.getHost();
+		// char [] loc = new char [3];
+		// host.getChars(host.length()-3, host.length(), loc, 0);
+		// String location = new String (loc);
+		// System.out.println(location);
+		// StringBuilder locationReturned = new StringBuilder(location);
 
-		if(location.charAt(0)=='.'){
-			locationReturned.deleteCharAt(0);
-		} else {
-			locationReturned.delete(0, 3);
-		}
-		System.out.println(locationReturned.toString());
+		// if(location.charAt(0)=='.'){
+		// 	locationReturned.deleteCharAt(0);
+		// } else {
+		// 	locationReturned.delete(0, 3);
+		// }
+		// System.out.println(locationReturned.toString());
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////
 		
