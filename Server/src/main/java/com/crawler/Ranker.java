@@ -169,10 +169,10 @@ public class Ranker {
 		
 		Collections.sort(websiteTFIDFList); //sort descendingly -- override CompareTo
 		
-		for(WebsiteTFIDFPair e:websiteTFIDFList) {
-			System.out.println(e.TFIDFValue + "\t" + e.websiteName);
+		// for(WebsiteTFIDFPair e:websiteTFIDFList) {
+		// 	System.out.println(e.TFIDFValue + "\t" + e.websiteName);
 			
-		}
+		// }
 
 
 		return websiteTFIDFList;		
