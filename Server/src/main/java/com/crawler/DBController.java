@@ -11,7 +11,7 @@ import com.crawler.Indexer.WordRecord;
 public class DBController {
 
 	
-	final String DBName = "Search_Engine";
+	final String DBName = "Search_Engine2";
 	final String username = "root";
 	final String password = "";
 	
@@ -387,8 +387,8 @@ public class DBController {
 			
 			ResultSet res = stmt.executeQuery(String.format("SELECT %s FROM %s"
 					+ " INNER JOIN %s ON %s = %s"
-					+ " WHERE %s = '%s' LIMIT 3;",
-					imageURL_col, image_table, URL_table, URLID_col, imageURLID_col, URLName_col, url));
+					+ " WHERE %s = '%s' ORDER BY %s DESC LIMIT 3;",
+					imageURL_col, image_table, URL_table, URLID_col, imageURLID_col, URLName_col, url, frequency_col));
 			
 			while(res.next()) {
 				images.add(res.getString(1));
@@ -741,8 +741,9 @@ public class DBController {
 		DBController controller = new DBController();
 		Connection conn;
 		conn = controller.connect();
-		// controller.build(conn);		
-		System.out.println(test(conn));
+		// controller.drop(conn);
+		controller.build(conn);		
+		// System.out.println(test(conn));
 		controller.close(conn);
 	}
 	
