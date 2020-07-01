@@ -232,7 +232,7 @@ public class SearchEngine extends HttpServlet {
         ArrayList<String> queryWords = new ArrayList<String>();
 
         /*** Checking Phrase Search ***/
-    	if(sentence.charAt(0) == '"' && sentence.charAt(sentence.length()-1) == '"')
+    	if(sentence.startsWith("\'") && sentence.endsWith("\'"))
     		queryWords.add("1");
     	else
     		queryWords.add("0");
