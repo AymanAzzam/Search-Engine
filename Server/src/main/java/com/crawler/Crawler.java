@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -99,7 +100,9 @@ public class Crawler {
 
 			try {
 				URL UR = new URL(url);
-				InputStream robotContent = new URL(UR.getProtocol() + "://" + UR.getHost() + "/robots.txt").openStream();
+				URLConnection roboConnection = new URL(UR.getProtocol() + "://" + UR.getHost() + "/robots.txt").openConnection();
+				roboConnection.setConnectTimeout(10000);
+				InputStream robotContent = roboConnection.getInputStream();
 				byte[] robotFile = new byte[robotContent.available()];
 				robotContent.read(robotFile);
 
@@ -466,12 +469,18 @@ public class Crawler {
 		// boolean urlAllowed = rules.isAllowed(url);
 		// System.out.println(rules.isAllowed("https://www.geeksforgeeks.org/"));
 		// System.out.println(rules.isAllowed("https://www.geeksforgeeks.org/content-override.php"));
-
-		//  String url = new String ("https://www.google.com.eg/");
+		// try {
+		//  String url = new String ("http://localhost:8080/GetTrends?Country=Egypt");
 		//  URL test = new URL(url);
 		
-		// System.out.println(url);
-		// Document doc = Jsoup.parse(test.openStream(), "ASCII", url);
+		// // System.out.println(url);
+		// // Document doc = Jsoup.parse(test.openStream(), "ASCII", url);
+		// InputStream in = test.openStream();
+		// System.out.println("A");
+		// } catch(Exception e) {
+		// 	e.printStackTrace();
+		// 	System.out.println("B");
+		// }
 		// Elements times = doc.select("time");
 		// for (Element time : times) {
 			
