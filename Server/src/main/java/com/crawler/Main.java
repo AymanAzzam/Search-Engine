@@ -81,7 +81,7 @@ public class Main {
         connect.close();
         
 		// Create Crawler Instance
-		Crawler crawler = new Crawler(MAX_LINKS_CNT, "seeder.txt", controller, DBMutex, crawlingMutex);
+		Crawler crawler = new Crawler(MAX_LINKS_CNT, "seeder.txt","countries_extensions.txt", controller, DBMutex, crawlingMutex);
 		
 
 		prodList = new ArrayList<Producer>();

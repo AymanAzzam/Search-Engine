@@ -2,7 +2,6 @@ package com.example.crawler;
 
 
 import android.content.Intent;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -10,7 +9,6 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -20,9 +18,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 
@@ -151,7 +146,7 @@ public class ResultsActivity extends AppCompatActivity {
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
 
                 RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-                String urlBackEnd = "http://ec2-54-224-132-31.compute-1.amazonaws.com:8080/IncrementFrequency?Query=" + url + "&Type=" + type;
+                String urlBackEnd = "http://ec2-54-224-132-31.compute-1.amazonaws.com:8080/IncrementFrequency?Query=" + url + "&Type=" + ((type==0)?"Image":"Normal");
 
                 StringRequest request = new StringRequest(Request.Method.GET, urlBackEnd,
                         new Response.Listener<String>() {

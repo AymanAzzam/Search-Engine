@@ -45,21 +45,24 @@ public class Crawler {
 	private int totalCrawlingSize;
 	private int currentNonCrawledSize;
 
+	Map <String, String> countries;
 	Map<String, BaseRobotRules> robotsRules;
 
 	
 
 	// constructor:
-	public Crawler(int maxNoOfLinks, String seederFileName, DBController dbController, Object dbmutex,
+	public Crawler(int maxNoOfLinks, String seederFileName, String countriesFileName, DBController dbController, Object dbmutex,
 			Object crawlmutex) throws ClassNotFoundException, SQLException, MalformedURLException, IOException {
 
 		MAX_LINKS_COUNT = maxNoOfLinks;
 		robotsRules = new HashMap<String, BaseRobotRules>();
+		countries = new HashMap<String, String>();
 		controller = dbController;
 		mainCrawlerConnection = controller.connect();
 		DBMutex = dbmutex;
 		crawlingMutex = crawlmutex;
 		seed(seederFileName);
+		fillCountries(countriesFileName);
 
 		totalCrawlingSize = controller.getCrawlingSize(mainCrawlerConnection);
 		currentNonCrawledSize = controller.checkNonCrawled(mainCrawlerConnection);
@@ -88,6 +91,30 @@ public class Crawler {
 			reader.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("An error occurred while open the seeder...");
+		}
+	}
+
+	//load the countries and thier domain extension:
+	public void fillCountries(String fileName) throws MalformedURLException, IOException {
+
+		try {
+
+			File countriesFile = new File(fileName);
+			Scanner reader = new Scanner(countriesFile);
+			
+			while (reader.hasNextLine()){
+				String [] line = reader.nextLine().split("\\s");
+				int l = line.length;
+				String cd = line[0];
+				String cntry = line[1];
+				for (int i=2; i<l; i++){
+					cntry = cntry +' '+line[i];
+				}
+				countries.put(cd,cntry);
+			}
+			reader.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("An error occurred while open the countries file...");
 		}
 	}
 
@@ -380,14 +407,7 @@ public class Crawler {
 				char[] loc = new char[3];
 				host.getChars(host.length() - 3, host.length(), loc, 0);
 				String location = new String(loc);
-				StringBuilder locationReturned = new StringBuilder(location);
-
-				if (location.charAt(0) == '.') {
-					locationReturned.deleteCharAt(0);
-					return locationReturned.toString();
-				} else {
-					return null;
-				}
+				return countries.get(location);
 
 			} catch (MalformedURLException e) {
 				return null;
@@ -560,6 +580,36 @@ public class Crawler {
 //		crawler5.start();
 //		crawler6.start();
 //		crawler7.start();
+///////////////////////////////////////////////////////////////////////
+		//countries:
+		Map <String,String> cs = new HashMap <String,String> ();
+		File cntriesfile = new File("cntrs.txt");
+		Scanner reader = new Scanner (cntriesfile);
+		while (reader.hasNextLine()){
+			String [] line = reader.nextLine().split("\\s");
+			int l = line.length;
+			String cd = line[0];
+			String cntry = line[1];
+			for (int i=2; i<l; i++){
+				cntry = cntry +' '+line[i];
+			}
+			cs.put(cd,cntry);
+		}
+		reader.close();
+		if(cs.get("ag")== null){ System.out.println("nullllll");}
+		System.out.println(cs.get("ag"));
+		System.out.println(cs.get("ag").length());
+		System.out.println(cs.size());
 	}
+
+
+	// String s1="java string split method by javatpoint";  
+	// String[] words=s1.split("\\s");//splits the string based on whitespace  
+	// //using java foreach loop to print elements of string array  
+	// for(String w:words){  
+	// 	System.out.println(w);
+	// 	System.out.println(w.length());  
+	// 	}
+	//}  
 
 }
