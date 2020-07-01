@@ -1,10 +1,8 @@
 package com.example.crawler;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -19,6 +17,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -40,6 +39,7 @@ public class SearchableActivity extends AppCompatActivity {
     String query;
     String type;
     String country;
+    final int socketTimeout=300000; //unit = ms
 
     @Override
     protected void onStart() {
@@ -141,6 +141,7 @@ public class SearchableActivity extends AppCompatActivity {
                 finish();
             }
         });
+        jsonArrayRequest.setRetryPolicy(new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         queue.add(jsonArrayRequest);
     }
 
