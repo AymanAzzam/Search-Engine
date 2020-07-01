@@ -265,7 +265,7 @@ public class SearchEngine extends HttpServlet {
 			Connection conn = dbController.connect();
 			
 			// Processing the Trend
-			new TrendsProcessor(query, location, dbController).start();
+			//new TrendsProcessor(query, location, dbController).start();
 
 
 			queryWords = query(query);
