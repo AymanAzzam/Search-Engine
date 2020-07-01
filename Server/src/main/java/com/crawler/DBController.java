@@ -387,7 +387,7 @@ public class DBController {
 			
 			ResultSet res = stmt.executeQuery(String.format("SELECT %s FROM %s"
 					+ " INNER JOIN %s ON %s = %s"
-					+ " WHERE %s = '%s' ORDER BY %s DESC LIMIT 3;",
+					+ " WHERE %s = '%s' ORDER BY %s DESC LIMIT 20;",
 					imageURL_col, image_table, URL_table, URLID_col, imageURLID_col, URLName_col, url, frequency_col));
 			
 			while(res.next()) {
