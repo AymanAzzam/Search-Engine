@@ -71,7 +71,12 @@ public class SearchableActivity extends AppCompatActivity {
 
         /*** Send GET Request ***/
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://ec2-54-224-132-31.compute-1.amazonaws.com:8080/GetResult?Query=" + query.replace(" ","+") + "&Type=" + type + "&Location=" + country;
+        if(query.startsWith("\"") && query.endsWith("\""))
+            query = query.replace("\"","\'").replace(" ","%20");
+        else
+            query = query.replace(" ","+");
+        String url = "http://ec2-54-224-132-31.compute-1.amazonaws.com:8080/GetResult?Query=" + query + "&Type=" + type + "&Location=" + country;
+        System.out.println(url);
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONArray>() {
                     @Override
@@ -139,6 +144,8 @@ public class SearchableActivity extends AppCompatActivity {
                 Toast errorToast = Toast.makeText(SearchableActivity.this, "Server Failed to Response with URL = "+url, Toast.LENGTH_SHORT);
                 errorToast.show();
                 finish();
+                error.printStackTrace();
+                System.out.println(error.networkResponse.data);
             }
         });
         jsonArrayRequest.setRetryPolicy(new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
