@@ -6,7 +6,7 @@
 
 |Web Search|Suggestion|Image Search|
 |--|--|--|
-|<img src="normal_search.png" height="27%" width="27%">   |<img src="suggestion.png" height="27%" width="27%">   |<img src="image_search.png" height="27%" width="27%">   |
+|<img src="normal_search.png">   |<img src="suggestion.png">   |<img src="image_search.png">   |
 
 ## Client
 [Client README](Client/README.md)
