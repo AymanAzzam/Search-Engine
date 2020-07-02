@@ -4,9 +4,14 @@
   <h4 align="center">A Search-engine Crawler-based that demonstrates the main features of a search engine (web crawling, indexing and ranking)</h4>
 </div>
 
-|Web Search|Suggestion|Image Search|
+|Home Page|Suggestion|Persons Trends|
 |--|--|--|
-|<img src="normal_search.png">   |<img src="suggestion.png">   |<img src="image_search.png">   |
+|<img src="Images/home_page.png">   |<img src="Images/suggestion.png">   |<img src="Images/persons_trends.png">   |
+|--|--|--|
+|Web Search|Voice Search|Image Search|
+|--|--|--|
+|<img src="Images/normal_search.png">   |<img src="Images/voice_search.png">   |<img src="Images/image_search.png">   |
+|Home Page|Voice Search|Persons Trends|
 
 ## Client
 [Client README](Client/README.md)
