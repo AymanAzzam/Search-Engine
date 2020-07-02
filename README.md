@@ -7,11 +7,10 @@
 |Home Page|Suggestion|Persons Trends|
 |--|--|--|
 |<img src="Images/home_page.png">   |<img src="Images/suggestion.png">   |<img src="Images/persons_trends.png">   |
-|--|--|--|
+
 |Web Search|Voice Search|Image Search|
 |--|--|--|
 |<img src="Images/normal_search.png">   |<img src="Images/voice_search.png">   |<img src="Images/image_search.png">   |
-|Home Page|Voice Search|Persons Trends|
 
 ## Client
 [Client README](Client/README.md)
