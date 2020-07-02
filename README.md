@@ -4,9 +4,9 @@
   <h4 align="center">A Search-engine Crawler-based that demonstrates the main features of a search engine (web crawling, indexing and ranking)</h4>
 </div>
 
-|Home Page|Suggestion|Persons Trends|
-|--|--|--|
-|<img src="Images/home_page.png">   |<img src="Images/suggestion.png">   |<img src="Images/persons_trends.png">   |
+|Home Page|Suggestion|
+|--|--|
+|<img src="Images/home_page.png">   |<img src="Images/suggestion.png">   |
 
 |Web Search|Voice Search|Image Search|
 |--|--|--|
