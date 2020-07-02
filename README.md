@@ -12,6 +12,9 @@
 |--|--|--|
 |<img src="Images/normal_search.png">   |<img src="Images/voice_search.png">   |<img src="Images/image_search.png">   |
 
+## Demo
+Here is a [Demo Video](https://www.youtube.com/watch?v=o17ntPXsIrg) for our Search Engine App.
+
 ## Client
 [Client README](Client/README.md)
 
