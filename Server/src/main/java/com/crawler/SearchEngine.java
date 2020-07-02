@@ -55,6 +55,7 @@ public class SearchEngine extends HttpServlet {
 
 					if(type.equals("PERSON")) {
 						try {
+							System.out.println(type + ":\t" + name);
 							controller.insertTrend(conn, name, location);
 						} catch (SQLException e) {
 							e.printStackTrace();
