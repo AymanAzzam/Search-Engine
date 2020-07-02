@@ -268,8 +268,6 @@ public class SearchEngine extends HttpServlet {
 			// Processing the Trend
 			new TrendsProcessor(query, location, dbController).start();
 
-			Thread.sleep(50000);
-
 
 			queryWords = query(query);
 			
