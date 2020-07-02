@@ -39,43 +39,28 @@ public class SearchEngine extends HttpServlet {
 		}
 
 		public void run() {
-			try {
-				System.out.println("START:\t" + Thread.currentThread().getId());
-				Annotation annotator = new Annotation(query);
-				int cnt = 0;
-				System.out.println(cnt++);
+			System.out.println("START:\t" + Thread.currentThread().getId());
+			Annotation annotator = new Annotation(query);
+
+			Properties properties = new Properties();
+			properties.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,entitymentions");
+
+			StanfordCoreNLP pipeline = new StanfordCoreNLP(properties);
+			pipeline.annotate(annotator);
 	
-				Properties properties = new Properties();
-				System.out.println(cnt++);
-				properties.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,entitymentions");
-				System.out.println(cnt++);
-	
-				StanfordCoreNLP pipeline = new StanfordCoreNLP(properties);
-				System.out.println(cnt++);
-				pipeline.annotate(annotator);
-				System.out.println(cnt++);
-		
-				for(CoreMap sentence : annotator.get(CoreAnnotations.SentencesAnnotation.class)) {
-					System.out.println(cnt++);
-					for(CoreMap entityMention : sentence.get(CoreAnnotations.MentionsAnnotation.class)) {
-						System.out.println(cnt++);
-						String type = entityMention.get(CoreAnnotations.EntityTypeAnnotation.class);
-						String name = entityMention.toString();
-	
-						if(type.equals("PERSON")) {
-							try {
-								controller.insertTrend(conn, name, location);
-							} catch (SQLException e) {
-								e.printStackTrace();
-							}
+			for(CoreMap sentence : annotator.get(CoreAnnotations.SentencesAnnotation.class)) {
+				for(CoreMap entityMention : sentence.get(CoreAnnotations.MentionsAnnotation.class)) {
+					String type = entityMention.get(CoreAnnotations.EntityTypeAnnotation.class);
+					String name = entityMention.toString();
+
+					if(type.equals("PERSON")) {
+						try {
+							controller.insertTrend(conn, name, location);
+						} catch (SQLException e) {
+							e.printStackTrace();
 						}
-						System.out.println("HERE");
 					}
 				}
-				
-			} catch (Exception e) {
-				//TODO: handle exception
-				e.printStackTrace();
 			}
 			System.out.println("Finish:\t" + Thread.currentThread().getId());
 		}
@@ -156,7 +141,7 @@ public class SearchEngine extends HttpServlet {
 
 				invertedFile.put(queryWords.get(i), invertedFileTempList);
 			}
-
+			
 			Integer dummyTotalNumberOfDocuments = dbController.getURLsSize(conn);
 			
 			// System.out.println("POP: " + Ranker.donePopularity);
@@ -282,9 +267,8 @@ public class SearchEngine extends HttpServlet {
 			
 			// Processing the Trend
 			new TrendsProcessor(query, location, dbController).start();
-			System.out.println("Sleeping");
+
 			Thread.sleep(50000);
-			System.out.println("Awaking!");
 
 
 			queryWords = query(query);
