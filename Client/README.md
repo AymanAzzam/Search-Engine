@@ -1,6 +1,7 @@
 ## Client Prerequisites
-1. Changing the URL to the Server URL in SearchableActivity.java.
+1. Change the URL to the URL Server in SearchableActivity.java and ResultsActivity.java.
 2. Setup the App on your Mobile phone.
+3. Open your GPS and Allow the app to use it.
 
 ## Features
 1. Text Search.
