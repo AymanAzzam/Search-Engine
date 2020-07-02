@@ -39,7 +39,7 @@ public class SearchEngine extends HttpServlet {
 		}
 
 		public void run() {
-
+			System.out.println("START:\t" + Thread.currentThread().getId());
 			Annotation annotator = new Annotation(query);
 
 			Properties properties = new Properties();
@@ -62,6 +62,7 @@ public class SearchEngine extends HttpServlet {
 					}
 				}
 			}
+			System.out.println("Finish:\t" + Thread.currentThread().getId());
 		}
 	}
 	
@@ -265,7 +266,7 @@ public class SearchEngine extends HttpServlet {
 			Connection conn = dbController.connect();
 			
 			// Processing the Trend
-			//new TrendsProcessor(query, location, dbController).start();
+			new TrendsProcessor(query, location, dbController).start();
 
 
 			queryWords = query(query);
