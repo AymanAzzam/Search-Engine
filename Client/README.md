@@ -6,7 +6,9 @@
 1. Text Search.
 2. Voice Search.
 3. Image Search.
-4. User Suggestion Mechanism.
+4. Phrase Search.
+5. User Suggestion Mechanism.
+6. Persons Trends.
 
 ## Helpful Links
 1. [How to Create Android Search Interface](https://developer.android.com/guide/topics/search/search-dialog).
