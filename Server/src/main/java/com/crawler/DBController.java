@@ -11,7 +11,7 @@ import com.crawler.Indexer.WordRecord;
 public class DBController {
 
 	
-	final String DBName = "Search_Engine2";
+	final String DBName = "Search_Engine";
 	final String username = "root";
 	final String password = "";
 	
