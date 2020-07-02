@@ -62,3 +62,4 @@ mvn exec:java -Dexec.mainClass="com.crawler.Main"
 7. [Error: java.lang.ClassNotFoundException: com.mysql.jdbc.Driver](https://www.java67.com/2015/07/javalangclassnotfoundexception-com.mysql.jdbc.Driver-solution.html).
 8. [MySQL Error: : 'Access denied for user 'root'@'localhost'](https://stackoverflow.com/questions/41645309/mysql-error-access-denied-for-user-rootlocalhost).
 9. [mariadb.service: Failed with result 'timeout'](https://stackoverflow.com/questions/40997257/mysql-service-fails-to-start-hangs-up-timeout-ubuntu-mariadb).
+10 [How to upload a file to Google Drive from the command line using gdrive](https://olivermarshall.net/how-to-upload-a-file-to-google-drive-from-the-command-line/).
