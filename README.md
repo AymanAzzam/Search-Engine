@@ -4,12 +4,12 @@
   <h4 align="center">A Search-engine Crawler-based that demonstrates the main features of a search engine (web crawling, indexing and ranking)</h4>
 </div>
 
-<img src="crawler.png" height="25%" width="25%"> <img src="crawler.png" height="25%" width="25%"> <img src="crawler.png" height="25%" width="25%">
+<img src="suggestion.png" height="27%" width="27%"> <img src="normal_search.png" height="27%" width="27%"> <img src="image_search.png" height="27%" width="27%">
 
-## Client Prerequisites
+## Client
 [Client README](Client/README.md)
 
-## Server Prerequisites (on AWS Cloud9)
+## Server (on AWS Cloud9)
 [Server README](Server/README.md)
 
 ## Team members
